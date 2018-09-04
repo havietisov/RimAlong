@@ -15,6 +15,7 @@ namespace CooperateRim
     public class CooperateRimming : ModBase
     {
         public override string ModIdentifier => "CooperateRim.CooperateRimming";
+        public static List<Pawn> initialPawnList = new List<Pawn>();
 
         public static CooperateRimming inst;
 
@@ -154,7 +155,7 @@ namespace CooperateRim
                 GUI.EndGroup();
             }
         }
-
+        
         public class Dialog_Coop : Window
         {
             public override void DoWindowContents(Rect inRect)
@@ -165,13 +166,14 @@ namespace CooperateRim
                 r.width = 150;
                 if (Widgets.ButtonText(r, "Host game"))
                 {
-                    Verse.Rand.PushState(100);
+                    Rand.PushState(0);
                     Current.Game = new Game();
                     Current.Game.InitData = new GameInitData();
                     Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
                     Find.Scenario.PreConfigure();
+                    string stringseed = GenText.RandomSeedString();
                     Current.Game.storyteller = new Storyteller(StorytellerDefOf.Cassandra, DifficultyDefOf.Rough);
-                    Current.Game.World = WorldGenerator.GenerateWorld(0.05f, GenText.RandomSeedString(), OverallRainfall.Normal, OverallTemperature.Normal);
+                    Current.Game.World = WorldGenerator.GenerateWorld(0.05f, stringseed, OverallRainfall.Normal, OverallTemperature.Normal);
                     for (int i = 0; i < 500; i++)
                     {
                         if (TileFinder.IsValidTileForNewSettlement(i))
@@ -182,14 +184,22 @@ namespace CooperateRim
                         }
                     }
 
+                    foreach (Pawn p in Current.Game.InitData.startingAndOptionalPawns)
+                    {
+                        Log("++++++++++++" + p.ToString());
+                    }
+                    
                     TickManagerPatch.myTicksValue = 0;
                     TickManagerPatch.nextFrameTime = DateTime.Now;
                     TickManagerPatch.nextSyncTickValue = 0;
-                    Current.Game.uniqueIDsManager = new UniqueIDsManager();
                     Page firstConfigPage = Current.Game.Scenario.GetFirstConfigPage();
-                    PageUtility.InitGameStart();
-                    //IsValidTileForNewSettlement(int tile, StringBuilder reason = null)
 
+                    foreach (var p in Find.GameInitData.startingAndOptionalPawns)
+                    {
+                        initialPawnList.Add(p);
+                    }
+                    PageUtility.InitGameStart();
+                    Log("Startseed : " + stringseed);
                 }
                 r.y += size;
                 Widgets.ButtonText(r, "Connect to"); r.y += size;

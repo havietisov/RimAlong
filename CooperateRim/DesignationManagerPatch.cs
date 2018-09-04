@@ -14,7 +14,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool AddDesignation(ref Designation newDes)
         {
-            if (!SyncTickData.IsDeserializing)
+            if (!SyncTickData.AvoidLoop)
             {
                 CooperateRimming.Log("AddDesignation++");
                 SyncTickData.AppendSyncTickData(newDes);

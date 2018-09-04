@@ -31,11 +31,20 @@ namespace CooperateRim
             public WorkGiver giver;
         }
 
+        public class JobPriorityData
+        {
+            public WorkTypeDef w;
+            public int priority;
+            public Pawn p;
+        }
+
         List<Designation> designations = new List<Designation>();
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
         List<FinalJobData> jobsToSerialize = new List<FinalJobData>();
+        List<JobPriorityData> jobPriorities = new List<JobPriorityData>();
 
         public static bool IsDeserializing;
+        public static bool AvoidLoop;
 
         static SyncTickData singleton = new SyncTickData();
 
@@ -49,6 +58,11 @@ namespace CooperateRim
             singleton.jobData.Add(j);
         }
 
+        public static void AppendSyncTickData(WorkTypeDef w, int priority, Pawn p)
+        {
+            singleton.jobPriorities.Add(new JobPriorityData() { w = w, priority = priority, p = p });
+        }
+
         public SyncTickData()
         {
 
@@ -56,14 +70,15 @@ namespace CooperateRim
 
         public static void FlushSyncTickData(int tickNum)
         {
-            if (singleton.designations.Count > 0 || singleton.jobsToSerialize.Count > 0)
+            if (singleton.designations.Count > 0 || singleton.jobsToSerialize.Count > 0 || singleton.jobPriorities.Count > 0)
             {
                 BinaryFormatter ser = new BinaryFormatter();
                 var fs = System.IO.File.OpenWrite(@"D:\CoopReplays\_" + tickNum + ".xml");
-                ser.Serialize(fs, singleton);
+                SyncTickData buffered = singleton;
+                singleton = new SyncTickData();
+                ser.Serialize(fs, buffered);
                 fs.Flush();
                 fs.Close();
-                singleton = new SyncTickData();
             }
         }
 
@@ -151,7 +166,7 @@ namespace CooperateRim
                         if (__workTypeDef.defName == jobdefName)
                         {
                             workTypeDef = __workTypeDef;
-                            //break;
+                            break;
                         }
                     }
                     CooperateRimming.Log(">>>>>>>>>>>>>");
@@ -170,39 +185,61 @@ namespace CooperateRim
                             Job job = workGiver_Scanner.JobOnThing(pawn, th, forced: bool.Parse(forced));
                             job.playerForced = true;
                             job.TryMakePreToilReservations(pawn, errorOnFailed: true);
+                            AvoidLoop = true;
                             CooperateRimming.Log("Ordered job : " + job + " : " + pawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workGiver_Scanner, cell));
+                            AvoidLoop = false;
                             break;
                         }
                     }
                     CooperateRimming.Log("<<<<<<<<<<<<<<");
+                }
+            }
 
-                    /*
-                    IntVec3 clickCell = new IntVec3(int.Parse(cellx), int.Parse(celly), int.Parse(cellz));
+            {
+                int amount = int.Parse(info.GetString("jobPrios.amount"));
 
+                for (int i = 0; i < amount; i++)
+                {
+                    int priority = int.Parse(info.GetString("jobPrios.[" + i + "].priority"));
+                    string pawnID = info.GetString("jobPrios.[" + i + "].pawnID");
+                    string wtd = info.GetString("jobPrios.[" + i + "].WorkTypeDef");
+                    WorkTypeDef _wtd = null;
+                    Pawn pawn = null;
 
-
-                    foreach (Thing item in pawn.Map.thingGrid.ThingsAt(clickCell))
+                    foreach (var __workTypeDef in DefDatabase<WorkTypeDef>.AllDefsListForReading)
                     {
-
-                    }*/
-
-                    /*
-                    foreach (var workTypeDef in DefDatabase<WorkTypeDef>.AllDefsListForReading)
-                    {
-                        if (workTypeDef.defName == jobdefName)
+                        if (__workTypeDef.defName == wtd)
                         {
-                            for (int k = 0; k < workTypeDef.workGiversByPriority.Count; k++)
-                            {
-                                WorkGiverDef workGiver = workTypeDef.workGiversByPriority[k];
-                                WorkGiver_Scanner workGiver_Scanner = workGiver.Worker as WorkGiver_Scanner;
+                            _wtd = __workTypeDef;
+                        }
+                    }
+                    
+                    foreach (var _pawn in Find.CurrentMap.mapPawns.AllPawns)
+                    {
+                        if (_pawn.ThingID == pawnID)
+                        {
+                            pawn = _pawn;
+                            break;
+                        }
+                    }
 
-                                if (workGiver_Scanner.def.defName == workTypeDef.defName)
-                                {
-                                    Job job = workGiver_Scanner.JobOnThing(pawn, item, forced: true);
-                                }
+                    if (pawn == null)
+                    {
+                        foreach (var _pawn in CooperateRimming.initialPawnList)
+                        {
+                            if (_pawn.ThingID == pawnID)
+                            {
+                                pawn = _pawn;
+                                break;
                             }
                         }
-                    }*/
+                    }
+
+                    CooperateRimming.Log("Find.GameInitData : " + Find.GameInitData);
+                    CooperateRimming.Log("pawn priority : " + pawn + " :: " + pawnID);
+                    AvoidLoop = true;
+                    pawn.workSettings.SetPriority(_wtd, priority);
+                    AvoidLoop = false;
                 }
             }
         }
@@ -227,7 +264,9 @@ namespace CooperateRim
 
                 foreach (Designation des in sd.designations)
                 {
+                    AvoidLoop = true;
                     Find.CurrentMap.designationManager.AddDesignation(des);
+                    AvoidLoop = false;
                 }
             }
         }
@@ -270,7 +309,6 @@ namespace CooperateRim
 
             //jobs
             {
-
                 info.AddValue("jobDesc.amount", jobsToSerialize.Count);
 
                 for (int i = 0; i < jobsToSerialize.Count; i++)
@@ -293,7 +331,18 @@ namespace CooperateRim
                     info.AddValue("job.[" + i + "].cell.z", jobInfos[i].cell.z);
                     info.AddValue("job.[" + i + "].pawnID", jobInfos[i].pawnID);*/
                 }
+            }
 
+            //job priorities
+            {
+                info.AddValue("jobPrios.amount", jobPriorities.Count.ToString());
+
+                for (int i = 0; i < jobPriorities.Count; i++)
+                {
+                    info.AddValue("jobPrios.[" + i + "].priority", jobPriorities[i].priority.ToString());
+                    info.AddValue("jobPrios.[" + i + "].pawnID", jobPriorities[i].p.ThingID);
+                    info.AddValue("jobPrios.[" + i + "].WorkTypeDef", jobPriorities[i].w.defName);
+                }
             }
         }
     }

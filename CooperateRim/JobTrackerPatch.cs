@@ -21,11 +21,10 @@ namespace CooperateRim
         {
             //job.def
             CooperateRimming.Log("TryTakeOrderedJobPrioritizedWork.IsDes : " + SyncTickData.IsDeserializing);
-            if (!SyncTickData.IsDeserializing)
+            if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AllowJobAt(job, giver, cell);
                 return false;
-                //cData.Enqueue(new CachedJobData() { job = job, tag = tag, __instance = __instance });
             }
             else
             {
