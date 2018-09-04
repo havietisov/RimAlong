@@ -102,6 +102,12 @@ namespace CooperateRim
 
         }
 
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            Rand.PushState(100);
+        }
+
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> MyTranspiler(IEnumerable<CodeInstruction> instr, MethodBase __originalMethod)
         {
@@ -129,6 +135,12 @@ namespace CooperateRim
             {
                 yield return @in;
             }
+        }
+
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            Rand.PopState();
         }
     }
 }

@@ -15,7 +15,7 @@ namespace CooperateRim
         //[HarmonyPostfix]
         public static void JobOnThing_1(Pawn pawn, Thing t, bool forced, ref Job __result)
         {
-            if (!SyncTickData.IsDeserializing)
+            if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(new SyncTickData.TemporaryJobData() { pawn = pawn, target = t, forced = forced, __result = __result });
             }
@@ -24,7 +24,7 @@ namespace CooperateRim
 
         public static void JobOnThing_2(Pawn pawn, Thing thing, bool forced, ref Job __result)
         {
-            if (!SyncTickData.IsDeserializing)
+            if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(new SyncTickData.TemporaryJobData() { pawn = pawn, target = thing, forced = forced, __result = __result });
             }
