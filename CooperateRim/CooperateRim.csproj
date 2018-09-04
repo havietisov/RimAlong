@@ -67,6 +67,7 @@
     <Compile Include="SyncTickData.cs" />
     <Compile Include="SyncTickManager.cs" />
     <Compile Include="WorkGiverPatch.cs" />
+    <Compile Include="ZoneManagerPatch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
