@@ -45,16 +45,50 @@ namespace CooperateRim
             HarmonyInstance harmony = HarmonyInst;
             Log(System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
             List<Type> typesToPatch = new List<Type>();
+            List<Type> designatorInheritees = new List<Type>();
             List<Type> leftOverTypes = new List<Type>();
 
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (Type t in a.GetTypes())
                 {
-                    if (t.IsSubclassOf(typeof(RimWorld.WorkGiver_Scanner)))
+                    if (!t.IsAbstract)
                     {
-                        typesToPatch.Add(t);
-                        leftOverTypes.Add(t);
+                        if (t.IsSubclassOf(typeof(RimWorld.WorkGiver_Scanner)))
+                        {
+                            typesToPatch.Add(t);
+                            leftOverTypes.Add(t);
+                        }
+
+                        /*
+                        if (t.IsSubclassOf(typeof(Designator)))
+                        {
+                            designatorInheritees.Add(t);
+                            leftOverTypes.Add(t);
+                        }*/
+                    }
+                }
+            }
+
+            foreach (MethodInfo mi in new[]
+            {
+                typeof(DesignatorPatch).GetMethod("DesignateSingleCell_1"),
+                typeof(DesignatorPatch).GetMethod("DesignateSingleCell_2"),
+            })
+            {
+                foreach (Type t in designatorInheritees)
+                {
+                    try
+                    {
+                        MethodInfo targetmethod = AccessTools.Method(t, "DesignateSingleCell");
+                        HarmonyMethod postfix = new HarmonyMethod(mi);
+                        harmony.Patch(targetmethod, postfix, null, null);
+                        Logger.Message("Patched type : " + t);
+                        leftOverTypes.Remove(t);
+                    }
+                    catch (Exception ee)
+                    {
+                        Log(ee.ToString());
                     }
                 }
             }
