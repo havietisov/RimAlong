@@ -175,17 +175,31 @@ namespace CooperateRim
         {
             public int zoneID;
             public string zoneName;
-            public Type zoneType;
+            public string zoneType;
         }
-        
+
+
+        [Serializable]
+        public class DesignatorCellCall
+        {
+            public SVEC3 cell;
+            public string designatorType;
+        }
+
+        [Serializable]
+        public class DesignatorMultiCellCall
+        {
+            public List<SVEC3> cells;
+            public string designatorType;
+        }
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
         List<FinalJobData> jobsToSerialize = new List<FinalJobData>();
         List<JobPriorityData> jobPriorities = new List<JobPriorityData>();
-        Dictionary<int, List<SVEC3>> zoneCellsAdded = new Dictionary<int, List<SVEC3>>();
-        Dictionary<int, List<SVEC3>> zoneCellsRemoved = new Dictionary<int, List<SVEC3>>();
-        List<SerializableZoneData> zonesCreated = new List<SerializableZoneData>();
+        List<DesignatorCellCall> designatorCellCalls = new List<DesignatorCellCall>();
+        List<DesignatorMultiCellCall> designatorMultiCellCalls = new List<DesignatorMultiCellCall>();
 
         public static bool IsDeserializing;
         public static bool AvoidLoop;
@@ -196,24 +210,7 @@ namespace CooperateRim
         {
             singleton.designations.Add(des);
         }
-
-        public static void AppendSyncTickData(int zoneID, string zoneName, Type zoneType)
-        {
-            singleton.zonesCreated.Add(new SerializableZoneData() { zoneID = zoneID, zoneName = zoneName, zoneType = zoneType });
-        }
-
-        public static void AppendSyncTickData(int zoneID, IntVec3 cell, bool addOrRemove)
-        {
-            Dictionary<int, List<SVEC3>> dict = addOrRemove ? singleton.zoneCellsAdded : singleton.zoneCellsRemoved;
-
-            if (!dict.ContainsKey(zoneID))
-            {
-                dict.Add(zoneID, new List<SVEC3>());
-            }
-
-            dict[zoneID].Add(cell);
-        }
-
+        
         public static void AppendSyncTickData(TemporaryJobData j)
         {
             singleton.jobData.Add(j);
@@ -237,9 +234,8 @@ namespace CooperateRim
                 singleton.jobsToSerialize,
                 singleton.jobPriorities,
                 singleton.designations,
-                singleton.zoneCellsAdded,
-                singleton.zoneCellsRemoved,
-                singleton.zonesCreated
+                singleton.designatorCellCalls,
+                singleton.designatorMultiCellCalls
             }.Any(u => { return u.Count > 0; }))
             {
                 BinaryFormatter ser = new BinaryFormatter();
@@ -270,12 +266,14 @@ namespace CooperateRim
         {
             tVar = (List<T2>)(info.GetValue(name, typeof(List<T2>)));
         }
-
+        
         public SyncTickData(SerializationInfo info, StreamingContext ctx)
         {
             GetVal(ref designations, info, nameof(designations));
             GetVal(ref jobsToSerialize, info, nameof(jobsToSerialize));
             GetVal(ref jobPriorities, info, nameof(jobPriorities));
+            GetVal(ref designatorCellCalls, info, nameof(designatorCellCalls));
+            GetVal(ref designatorMultiCellCalls, info, nameof(designatorMultiCellCalls));
 
             foreach (var des in designations)
             {
@@ -396,6 +394,20 @@ namespace CooperateRim
                     }
                 }
             }
+            
+            foreach (var s in designatorCellCalls)
+            {
+                Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateSingleCell(s.cell);
+            }
+
+            foreach (DesignatorMultiCellCall s in designatorMultiCellCalls)
+            {
+                AvoidLoop = true;
+                ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
+                //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
+                //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
+                AvoidLoop = false;
+            }
         }
 
         internal static void AllowJobAt(Job job, WorkGiver giver, IntVec3 cell)
@@ -467,20 +479,35 @@ namespace CooperateRim
                 info.AddValue("jobPriorities", jobPriorities);
             }
 
-            //added cells
+            //designator cell calls
             {
-                info.AddValue("cells_added", zoneCellsAdded);
-            }
-            /*
-            //removed_cells
-            {
-                info.AddValue("cells_removed", zoneCellsRemoved);
+                info.AddValue("designatorCellCalls", designatorCellCalls);
             }
 
-            //zonesCreated
+            //designator multicellcalls
             {
-                info.AddValue("zonesCreated", zonesCreated);
-            }*/
+                info.AddValue(nameof(designatorMultiCellCalls), designatorMultiCellCalls);
+            }
+        }
+        
+        internal static void AppendSyncTickData(Designator instance, IntVec3 cell)
+        {
+            singleton.designatorCellCalls.Add(new DesignatorCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName });    
+        }
+
+        static IEnumerable<T2> ConvertAll<T1, T2>(IEnumerable<T1> @this, Func<T1, T2> converter)
+        {
+            foreach (T1 v in @this)
+            {
+                yield return converter(v);
+            }
+        }
+
+        internal static void AppendSyncTickData(Designator instance, IEnumerable<IntVec3> cells)
+        {
+            List<SVEC3> ss = new List<SVEC3>();
+            ss.AddRange(ConvertAll<IntVec3, SVEC3>(cells, u => (SVEC3)u));
+            singleton.designatorMultiCellCalls.Add(new DesignatorMultiCellCall() { cells = ss, designatorType = instance.GetType().AssemblyQualifiedName });
         }
     }
 }
