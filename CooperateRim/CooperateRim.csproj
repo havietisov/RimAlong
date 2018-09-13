@@ -64,6 +64,7 @@
     <Compile Include="Pawn_WorkSettings_patch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandPatch.cs" />
+    <Compile Include="StoreUtility.cs" />
     <Compile Include="SyncTickData.cs" />
     <Compile Include="SyncTickManager.cs" />
     <Compile Include="WorkGiverPatch.cs" />
