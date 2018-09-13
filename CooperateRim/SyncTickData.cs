@@ -10,6 +10,7 @@ using System.Xml.Schema;
 using System.Xml.Serialization;
 using Verse;
 using Verse.AI;
+using System.Linq;
 
 namespace CooperateRim
 {
@@ -193,6 +194,13 @@ namespace CooperateRim
             public string designatorType;
         }
 
+        [Serializable]
+        public class ForbiddenCallData
+        {
+            public string thingID;
+            public bool value;
+        }
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
@@ -200,11 +208,20 @@ namespace CooperateRim
         List<JobPriorityData> jobPriorities = new List<JobPriorityData>();
         List<DesignatorCellCall> designatorCellCalls = new List<DesignatorCellCall>();
         List<DesignatorMultiCellCall> designatorMultiCellCalls = new List<DesignatorMultiCellCall>();
+        List<ForbiddenCallData> ForbiddenCallDataCall = new List<ForbiddenCallData>();
+
+        public static int clientCount = 2;
+        public static string cliendID = "2";
 
         public static bool IsDeserializing;
         public static bool AvoidLoop;
 
         static SyncTickData singleton = new SyncTickData();
+
+        public static void CompForbiddableSetForbiddenCall(string thingID, bool value)
+        {
+            singleton.ForbiddenCallDataCall.Add(new ForbiddenCallData() { thingID = thingID, value = value });
+        }
 
         public static void AppendSyncTickData(Designation des)
         {
@@ -228,25 +245,35 @@ namespace CooperateRim
 
         public static void FlushSyncTickData(int tickNum)
         {
-            CooperateRimming.Log(" +=========================== +");
-            if (new System.Collections.ICollection[]
+            /*if (new System.Collections.ICollection[]
             {
                 singleton.jobsToSerialize,
                 singleton.jobPriorities,
                 singleton.designations,
                 singleton.designatorCellCalls,
-                singleton.designatorMultiCellCalls
-            }.Any(u => { return u.Count > 0; }))
+                singleton.designatorMultiCellCalls,
+                singleton.ForbiddenCallDataCall
+            }.Any(u => { return u.Count > 0; }))*/
             {
-                BinaryFormatter ser = new BinaryFormatter();
-                var fs = System.IO.File.OpenWrite(@"D:\CoopReplays\_" + tickNum + ".xml");
-                SyncTickData buffered = singleton;
-                singleton = new SyncTickData();
-                ser.Serialize(fs, buffered);
-                fs.Flush();
-                fs.Close();
+                try
+                {
+                    string s = @"D:\CoopReplays\_" + tickNum + "client_" + cliendID + ".xml";
+                    
+                    //CooperateRimming.Log("Written : " + s);
+                    BinaryFormatter ser = new BinaryFormatter();
+                    var fs = System.IO.File.OpenWrite(s);
+                    SyncTickData buffered = singleton;
+                    singleton = new SyncTickData();
+                    ser.Serialize(fs, buffered);
+                    fs.Flush();
+                    fs.Close();
+                    System.IO.File.WriteAllText(s + ".sync", "");
+                }
+                catch (Exception ee)
+                {
+                    CooperateRimming.Log(ee.ToString());
+                }
             }
-            CooperateRimming.Log(" +++++++++++++++++++++++++++++++++++");
         }
 
         static DesignationDef DefFromString(string name)
@@ -274,6 +301,7 @@ namespace CooperateRim
             GetVal(ref jobPriorities, info, nameof(jobPriorities));
             GetVal(ref designatorCellCalls, info, nameof(designatorCellCalls));
             GetVal(ref designatorMultiCellCalls, info, nameof(designatorMultiCellCalls));
+            GetVal(ref ForbiddenCallDataCall, info, nameof(ForbiddenCallDataCall));
 
             foreach (var des in designations)
             {
@@ -291,7 +319,7 @@ namespace CooperateRim
                 Find.CurrentMap.designationManager.AddDesignation(new Designation(new LocalTargetInfo(sdt), DefFromString(des.designationDef)));
                 AvoidLoop = false;
 
-                CooperateRimming.Log(des.designationDef);
+                //CooperateRimming.Log(des.designationDef);
             }
 
             foreach(var prior in jobPriorities)
@@ -328,8 +356,8 @@ namespace CooperateRim
                     }
                 }
 
-                CooperateRimming.Log("Find.GameInitData : " + Find.GameInitData);
-                CooperateRimming.Log("pawn priority : " + pawn);
+                //CooperateRimming.Log("Find.GameInitData : " + Find.GameInitData);
+                //CooperateRimming.Log("pawn priority : " + pawn);
                 AvoidLoop = true;
                 pawn.workSettings.SetPriority(_wtd, prior.priority);
                 AvoidLoop = false;
@@ -408,6 +436,26 @@ namespace CooperateRim
                 //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
                 AvoidLoop = false;
             }
+
+            foreach (var s in ForbiddenCallDataCall)
+            {
+                Thing th = null;
+
+                foreach (var thing in Find.CurrentMap.spawnedThings)
+                {
+                    if (thing.ThingID == s.thingID)
+                    {
+                        th = thing;
+                        break;
+                    }
+                }
+
+                AvoidLoop = true;
+                //((ThingWithComps)(th)).GetComp<CompForbiddable>();
+                ForbidUtility.SetForbidden(th, s.value, true);
+                //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateThing(th);
+                AvoidLoop = false;
+            }
         }
 
         internal static void AllowJobAt(Job job, WorkGiver giver, IntVec3 cell)
@@ -420,21 +468,37 @@ namespace CooperateRim
             }
         }
 
+        public static IEnumerable<string> tickFileNames(int ticknum)
+        {
+            for (int i = 0; i < clientCount; i++)
+            {
+                yield return @"D:\CoopReplays\_" + ticknum + "client_" + i + ".xml";
+            }
+        }
+
         public static void Apply(int tickNum)
         {
-            if (System.IO.File.Exists(@"D:\CoopReplays\_" + tickNum + ".xml"))
+            //CooperateRimming.Log("Applied frame " + tickNum);
+            foreach (string s in tickFileNames(tickNum))
             {
-                BinaryFormatter ser = new BinaryFormatter();
-                var fs = System.IO.File.OpenRead(@"D:\CoopReplays\_" + tickNum + ".xml");
-                SyncTickData sd = ser.Deserialize(fs) as SyncTickData;
-
-                /*
-                foreach (Designation des in sd.designations)
+                
+                if (System.IO.File.Exists(s))
                 {
-                    AvoidLoop = true;
-                    Find.CurrentMap.designationManager.AddDesignation(des);
-                    AvoidLoop = false;
-                }*/
+                    Rand.PushState(0);
+                    BinaryFormatter ser = new BinaryFormatter();
+                    var fs = System.IO.File.OpenRead(s);
+                    SyncTickData sd = ser.Deserialize(fs) as SyncTickData;
+
+                    /*
+                    foreach (Designation des in sd.designations)
+                    {
+                        AvoidLoop = true;
+                        Find.CurrentMap.designationManager.AddDesignation(des);
+                        AvoidLoop = false;
+                    }*/
+                    Rand.PopState();
+                }
+                
             }
         }
 
@@ -487,6 +551,11 @@ namespace CooperateRim
             //designator multicellcalls
             {
                 info.AddValue(nameof(designatorMultiCellCalls), designatorMultiCellCalls);
+            }
+
+            //designator designate thing calls
+            {
+                info.AddValue(nameof(ForbiddenCallDataCall), ForbiddenCallDataCall);
             }
         }
         

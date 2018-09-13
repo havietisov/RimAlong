@@ -47,7 +47,10 @@ namespace CooperateRim
         public static bool shouldReallyTick = false;
         public static DateTime nextFrameTime;
         public static int myTicksValue;
+
         public static int nextSyncTickValue = 0;
+        public static int clientsInSync = 0;
+        public static bool imSynced = false;
 
         public static bool IsSyncTick;
         
@@ -59,28 +62,44 @@ namespace CooperateRim
         public static void ReferenceTranspilerMethod(ref int ticksGameInt)
         {
             shouldReallyTick = false;
-
             IsSyncTick = false;
             SyncTickData.IsDeserializing = false;
             {
                 if (DateTime.Now.Ticks > nextFrameTime.Ticks)
                 {
-                    if (nextSyncTickValue == myTicksValue)
+                    bool expectToSync = nextSyncTickValue == myTicksValue;
+                    
+                    if (!imSynced)
                     {
-                        IsSyncTick = true;
-                        nextSyncTickValue = myTicksValue + 10;
-                        //CooperateRimming.Log("Synctick happened at " + myTicksValue);
-                        SyncTickData.FlushSyncTickData(myTicksValue);
-
-                        SyncTickData.IsDeserializing = true;
-                        SyncTickData.Apply(myTicksValue);
-                        //JobTrackerPatch.FlushCData();
+                        if (expectToSync)
+                        {
+                            SyncTickData.FlushSyncTickData(myTicksValue);
+                            imSynced = true;
+                        }
                     }
-                    myTicksValue++;
-                    //CooperateRimming.Log("[2] game ticks : " + ticksGameInt);
+
+                    bool allSyncDataAvailable = SyncTickData.tickFileNames(myTicksValue).All(u => System.IO.File.Exists(u + ".sync"));
+
+                    //CooperateRimming.Log("Frame " + myTicksValue + " : " + expectToSync + " ::: " + allSyncDataAvailable + "[" + myTicksValue + "] :: " + nextSyncTickValue + " [is synced : ] " + imSynced);
+
+                    if (!expectToSync || (expectToSync && allSyncDataAvailable))
+                    {
+                        if (expectToSync)
+                        {
+                            IsSyncTick = true;
+                            nextSyncTickValue = myTicksValue + 10;
+                            //CooperateRimming.Log("Synctick happened at " + myTicksValue);
+
+                            SyncTickData.IsDeserializing = true;
+                            SyncTickData.Apply(myTicksValue);
+                            imSynced = false;
+                            //JobTrackerPatch.FlushCData();
+                        }
+                        myTicksValue++;
+                        shouldReallyTick = true;
+                    }
+                    
                     nextFrameTime = DateTime.Now + TimeSpan.FromSeconds(0.05);
-                    //CooperateRimming.Log("[3] ctime : " + DateTime.Now.Ticks + "ftime : " + nextFrameTime.Ticks);
-                    shouldReallyTick = true;
                 }
 
                 ticksGameInt = myTicksValue;

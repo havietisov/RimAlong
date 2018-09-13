@@ -48,6 +48,17 @@ namespace CooperateRim
             List<Type> designatorInheritees = new List<Type>();
             List<Type> leftOverTypes = new List<Type>();
 
+            for (int i = 0; i < SyncTickData.clientCount; i++)
+            {
+                string sname = @"D:\CoopReplays\" + i + ".lock";
+                if (!System.IO.File.Exists(sname))
+                {
+                    SyncTickData.cliendID = i.ToString();
+                    System.IO.File.CreateText(sname).Close();
+                    break;
+                }
+            }
+
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (Type t in a.GetTypes())
@@ -69,22 +80,20 @@ namespace CooperateRim
                     }
                 }
             }
-
+            /*
             foreach (MethodInfo mi in new[]
             {
-                typeof(DesignatorPatch).GetMethod("DesignateSingleCell_1"),
-                typeof(DesignatorPatch).GetMethod("DesignateSingleCell_2"),
+                typeof(DesignatorPatch).GetMethod("DesignateThing")
             })
             {
                 foreach (Type t in designatorInheritees)
                 {
                     try
                     {
-                        MethodInfo targetmethod = AccessTools.Method(t, "DesignateSingleCell");
+                        MethodInfo targetmethod = AccessTools.Method(t, "DesignateThing");
                         HarmonyMethod postfix = new HarmonyMethod(mi);
                         harmony.Patch(targetmethod, postfix, null, null);
-                        Logger.Message("Patched type : " + t);
-                        leftOverTypes.Remove(t);
+                        Logger.Message("Patched type (thing) : " + t);
                     }
                     catch (Exception ee)
                     {
@@ -92,6 +101,8 @@ namespace CooperateRim
                     }
                 }
             }
+            */
+
 
             foreach (MethodInfo mi in new[] 
             {
@@ -201,6 +212,9 @@ namespace CooperateRim
                 if (Widgets.ButtonText(r, "Host game"))
                 {
                     Rand.PushState(0);
+                    GenericRand.r = new System.Random(0);
+                    RandomNumberGenerator_BasicHash_patch.FrameIter = 0;
+                    RandomNumberGenerator_BasicHash_patch.lastIter = 0;
                     Current.Game = new Game();
                     Current.Game.InitData = new GameInitData();
                     Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
@@ -233,6 +247,7 @@ namespace CooperateRim
                         initialPawnList.Add(p);
                     }
                     PageUtility.InitGameStart();
+                    RandomNumberGenerator_BasicHash_patch.iterationsReset = false;
                     Log("Startseed : " + stringseed);
                 }
                 r.y += size;
