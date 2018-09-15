@@ -42,6 +42,8 @@ namespace CooperateRim
         public override void Initialize()
         {
             inst = this;
+
+
             HarmonyInstance harmony = HarmonyInst;
             Log(System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
             List<Type> typesToPatch = new List<Type>();
