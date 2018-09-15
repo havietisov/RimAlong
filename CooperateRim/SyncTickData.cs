@@ -195,6 +195,14 @@ namespace CooperateRim
         }
 
         [Serializable]
+        public class DesignatorSingleCellCall
+        {
+            public SVEC3 cell;
+            public string designatorType;
+            public string thingDefName;
+        }
+
+        [Serializable]
         public class ForbiddenCallData
         {
             public string thingID;
@@ -208,10 +216,11 @@ namespace CooperateRim
         List<JobPriorityData> jobPriorities = new List<JobPriorityData>();
         List<DesignatorCellCall> designatorCellCalls = new List<DesignatorCellCall>();
         List<DesignatorMultiCellCall> designatorMultiCellCalls = new List<DesignatorMultiCellCall>();
+        List<DesignatorSingleCellCall> designatorSingleCellCalls = new List<DesignatorSingleCellCall>();
         List<ForbiddenCallData> ForbiddenCallDataCall = new List<ForbiddenCallData>();
 
         public static int clientCount = 2;
-        public static string cliendID = "2";
+        public static string cliendID = "1";
 
         public static bool IsDeserializing;
         public static bool AvoidLoop;
@@ -302,6 +311,8 @@ namespace CooperateRim
             GetVal(ref designatorCellCalls, info, nameof(designatorCellCalls));
             GetVal(ref designatorMultiCellCalls, info, nameof(designatorMultiCellCalls));
             GetVal(ref ForbiddenCallDataCall, info, nameof(ForbiddenCallDataCall));
+            GetVal(ref designatorSingleCellCalls, info, nameof(designatorSingleCellCalls));
+            
 
             foreach (var des in designations)
             {
@@ -423,11 +434,6 @@ namespace CooperateRim
                 }
             }
             
-            foreach (var s in designatorCellCalls)
-            {
-                Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateSingleCell(s.cell);
-            }
-
             foreach (DesignatorMultiCellCall s in designatorMultiCellCalls)
             {
                 AvoidLoop = true;
@@ -435,6 +441,52 @@ namespace CooperateRim
                 //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
                 //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
                 AvoidLoop = false;
+            }
+            
+            foreach (var s in designatorSingleCellCalls)
+            {
+                {
+                    List<DesignationCategoryDef> allDefsListForReading = DefDatabase<DesignationCategoryDef>.AllDefsListForReading;
+                    for (int i = 0; i < allDefsListForReading.Count; i++)
+                    {
+                        List<Designator> allResolvedDesignators = allDefsListForReading[i].AllResolvedDesignators;
+                        for (int j = 0; j < allResolvedDesignators.Count; j++)
+                        {
+                            //CooperateRimming.Log(" ++ " + allResolvedDesignators[j].GetType());
+                            
+                            // if (allResolvedDesignators[j].GetType().AssemblyQualifiedName == s.designatorType)
+                            {
+                                AvoidLoop = true;
+                                Designator_Build dsf = allResolvedDesignators[j] as Designator_Build;
+                                if (null != dsf)
+                                {
+                                    //CooperateRimming.Log(" ++ " + dsf.PlacingDef.defName + " :: " + s.thingDefName);
+
+                                    if (dsf.PlacingDef.defName == s.thingDefName)
+                                    {
+                                        dsf.DesignateSingleCell(s.cell);
+                                        //CooperateRimming.Log("Found ! " + allResolvedDesignators[j].GetType().AssemblyQualifiedName);
+                                    }
+                                }
+
+                                //allResolvedDesignators[i].DesignateSingleCell(s.cell);
+                                AvoidLoop = false;
+                                
+                               
+                            }
+                            /*
+                            Designator_Build designator_Build = FindAllowedDesignatorRecursive(allResolvedDesignators[j], buildable, mustBeVisible);
+                            if (designator_Build != null)
+                            {
+                                return designator_Build;
+                            }*/
+                        }
+                    }
+                }
+
+                
+                //((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateSingleCell(s.cell);
+                
             }
 
             foreach (var s in ForbiddenCallDataCall)
@@ -456,6 +508,7 @@ namespace CooperateRim
                 //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateThing(th);
                 AvoidLoop = false;
             }
+
         }
 
         internal static void AllowJobAt(Job job, WorkGiver giver, IntVec3 cell)
@@ -557,6 +610,11 @@ namespace CooperateRim
             {
                 info.AddValue(nameof(ForbiddenCallDataCall), ForbiddenCallDataCall);
             }
+
+            //designator single cell for some types of jobs
+            {
+                info.AddValue(nameof(designatorSingleCellCalls), designatorSingleCellCalls);
+            }
         }
         
         internal static void AppendSyncTickData(Designator instance, IntVec3 cell)
@@ -577,6 +635,11 @@ namespace CooperateRim
             List<SVEC3> ss = new List<SVEC3>();
             ss.AddRange(ConvertAll<IntVec3, SVEC3>(cells, u => (SVEC3)u));
             singleton.designatorMultiCellCalls.Add(new DesignatorMultiCellCall() { cells = ss, designatorType = instance.GetType().AssemblyQualifiedName });
+        }
+
+        internal static void AppendSyncTickDataDesignatorSingleCell(Designator instance, IntVec3 cell, BuildableDef bdef)
+        {
+            singleton.designatorSingleCellCalls.Add(new DesignatorSingleCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName, thingDefName = bdef.defName });
         }
     }
 }

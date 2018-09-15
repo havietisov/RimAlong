@@ -9,7 +9,6 @@ using System.Diagnostics;
 
 namespace CooperateRim
 {
-
     [HarmonyPatch(typeof(Designator_ZoneAdd))]
     [HarmonyPatch("DesignateMultiCell")]
     public class Designator_zoneAdd
@@ -29,6 +28,39 @@ namespace CooperateRim
             }
         }
     }
+
+
+    [HarmonyPatch(typeof(Designator_Build))]
+    [HarmonyPatch("DesignateSingleCell")]
+    public class Designator_build
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(ref Designator __instance, ref IntVec3 c, ref BuildableDef ___entDef)
+        {
+            CooperateRimming.Log("Designator_Build designate single cell");
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickDataDesignatorSingleCell(__instance, c , ___entDef);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+            /*
+            CooperateRimming.Log("DesignateMultiCell_1");
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickData(__instance, cells);
+                return false;
+            }
+            else
+            {
+                return true;
+            }*/
+        }
+    }
+
 
     [HarmonyPatch(typeof(CompForbiddable))]
     [HarmonyPatch("set_Forbidden")]
