@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="CooperateRimming.cs" />
     <Compile Include="DesignationManagerPatch.cs" />
+    <Compile Include="Designator_AreaBuildRoof_patch.cs" />
     <Compile Include="GenConstructPatch.cs" />
     <Compile Include="JobTrackerPatch.cs" />
     <Compile Include="NetworkGame.cs" />
