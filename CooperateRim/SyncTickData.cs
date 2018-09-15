@@ -209,6 +209,13 @@ namespace CooperateRim
             public bool value;
         }
 
+        [Serializable]
+        public class Designator_area_call_data
+        {
+            public string typeID;
+            public SVEC3 cell;
+        }
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
@@ -218,6 +225,7 @@ namespace CooperateRim
         List<DesignatorMultiCellCall> designatorMultiCellCalls = new List<DesignatorMultiCellCall>();
         List<DesignatorSingleCellCall> designatorSingleCellCalls = new List<DesignatorSingleCellCall>();
         List<ForbiddenCallData> ForbiddenCallDataCall = new List<ForbiddenCallData>();
+        List<Designator_area_call_data> designatorAreaCallData = new List<Designator_area_call_data>();
 
         public static int clientCount = 1;
         public static string cliendID = "1";
@@ -320,8 +328,8 @@ namespace CooperateRim
             GetVal(ref designatorMultiCellCalls, info, nameof(designatorMultiCellCalls));
             GetVal(ref ForbiddenCallDataCall, info, nameof(ForbiddenCallDataCall));
             GetVal(ref designatorSingleCellCalls, info, nameof(designatorSingleCellCalls));
+            GetVal(ref designatorAreaCallData, info, nameof(designatorAreaCallData));
             
-
             foreach (var des in designations)
             {
                 Thing sdt = null;
@@ -527,7 +535,6 @@ namespace CooperateRim
                 //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateThing(th);
                 AvoidLoop = false;
             }
-
         }
 
         internal static void AllowJobAt(Job job, WorkGiver giver, IntVec3 cell)
@@ -635,6 +642,10 @@ namespace CooperateRim
             {
                 info.AddValue(nameof(designatorSingleCellCalls), designatorSingleCellCalls);
             }
+            //designator area (build roof) calls
+            {
+                info.AddValue(nameof(designatorAreaCallData), designatorAreaCallData);
+            }
         }
         
         internal static void AppendSyncTickData(Designator instance, IntVec3 cell)
@@ -660,6 +671,11 @@ namespace CooperateRim
         internal static void AppendSyncTickDataDesignatorSingleCell(Designator instance, IntVec3 cell, BuildableDef bdef)
         {
             singleton.designatorSingleCellCalls.Add(new DesignatorSingleCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName, thingDefName = bdef.defName });
+        }
+
+        internal static void AppendSyncTickDataArea(Designator_AreaBuildRoof instance, IntVec3 c)
+        {
+            singleton.designatorCellCalls.Add(new DesignatorCellCall { designatorType = instance.GetType().AssemblyQualifiedName, cell = c });
         }
     }
 }
