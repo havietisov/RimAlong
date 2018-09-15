@@ -239,7 +239,15 @@ namespace CooperateRim
         
         public static void AppendSyncTickData(TemporaryJobData j)
         {
-            singleton.jobData.Add(j);
+            if (j.__result != null)
+            {
+                CooperateRimming.Log("new sync tick temporaty job defname : " + j.__result.def.defName);
+                singleton.jobData.Add(j);
+            }
+            else
+            {
+                CooperateRimming.Log("temp job data is null");
+            }
         }
 
         public static void AppendSyncTickData(WorkTypeDef w, int priority, Pawn p)
@@ -373,6 +381,8 @@ namespace CooperateRim
                 pawn.workSettings.SetPriority(_wtd, prior.priority);
                 AvoidLoop = false;
             }
+
+            CooperateRimming.Log("Deserialized jobs :  " + jobsToSerialize.Count);
 
             foreach (var _job in jobsToSerialize)
             {
@@ -522,10 +532,11 @@ namespace CooperateRim
 
         internal static void AllowJobAt(Job job, WorkGiver giver, IntVec3 cell)
         {
-            TemporaryJobData _tj = singleton.jobData.Find(u => u != null && u.__result != null && u.__result.loadID == job.loadID);
-            CooperateRimming.Log("gtype : " + giver.def.giverClass);
+            TemporaryJobData _tj = singleton.jobData.Find(u => u != null && u.__result != null && u.__result.def.defName == job.def.defName);
+            CooperateRimming.Log("gtype : " + giver.def.giverClass + ":" + job.def.defName);
             if (_tj != null)
             {
+                CooperateRimming.Log("found temporary job to add : " + _tj.__result.def.defName);
                 singleton.jobsToSerialize.Add(new FinalJobData() { cell = cell, giver = giver, forced = _tj.forced, pawn = _tj.pawn, target = _tj.target });
             }
         }
@@ -597,7 +608,7 @@ namespace CooperateRim
                 {
                     CooperateRimming.Log("++++ : " + j.giver.__jobDefName);
                 }
-                info.AddValue("jobsToSerialize", jobsToSerialize);
+                info.AddValue(nameof(jobsToSerialize), jobsToSerialize);
             }
 
             //job priorities
