@@ -219,7 +219,7 @@ namespace CooperateRim
         List<DesignatorSingleCellCall> designatorSingleCellCalls = new List<DesignatorSingleCellCall>();
         List<ForbiddenCallData> ForbiddenCallDataCall = new List<ForbiddenCallData>();
 
-        public static int clientCount = 2;
+        public static int clientCount = 1;
         public static string cliendID = "1";
 
         public static bool IsDeserializing;
@@ -433,7 +433,16 @@ namespace CooperateRim
                     }
                 }
             }
-            
+
+            foreach (var s in designatorCellCalls)
+            {
+                AvoidLoop = true;
+                ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateSingleCell(s.cell);
+                //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
+                //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
+                AvoidLoop = false;
+            }
+
             foreach (DesignatorMultiCellCall s in designatorMultiCellCalls)
             {
                 AvoidLoop = true;
