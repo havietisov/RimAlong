@@ -61,6 +61,37 @@ namespace CooperateRim
         }
     }
 
+    [HarmonyPatch(typeof(Designator_Cancel))]
+    [HarmonyPatch("DesignateSingleCell")]
+    public class Designator_cancel
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(ref Designator __instance, ref IntVec3 c)
+        {
+            CooperateRimming.Log("Designator_cancel designate single cell");
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickData(__instance, c);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+            /*
+            CooperateRimming.Log("DesignateMultiCell_1");
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickData(__instance, cells);
+                return false;
+            }
+            else
+            {
+                return true;
+            }*/
+        }
+    }
+
 
     [HarmonyPatch(typeof(CompForbiddable))]
     [HarmonyPatch("set_Forbidden")]
