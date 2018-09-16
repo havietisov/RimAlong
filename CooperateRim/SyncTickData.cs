@@ -15,6 +15,27 @@ using System.Linq;
 namespace CooperateRim
 {
     [Serializable]
+    public struct SRot4
+    {
+        public SRot4(Rot4 r)
+        {
+            intValue = r.AsInt;
+        }
+
+        public int intValue;
+
+        public static implicit operator SRot4(Rot4 @this)
+        {
+            return new SRot4(@this);
+        }
+
+        public static implicit operator Rot4(SRot4 @this)
+        {
+            return new Rot4(@this.intValue);
+        }
+    }
+
+    [Serializable]
     public struct SVEC3
     {
         public SVEC3(IntVec3 i)
@@ -200,6 +221,8 @@ namespace CooperateRim
             public SVEC3 cell;
             public string designatorType;
             public string thingDefName;
+            public SRot4 rot;
+            public string StuffDefName;
         }
 
         [Serializable]
@@ -227,7 +250,7 @@ namespace CooperateRim
         List<ForbiddenCallData> ForbiddenCallDataCall = new List<ForbiddenCallData>();
         List<Designator_area_call_data> designatorAreaCallData = new List<Designator_area_call_data>();
 
-        public static int clientCount = 1;
+        public static int clientCount = 2;
         public static string cliendID = "1";
 
         public static bool IsDeserializing;
@@ -479,41 +502,25 @@ namespace CooperateRim
                         List<Designator> allResolvedDesignators = allDefsListForReading[i].AllResolvedDesignators;
                         for (int j = 0; j < allResolvedDesignators.Count; j++)
                         {
-                            //CooperateRimming.Log(" ++ " + allResolvedDesignators[j].GetType());
-                            
-                            // if (allResolvedDesignators[j].GetType().AssemblyQualifiedName == s.designatorType)
                             {
                                 AvoidLoop = true;
                                 Designator_Build dsf = allResolvedDesignators[j] as Designator_Build;
+
                                 if (null != dsf)
                                 {
-                                    //CooperateRimming.Log(" ++ " + dsf.PlacingDef.defName + " :: " + s.thingDefName);
-
                                     if (dsf.PlacingDef.defName == s.thingDefName)
                                     {
+                                        dsf.GetType().GetField("placingRot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(dsf, (Rot4)s.rot);
+                                        dsf.SetStuffDef(DefDatabase<ThingDef>.AllDefs.First(u => u.defName == s.StuffDefName));
                                         dsf.DesignateSingleCell(s.cell);
-                                        //CooperateRimming.Log("Found ! " + allResolvedDesignators[j].GetType().AssemblyQualifiedName);
                                     }
                                 }
 
-                                //allResolvedDesignators[i].DesignateSingleCell(s.cell);
                                 AvoidLoop = false;
-                                
-                               
                             }
-                            /*
-                            Designator_Build designator_Build = FindAllowedDesignatorRecursive(allResolvedDesignators[j], buildable, mustBeVisible);
-                            if (designator_Build != null)
-                            {
-                                return designator_Build;
-                            }*/
                         }
                     }
                 }
-
-                
-                //((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateSingleCell(s.cell);
-                
             }
 
             foreach (var s in ForbiddenCallDataCall)
@@ -668,9 +675,9 @@ namespace CooperateRim
             singleton.designatorMultiCellCalls.Add(new DesignatorMultiCellCall() { cells = ss, designatorType = instance.GetType().AssemblyQualifiedName });
         }
 
-        internal static void AppendSyncTickDataDesignatorSingleCell(Designator instance, IntVec3 cell, BuildableDef bdef)
+        internal static void AppendSyncTickDataDesignatorSingleCell(Designator instance, IntVec3 cell, BuildableDef bdef, Rot4 rot, ThingDef stuffDef)
         {
-            singleton.designatorSingleCellCalls.Add(new DesignatorSingleCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName, thingDefName = bdef.defName });
+            singleton.designatorSingleCellCalls.Add(new DesignatorSingleCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName, thingDefName = bdef.defName, rot = rot, StuffDefName = stuffDef.defName });
         }
 
         internal static void AppendSyncTickDataArea(Designator_AreaBuildRoof instance, IntVec3 c)

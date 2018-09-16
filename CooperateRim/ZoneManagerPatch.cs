@@ -35,12 +35,15 @@ namespace CooperateRim
     public class Designator_build
     {
         [HarmonyPrefix]
-        public static bool Prefix(ref Designator __instance, ref IntVec3 c, ref BuildableDef ___entDef)
+        public static bool Prefix(ref Designator __instance, ref IntVec3 c, ref BuildableDef ___entDef, ref Rot4 ___placingRot, ref ThingDef ___stuffDef)
         {
-            CooperateRimming.Log("Designator_Build designate single cell");
+            CooperateRimming.Log("Designator_Build designate single cell " + ___stuffDef.ToString() + " || " + ___stuffDef.defName );
+            ThingDef td = ___stuffDef;
+           
             if (!SyncTickData.AvoidLoop)
             {
-                SyncTickData.AppendSyncTickDataDesignatorSingleCell(__instance, c , ___entDef);
+                //DefDatabase<ThingDef>.AllDefs
+                SyncTickData.AppendSyncTickDataDesignatorSingleCell(__instance, c , ___entDef, ___placingRot, ___stuffDef);
                 return false;
             }
             else
