@@ -122,11 +122,22 @@ namespace CooperateRim
         }
 
         [HarmonyPrefix]
-        public static void Prefix()
+        public static bool Prefix(ref int ___ticksGameInt)
         {
             Rand.PushState(100);
+            ReferenceTranspilerMethod(ref ___ticksGameInt);
+
+            if (shouldReallyTick)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
+        /*
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> MyTranspiler(IEnumerable<CodeInstruction> instr, MethodBase __originalMethod)
         {
@@ -155,11 +166,20 @@ namespace CooperateRim
                 yield return @in;
             }
         }
+        */
+        
+        public static ResearchProjectDef cachedRDef;
 
         [HarmonyPostfix]
         public static void Postfix()
         {
             Rand.PopState();
+
+            if (Find.ResearchManager.currentProj != cachedRDef)
+            {
+                SyncTickData.AppendSyncTickData(Find.ResearchManager.currentProj);
+                Find.ResearchManager.currentProj = cachedRDef;
+            }
         }
     }
 }

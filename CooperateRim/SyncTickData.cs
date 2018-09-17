@@ -161,7 +161,7 @@ namespace CooperateRim
             return new S_Designation(@this);
         }
     }
-    
+
     [Serializable]
     public class SyncTickData : ISerializable
     {
@@ -249,6 +249,7 @@ namespace CooperateRim
         List<DesignatorSingleCellCall> designatorSingleCellCalls = new List<DesignatorSingleCellCall>();
         List<ForbiddenCallData> ForbiddenCallDataCall = new List<ForbiddenCallData>();
         List<Designator_area_call_data> designatorAreaCallData = new List<Designator_area_call_data>();
+        List<string> researches = new List<string>();
 
         public static int clientCount = 2;
         public static string cliendID = "1";
@@ -267,7 +268,13 @@ namespace CooperateRim
         {
             singleton.designations.Add(des);
         }
-        
+
+        public static void AppendSyncTickData(ResearchProjectDef research)
+        {
+            
+            singleton.researches.Add(research.defName);
+        }
+
         public static void AppendSyncTickData(TemporaryJobData j)
         {
             if (j.__result != null)
@@ -352,6 +359,7 @@ namespace CooperateRim
             GetVal(ref ForbiddenCallDataCall, info, nameof(ForbiddenCallDataCall));
             GetVal(ref designatorSingleCellCalls, info, nameof(designatorSingleCellCalls));
             GetVal(ref designatorAreaCallData, info, nameof(designatorAreaCallData));
+            GetVal(ref researches, info, nameof(researches));
             
             foreach (var des in designations)
             {
@@ -542,6 +550,12 @@ namespace CooperateRim
                 //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateThing(th);
                 AvoidLoop = false;
             }
+
+            foreach (string s in researches)
+            {
+                TickManagerPatch.cachedRDef = DefDatabase<ResearchProjectDef>.AllDefsListForReading.Find(u => u.defName == s);
+                Find.ResearchManager.currentProj = TickManagerPatch.cachedRDef;
+            }
         }
 
         internal static void AllowJobAt(Job job, WorkGiver giver, IntVec3 cell)
@@ -652,6 +666,11 @@ namespace CooperateRim
             //designator area (build roof) calls
             {
                 info.AddValue(nameof(designatorAreaCallData), designatorAreaCallData);
+            }
+
+            //researches
+            {
+                info.AddValue(nameof(researches), researches);
             }
         }
         
