@@ -82,6 +82,19 @@ namespace CooperateRim
                     }
                 }
             }
+
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type t in a.GetTypes())
+                {
+                    if (!t.IsAbstract && t.IsSubclassOf(typeof(RimWorld.Designator_Area)))
+                    {
+                        MethodInfo targetmethod = AccessTools.Method(t, "DesignateSingleCell");
+                        HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_AreaPatch).GetMethod("DesignateSingleCell"));
+                        harmony.Patch(targetmethod, prefix, null, null);
+                    }
+                }
+            }
             /*
             foreach (MethodInfo mi in new[]
             {
