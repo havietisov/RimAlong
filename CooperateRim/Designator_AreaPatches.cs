@@ -8,14 +8,14 @@ using Verse;
 
 namespace CooperateRim
 {
-    [HarmonyPatch(typeof(Designator_AreaBuildRoof))]
-    [HarmonyPatch("DesignateSingleCell")]
-    class Designator_AreaBuildRoof_patch
+    //[HarmonyPatch(typeof(Designator_AreaBuildRoof))]
+    //[HarmonyPatch("DesignateSingleCell")]
+    class Designator_AreaPatch
     {
-        [HarmonyPrefix]
-        public static bool DesignateSingleCell(ref Designator_AreaBuildRoof __instance, ref IntVec3 c)
+        //[HarmonyPrefix]
+        public static bool DesignateSingleCell(ref Designator_Area __instance, ref IntVec3 c)
         {
-            CooperateRimming.Log("Designator_AreaBuildRoof.DesignateSingleCell");
+            CooperateRimming.Log(__instance.GetType().AssemblyQualifiedName + ".DesignateSingleCell");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickDataArea(__instance, c);

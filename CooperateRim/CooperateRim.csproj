@@ -57,9 +57,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BillStack.cs" />
     <Compile Include="CooperateRimming.cs" />
     <Compile Include="DesignationManagerPatch.cs" />
-    <Compile Include="Designator_AreaBuildRoof_patch.cs" />
+    <Compile Include="Designator_AreaPatches.cs" />
     <Compile Include="GenConstructPatch.cs" />
     <Compile Include="JobTrackerPatch.cs" />
     <Compile Include="NetworkGame.cs" />
@@ -77,6 +78,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\CooperateRim.dll" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y</PostBuildEvent>
+    <PostBuildEvent>copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\CooperateRim.dll" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
+copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\CooperateRim.pdb" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
+del D:\CoopReplays\*.* /s /q</PostBuildEvent>
   </PropertyGroup>
 </Project>

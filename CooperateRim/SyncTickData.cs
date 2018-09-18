@@ -115,7 +115,7 @@ namespace CooperateRim
     {
         public S_Thing(Thing t)
         {
-            ThingID = t.ThingID;
+            ThingID = t == null ? "<INVALID>" : t.ThingID;
         }
 
         public string ThingID;
@@ -140,7 +140,7 @@ namespace CooperateRim
 
         public static implicit operator S_LocalTargetInfo(LocalTargetInfo @this)
         {
-            return new S_LocalTargetInfo(@this);
+            return @this != null ? new S_LocalTargetInfo(@this) : null;
         }
     }
 
@@ -168,7 +168,10 @@ namespace CooperateRim
         public class TemporaryJobData
         {
             public S_Pawn pawn;
-            public S_Thing target;
+            public S_Thing targetThing;
+            public S_LocalTargetInfo jobTargetA;
+            public S_LocalTargetInfo jobTargetB;
+            public S_LocalTargetInfo jobTargetC;
             public bool forced;
             public Job __result;
         }
@@ -181,6 +184,9 @@ namespace CooperateRim
             public S_WorkGiver giver;
             public S_Pawn pawn;
             public S_Thing target;
+            public S_LocalTargetInfo jobTargetA;
+            public S_LocalTargetInfo jobTargetB;
+            public S_LocalTargetInfo jobTargetC;
             public bool forced;
         }
 
@@ -239,6 +245,14 @@ namespace CooperateRim
             public SVEC3 cell;
         }
 
+        [Serializable]
+        public class R_BILL
+        {
+            public string recipeDefName;
+            public string billGiverName;
+            public S_Thing targetThing;
+        }
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
@@ -249,6 +263,7 @@ namespace CooperateRim
         List<DesignatorSingleCellCall> designatorSingleCellCalls = new List<DesignatorSingleCellCall>();
         List<ForbiddenCallData> ForbiddenCallDataCall = new List<ForbiddenCallData>();
         List<Designator_area_call_data> designatorAreaCallData = new List<Designator_area_call_data>();
+        List<R_BILL> bills = new List<R_BILL>();
         List<string> researches = new List<string>();
 
         public static int clientCount = 2;
@@ -262,6 +277,11 @@ namespace CooperateRim
         public static void CompForbiddableSetForbiddenCall(string thingID, bool value)
         {
             singleton.ForbiddenCallDataCall.Add(new ForbiddenCallData() { thingID = thingID, value = value });
+        }
+
+        public static void AppendSyncTickData(Bill b, IBillGiver giver)
+        {
+            singleton.bills.Add(new R_BILL() { recipeDefName = b.recipe.defName, billGiverName = giver.ToString(), targetThing = Find.Selector.SingleSelectedThing });
         }
 
         public static void AppendSyncTickData(Designation des)
@@ -360,6 +380,7 @@ namespace CooperateRim
             GetVal(ref designatorSingleCellCalls, info, nameof(designatorSingleCellCalls));
             GetVal(ref designatorAreaCallData, info, nameof(designatorAreaCallData));
             GetVal(ref researches, info, nameof(researches));
+            GetVal(ref bills, info, nameof(bills));
             
             foreach (var des in designations)
             {
@@ -423,12 +444,32 @@ namespace CooperateRim
 
             CooperateRimming.Log("Deserialized jobs :  " + jobsToSerialize.Count);
 
+            List<Thing>[] things = (List<Thing>[])Find.CurrentMap.thingGrid.GetType().GetField("thingGrid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Find.CurrentMap.thingGrid);
+
+            CooperateRimming.Log("thinglist : " + things);
+
+            foreach (var _bill in bills)
+            {
+                Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
+
+                foreach (var rec in issuer.def.AllRecipes)
+                {
+                    if (rec.defName == _bill.recipeDefName)
+                    {
+                        AvoidLoop = true;
+                        (issuer as IBillGiver).BillStack.AddBill(BillUtility.MakeNewBill(rec));
+                        AvoidLoop = false;
+                        break;
+                    }
+                }
+            }
+
             foreach (var _job in jobsToSerialize)
             {
                 Pawn pawn = null;
                 Thing th = null;
                 WorkTypeDef workTypeDef = null;
-
+                
                 foreach (var thing in Find.CurrentMap.thingGrid.ThingsAt(_job.cell))
                 {
                     if (thing.ThingID == _job.target.ThingID)
@@ -464,22 +505,76 @@ namespace CooperateRim
                 CooperateRimming.Log("pawn :" + pawn + "]");
                 CooperateRimming.Log("givers count : " + workTypeDef.workGiversByPriority.Count);
 
-                for (int k = 0; k < workTypeDef.workGiversByPriority.Count; k++)
+                try
                 {
-                    WorkGiverDef workGiver = workTypeDef.workGiversByPriority[k];
-                    WorkGiver_Scanner workGiver_Scanner = workGiver.Worker as WorkGiver_Scanner;
-                    CooperateRimming.Log(workGiver_Scanner.def.defName);
-                    CooperateRimming.Log(workGiver_Scanner.def.giverClass + " <> " + _job.giver.jobGiverClass);
-                    if (workGiver_Scanner.def.giverClass.ToString() == _job.giver.jobGiverClass.ToString())
+                    for (int k = 0; k < workTypeDef.workGiversByPriority.Count; k++)
                     {
-                        Job job = workGiver_Scanner.JobOnThing(pawn, th, forced: _job.forced);
-                        job.playerForced = true;
-                        job.TryMakePreToilReservations(pawn, errorOnFailed: true);
-                        AvoidLoop = true;
-                        CooperateRimming.Log("Ordered job : " + job + " : " + pawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workGiver_Scanner, _job.cell));
-                        AvoidLoop = false;
-                        break;
+                        WorkGiverDef workGiver = workTypeDef.workGiversByPriority[k];
+                        WorkGiver_Scanner workGiver_Scanner = workGiver.Worker as WorkGiver_Scanner;
+
+                        CooperateRimming.Log(workGiver_Scanner == null ? "FOOKIN NULL GIVER worker at " + workGiver.ToString() : workGiver_Scanner.ToString());
+
+                        if (workGiver_Scanner != null && workGiver_Scanner.def != null)
+                        {
+                            CooperateRimming.Log(workGiver_Scanner.def.defName);
+                            CooperateRimming.Log(workGiver_Scanner.def.giverClass + " <> " + _job.giver.jobGiverClass);
+                            if (workGiver_Scanner.def.giverClass.ToString() == _job.giver.jobGiverClass.ToString())
+                            {
+                                Job job = workGiver_Scanner.JobOnThing(pawn, th, forced: _job.forced);
+                                job.playerForced = true;
+                                job.TryMakePreToilReservations(pawn, errorOnFailed: true);
+
+                                try
+                                {
+                                    if (_job.jobTargetA != null)
+                                    {
+                                        job.targetA = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetA.thing.ThingID)).First(u => u.ThingID == _job.jobTargetA.thing.ThingID);
+                                    }
+                                }
+                                catch (Exception ee)
+                                {
+
+                                }
+
+                                try
+                                {
+                                    if (_job.jobTargetB != null)
+                                    {
+                                        job.targetB = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetB.thing.ThingID)).First(u => u.ThingID == _job.jobTargetB.thing.ThingID);
+                                    }
+                                }
+                                catch (Exception ee)
+                                {
+
+                                }
+
+                                try
+                                {
+                                    if (_job.jobTargetC != null)
+                                    {
+                                        job.targetC = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetC.thing.ThingID)).First(u => u.ThingID == _job.jobTargetC.thing.ThingID);
+                                    }
+                                }
+                                catch (Exception ee)
+                                {
+
+                                }
+
+                                AvoidLoop = true;
+                                CooperateRimming.Log("Ordered job : " + job + " : " + pawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workGiver_Scanner, _job.cell));
+                                AvoidLoop = false;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            CooperateRimming.Log("Job giver scanner null? wtf?");
+                        }
                     }
+                }
+                catch (Exception ee)
+                {
+                    CooperateRimming.Log("[01FFFFFFFFFFFF] " + ee.ToString());
                 }
             }
 
@@ -565,7 +660,7 @@ namespace CooperateRim
             if (_tj != null)
             {
                 CooperateRimming.Log("found temporary job to add : " + _tj.__result.def.defName);
-                singleton.jobsToSerialize.Add(new FinalJobData() { cell = cell, giver = giver, forced = _tj.forced, pawn = _tj.pawn, target = _tj.target });
+                singleton.jobsToSerialize.Add(new FinalJobData() { cell = cell, giver = giver, forced = _tj.forced, pawn = _tj.pawn, target = _tj.targetThing, jobTargetA = _tj.jobTargetA, jobTargetB = _tj.jobTargetB, jobTargetC = _tj.jobTargetC });
             }
         }
 
@@ -672,6 +767,11 @@ namespace CooperateRim
             {
                 info.AddValue(nameof(researches), researches);
             }
+
+            //bills
+            {
+                info.AddValue(nameof(bills), bills);
+            }
         }
         
         internal static void AppendSyncTickData(Designator instance, IntVec3 cell)
@@ -699,7 +799,7 @@ namespace CooperateRim
             singleton.designatorSingleCellCalls.Add(new DesignatorSingleCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName, thingDefName = bdef.defName, rot = rot, StuffDefName = stuffDef.defName });
         }
 
-        internal static void AppendSyncTickDataArea(Designator_AreaBuildRoof instance, IntVec3 c)
+        internal static void AppendSyncTickDataArea(Designator_Area instance, IntVec3 c)
         {
             singleton.designatorCellCalls.Add(new DesignatorCellCall { designatorType = instance.GetType().AssemblyQualifiedName, cell = c });
         }

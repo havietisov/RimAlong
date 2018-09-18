@@ -17,7 +17,7 @@ namespace CooperateRim
         {
             if (!SyncTickData.AvoidLoop)
             {
-                SyncTickData.AppendSyncTickData(new SyncTickData.TemporaryJobData() { pawn = pawn, target = t, forced = forced, __result = __result });
+                SyncTickData.AppendSyncTickData(new SyncTickData.TemporaryJobData() { pawn = pawn, targetThing = t, forced = forced, __result = __result, jobTargetA = __result != null ? __result.targetA : null, jobTargetB = __result != null ? __result.targetB : null, jobTargetC = __result != null ? __result.targetC : null });
             }
             //CooperateRimming.Log("::___::" + __result.ToString());
         }
@@ -26,7 +26,7 @@ namespace CooperateRim
         {
             if (!SyncTickData.AvoidLoop)
             {
-                SyncTickData.AppendSyncTickData(new SyncTickData.TemporaryJobData() { pawn = pawn, target = thing, forced = forced, __result = __result });
+                SyncTickData.AppendSyncTickData(new SyncTickData.TemporaryJobData() { pawn = pawn, targetThing = thing, forced = forced, __result = __result, jobTargetA = __result != null ? __result.targetA : null, jobTargetB = __result != null ? __result.targetB : null, jobTargetC = __result != null ? __result.targetC : null });
             }
             //CooperateRimming.Log("::___::" + __result.ToString());
         }
