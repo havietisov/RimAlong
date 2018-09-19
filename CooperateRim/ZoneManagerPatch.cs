@@ -37,7 +37,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref Designator __instance, ref IntVec3 c, ref BuildableDef ___entDef, ref Rot4 ___placingRot, ref ThingDef ___stuffDef)
         {
-            CooperateRimming.Log("Designator_Build designate single cell " + ___stuffDef.ToString() + " || " + ___stuffDef.defName );
+            CooperateRimming.Log("Designator_Build designate single cell " + (___stuffDef == null ? "null" : ___stuffDef.ToString()) + " || " + (___stuffDef == null ? "null" : ___stuffDef.defName) );
             ThingDef td = ___stuffDef;
            
             if (!SyncTickData.AvoidLoop)

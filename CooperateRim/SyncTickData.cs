@@ -452,6 +452,8 @@ namespace CooperateRim
             {
                 Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
 
+                CooperateRimming.Log("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
+
                 foreach (var rec in issuer.def.AllRecipes)
                 {
                     if (rec.defName == _bill.recipeDefName)
@@ -614,7 +616,10 @@ namespace CooperateRim
                                     if (dsf.PlacingDef.defName == s.thingDefName)
                                     {
                                         dsf.GetType().GetField("placingRot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(dsf, (Rot4)s.rot);
-                                        dsf.SetStuffDef(DefDatabase<ThingDef>.AllDefs.First(u => u.defName == s.StuffDefName));
+                                        if (s.StuffDefName != null)
+                                        {
+                                            dsf.SetStuffDef(DefDatabase<ThingDef>.AllDefs.First(u => u.defName == s.StuffDefName));
+                                        }
                                         dsf.DesignateSingleCell(s.cell);
                                     }
                                 }
@@ -796,7 +801,7 @@ namespace CooperateRim
 
         internal static void AppendSyncTickDataDesignatorSingleCell(Designator instance, IntVec3 cell, BuildableDef bdef, Rot4 rot, ThingDef stuffDef)
         {
-            singleton.designatorSingleCellCalls.Add(new DesignatorSingleCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName, thingDefName = bdef.defName, rot = rot, StuffDefName = stuffDef.defName });
+            singleton.designatorSingleCellCalls.Add(new DesignatorSingleCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName, thingDefName = bdef.defName, rot = rot, StuffDefName = stuffDef == null ? null : stuffDef.defName });
         }
 
         internal static void AppendSyncTickDataArea(Designator_Area instance, IntVec3 c)
