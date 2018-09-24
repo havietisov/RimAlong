@@ -36,9 +36,7 @@ namespace CooperateRim
             public bool hasValue;
             public BillRepeatModeDef temp_def;
         }
-
-        static string def_name_t;
-
+        
         public static Dictionary<Bill_Production, BillRepeatModeDef> kkk = new Dictionary<Bill_Production, BillRepeatModeDef>();
 
         [HarmonyPrefix]
@@ -50,11 +48,6 @@ namespace CooperateRim
             {
                 kkk.Add(__instance, null);
             }
-
-            //kkk[__instance] = __instance.repeatMode.defName;
-            /*
-            def_name_t = __instance.repeatMode.defName;
-            __state.hasValue = true;*/
             return true;
         }
 
@@ -84,16 +77,6 @@ namespace CooperateRim
                     __instance.repeatMode = kkk[__instance];
                 }
             }
-            /*
-            if (__state!=null)
-            {
-                if (__instance.repeatMode.defName != __state.temp_def)
-                {
-                    CooperateRimming.Log("obtained bill state = " + __state.temp_def);
-                    SyncTickData.AppendSyncTickData(__instance, ___billStack.billGiver, __instance.repeatMode);
-                    //__instance.repeatMode = __state;
-                }
-            }*/
         }
     }
 }
