@@ -9,36 +9,6 @@ using Verse;
 
 namespace CooperateRim
 {
-    
-    /*
-    [HarmonyPatch(typeof(Verse.TickManager))]
-    [HarmonyPatch("get_TickRateMultiplier")]
-    class TickRateMultiplier_get_patch
-    {
-        
-        static int lastCheckedTick = 0;
-
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> MyTranspiler(IEnumerable<CodeInstruction> instr, ILGenerator generator, MethodBase __originalMethod)
-        {
-            var fld1 = typeof(TickManager).GetField(nameof(lastCheckedTick), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var prop1 = typeof(TickManagerPatch).GetProperty(nameof(TickManager.TicksGame), System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-            
-            yield return new CodeInstruction(OpCodes.Call, prop1);
-            yield return new CodeInstruction(OpCodes.Ldsfld, fld1);
-            yield return new CodeInstruction(OpCodes.Blt, 5);
-            
-            //yield return new CodeInstruction(OpCodes.Ldc_I4, 1);
-            //yield return new CodeInstruction(OpCodes.Ret);
-            //yield return new CodeInstruction(OpCodes.Nop);
-            
-            foreach (var code in instr)
-            {
-                yield return code;
-            }
-        }
-    }*/
-
     [HarmonyPatch(typeof(Verse.TickManager))]
     [HarmonyPatch("DoSingleTick")]
     public class TickManagerPatch

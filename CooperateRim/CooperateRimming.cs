@@ -90,13 +90,6 @@ namespace CooperateRim
                             typesToPatch.Add(t);
                             leftOverTypes.Add(t);
                         }
-
-                        /*
-                        if (t.IsSubclassOf(typeof(Designator)))
-                        {
-                            designatorInheritees.Add(t);
-                            leftOverTypes.Add(t);
-                        }*/
                     }
                 }
             }
@@ -113,29 +106,6 @@ namespace CooperateRim
                     }
                 }
             }
-            /*
-            foreach (MethodInfo mi in new[]
-            {
-                typeof(DesignatorPatch).GetMethod("DesignateThing")
-            })
-            {
-                foreach (Type t in designatorInheritees)
-                {
-                    try
-                    {
-                        MethodInfo targetmethod = AccessTools.Method(t, "DesignateThing");
-                        HarmonyMethod postfix = new HarmonyMethod(mi);
-                        harmony.Patch(targetmethod, postfix, null, null);
-                        Logger.Message("Patched type (thing) : " + t);
-                    }
-                    catch (Exception ee)
-                    {
-                        Log(ee.ToString());
-                    }
-                }
-            }
-            */
-
 
             foreach (MethodInfo mi in new[] 
             {
@@ -172,12 +142,6 @@ namespace CooperateRim
                 Logger.Message("All job issuers patched");
             }
 
-            /*
-            MethodInfo targetmethod = AccessTools.Method(typeof(RimWorld.UIRoot_Play), "UIRootOnGUI");            
-            Logger.Message(Comparer<MethodInfo>.Default.Compare(targetmethod, null) == 0 ? "Null method" : "not null method, doing. well, stuff!");
-            HarmonyMethod prefixmethod = new HarmonyMethod(typeof(CooperateRim.CooperateRimming).GetMethod("DrawStuffIntoVersionControl"));
-            harmony.Patch(targetmethod, null, null, prefixmethod);
-            base.Initialize();*/
             if (System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch"))
             {
                 //harmony.PatchAll(Assembly.GetExecutingAssembly());
