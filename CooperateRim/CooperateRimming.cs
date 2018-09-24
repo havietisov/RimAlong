@@ -61,6 +61,24 @@ namespace CooperateRim
                 }
             }
 
+            //thingfilter patch
+            {
+                MethodInfo[] targetmethod = typeof(Verse.ThingFilter).GetMethods();
+
+                foreach (var m in targetmethod)
+                {
+                    if 
+                    (
+                        m.Name == "SetAllow" && m.GetParameters().Length == 2 
+                        && m.GetParameters()[0].ParameterType == typeof(ThingDef) 
+                        && m.GetParameters()[1].ParameterType == typeof(bool)
+                    )
+                    {
+                        Log("+++" + m);
+                    }
+                }
+            }
+
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (Type t in a.GetTypes())

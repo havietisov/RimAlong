@@ -126,6 +126,7 @@ namespace CooperateRim
         }
     }
 
+
     [Serializable]
     public class S_LocalTargetInfo
     {
@@ -251,6 +252,27 @@ namespace CooperateRim
             public string recipeDefName;
             public string billGiverName;
             public S_Thing targetThing;
+
+            public static implicit operator R_BILL(Bill bill)
+            {
+                return new R_BILL() { recipeDefName = bill.recipe.defName, billGiverName = bill.billStack.billGiver.ToString(), targetThing = Find.Selector.SingleSelectedThing };
+            }
+        }
+
+        [Serializable]
+        public class BILL_REPEAT_CHANGES
+        {
+            public string modeDefName;
+            public R_BILL owner;
+        }
+
+        [Serializable]
+        public class ThingFilterSetAllowCall
+        {
+            public string thingDef;
+            public bool val;
+            public SVEC3 giverPos;
+            public R_BILL bill;
         }
 
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
@@ -264,9 +286,11 @@ namespace CooperateRim
         List<ForbiddenCallData> ForbiddenCallDataCall = new List<ForbiddenCallData>();
         List<Designator_area_call_data> designatorAreaCallData = new List<Designator_area_call_data>();
         List<R_BILL> bills = new List<R_BILL>();
+        List<BILL_REPEAT_CHANGES> bill_repeat_commands = new List<BILL_REPEAT_CHANGES>();
+        List<ThingFilterSetAllowCall> thingFilterSetAllowCalls = new List<ThingFilterSetAllowCall>();
         List<string> researches = new List<string>();
 
-        public static int clientCount = 2;
+        public static int clientCount = 1;
         public static string cliendID = "1";
 
         public static bool IsDeserializing;
@@ -277,6 +301,12 @@ namespace CooperateRim
         public static void CompForbiddableSetForbiddenCall(string thingID, bool value)
         {
             singleton.ForbiddenCallDataCall.Add(new ForbiddenCallData() { thingID = thingID, value = value });
+        }   
+        
+        public static void AppendSyncTickData(Bill b, IBillGiver giver, BillRepeatModeDef def)
+        {
+            R_BILL bb = new R_BILL() { recipeDefName = b.recipe.defName, billGiverName = giver.ToString(), targetThing = Find.Selector.SingleSelectedThing };
+            singleton.bill_repeat_commands.Add(new BILL_REPEAT_CHANGES() { modeDefName = def.defName, owner = bb });
         }
 
         public static void AppendSyncTickData(Bill b, IBillGiver giver)
@@ -381,7 +411,10 @@ namespace CooperateRim
             GetVal(ref designatorAreaCallData, info, nameof(designatorAreaCallData));
             GetVal(ref researches, info, nameof(researches));
             GetVal(ref bills, info, nameof(bills));
-            
+            GetVal(ref bill_repeat_commands, info, nameof(bill_repeat_commands));
+            GetVal(ref thingFilterSetAllowCalls, info, nameof(thingFilterSetAllowCalls));
+
+
             foreach (var des in designations)
             {
                 Thing sdt = null;
@@ -460,6 +493,55 @@ namespace CooperateRim
                     {
                         AvoidLoop = true;
                         (issuer as IBillGiver).BillStack.AddBill(BillUtility.MakeNewBill(rec));
+                        AvoidLoop = false;
+                        break;
+                    }
+                }
+            }
+
+            foreach (var comm in bill_repeat_commands)
+            {
+                var _bill = comm.owner;
+                Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
+
+                CooperateRimming.Log("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
+
+                foreach (var rec in issuer.def.AllRecipes)
+                {
+                    if (rec.defName == _bill.recipeDefName)
+                    {
+                        AvoidLoop = true;
+                        foreach (var ___bill in (issuer as IBillGiver).BillStack.Bills)
+                        {
+                            if (___bill is Bill_Production && ___bill.recipe.defName == _bill.recipeDefName)
+                            {
+                                (___bill as Bill_Production).repeatMode = (BillRepeatModeDef)typeof(BillRepeatModeDefOf).GetFields().First(u => (u.GetValue(null) as BillRepeatModeDef).defName == comm.modeDefName).GetValue(null);
+                            }
+                        }
+                        AvoidLoop = false;
+                        break;
+                    }
+                }
+            }
+            
+            foreach (var a in thingFilterSetAllowCalls)
+            {
+                var _bill = a.bill;
+                Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(a.giverPos).First(u => u.ThingID == _bill.targetThing.ThingID);
+                CooperateRimming.Log("thing filter issuer : " + (issuer == null ? "null" : issuer.ToString()));
+                
+                foreach (var rec in issuer.def.AllRecipes)
+                {
+                    if (rec.defName == _bill.recipeDefName)
+                    {
+                        AvoidLoop = true;
+                        foreach (var ___bill in (issuer as IBillGiver).BillStack.Bills)
+                        {
+                            if (___bill is Bill_Production && ___bill.recipe.defName == _bill.recipeDefName)
+                            {
+                                (___bill as Bill_Production).ingredientFilter.SetAllow(DefDatabase<ThingDef>.AllDefsListForReading.First(u => u.defName == a.thingDef), a.val);
+                            }
+                        }
                         AvoidLoop = false;
                         break;
                     }
@@ -650,12 +732,14 @@ namespace CooperateRim
                 //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateThing(th);
                 AvoidLoop = false;
             }
-
+            
             foreach (string s in researches)
             {
                 TickManagerPatch.cachedRDef = DefDatabase<ResearchProjectDef>.AllDefsListForReading.Find(u => u.defName == s);
                 Find.ResearchManager.currentProj = TickManagerPatch.cachedRDef;
             }
+
+            Bill_production_patch.kkk.Clear();
         }
 
         internal static void AllowJobAt(Job job, WorkGiver giver, IntVec3 cell)
@@ -777,6 +861,16 @@ namespace CooperateRim
             {
                 info.AddValue(nameof(bills), bills);
             }
+
+            //bill repeat modes
+            {
+                info.AddValue(nameof(bill_repeat_commands), bill_repeat_commands);
+            }
+
+            //thingfilter commands
+            {
+                info.AddValue(nameof(thingFilterSetAllowCalls), thingFilterSetAllowCalls);
+            }
         }
         
         internal static void AppendSyncTickData(Designator instance, IntVec3 cell)
@@ -807,6 +901,11 @@ namespace CooperateRim
         internal static void AppendSyncTickDataArea(Designator_Area instance, IntVec3 c)
         {
             singleton.designatorCellCalls.Add(new DesignatorCellCall { designatorType = instance.GetType().AssemblyQualifiedName, cell = c });
+        }
+
+        internal static void AppendSyncTickDataThingFilterSetAllow(ThingDef thingDef, bool allow, IntVec3 pos, Bill_Production bill)
+        {
+            singleton.thingFilterSetAllowCalls.Add(new ThingFilterSetAllowCall() { thingDef = thingDef.defName, val = allow, giverPos = pos, bill = bill });
         }
     }
 }
