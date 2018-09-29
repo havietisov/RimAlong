@@ -41,13 +41,15 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool RandomWanderDestFor(Pawn pawn, IntVec3 root, float radius, Func<Pawn, IntVec3, IntVec3, bool> validator, Danger maxDanger, ref IntVec3 __result, ref List<Region> ___regions)
         {
+            
             var CanWanderToCell = typeof(RCellFinder).GetMethod("CanWanderToCell", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
             System.Random r = new System.Random(TickManagerPatch.nextSyncTickValue);
 
             bool dirx = TickManagerPatch.nextSyncTickValue % 2 == 0 ? true : false;
             bool diry = TickManagerPatch.nextSyncTickValue % 4 == 0 ? true : false;
 
-            __result = pawn.Position + new IntVec3(dirx ? (int)radius : -(int)radius, diry ? (int)radius : -(int)radius, 0);
+            __result = pawn.Position + new IntVec3(dirx ? (int)radius : -(int)radius, 0, diry ? (int)radius : -(int)radius);
+            CooperateRimming.Log("Wander to : " + pawn + " :: " + __result  + " {" + TickManagerPatch.nextSyncTickValue + "}");
             pawn.Map.debugDrawer.FlashCell(__result, 0.4f, "wander");
             return false;
         }

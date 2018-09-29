@@ -1,6 +1,7 @@
 ﻿using Harmony;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -10,17 +11,17 @@ using Verse;
 namespace CooperateRim
 {
     [HarmonyPatch(typeof(Verse.TickManager))]
-    [HarmonyPatch("DoSingleTick")]
+    [HarmonyPatch("TickManagerUpdate")]
     public class TickManagerPatch
     {
         public static bool isNetworkLaunch = false;
         public static bool shouldReallyTick = false;
         public static DateTime nextFrameTime;
-        public static int myTicksValue;
+        // public static int myTicksValue;
 
         public static int nextSyncTickValue = 0;
         public static int clientsInSync = 0;
-        public static bool imSynced = false;
+        public static bool imInSync;
 
         public static bool IsSyncTick;
         
@@ -28,7 +29,7 @@ namespace CooperateRim
         {
             return true;
         }
-        
+        /*
         public static void ReferenceTranspilerMethod(ref int ticksGameInt)
         {
             shouldReallyTick = false;
@@ -74,7 +75,7 @@ namespace CooperateRim
 
                 ticksGameInt = myTicksValue;
             }
-        }
+        }*/
 
         public static bool TestInjMethod()
         {
@@ -91,20 +92,61 @@ namespace CooperateRim
 
         }
 
+        static Stopwatch sw;
+
         [HarmonyPrefix]
-        public static bool Prefix(ref int ___ticksGameInt)
+        public static bool Prefix(ref int ___ticksGameInt, ref TickManager __instance)
         {
             Rand.PushState(100);
-            ReferenceTranspilerMethod(ref ___ticksGameInt);
+            if (sw == null)
+            {
+                sw = new Stopwatch();
+                sw.Start();
+            }
+            shouldReallyTick = false;
 
-            if (shouldReallyTick)
+            if (sw.ElapsedMilliseconds > 85 && !__instance.Paused)
             {
-                return true;
+                sw.Reset();
+                sw.Start();
+                bool canNormallyTick = nextSyncTickValue > ___ticksGameInt;
+
+                CooperateRimming.Log("Frame " + ___ticksGameInt + " canNormallyTick " + canNormallyTick);
+
+                if (canNormallyTick)
+                {
+                    __instance.DoSingleTick();
+                }
+                else
+                {
+                    if (!imInSync)
+                    {
+                        SyncTickData.FlushSyncTickData(___ticksGameInt);
+                        imInSync = true;
+                    }
+
+                    bool allSyncDataAvailable = SyncTickData.tickFileNames(___ticksGameInt).All(u => System.IO.File.Exists(u + ".sync"));
+
+                    CooperateRimming.Log("Frame " + ___ticksGameInt + " : " + " ::: " + allSyncDataAvailable + "[" + ___ticksGameInt + "] :: " + nextSyncTickValue + " [is synced : ] " + imInSync);
+
+                    if (allSyncDataAvailable)
+                    {
+                        IsSyncTick = true;
+                        nextSyncTickValue = ___ticksGameInt + 10;
+                        CooperateRimming.Log("Synctick happened at " + ___ticksGameInt);
+
+                        SyncTickData.IsDeserializing = true;
+                        SyncTickData.Apply(___ticksGameInt);
+                        //JobTrackerPatch.FlushCData();
+                        shouldReallyTick = true;
+                        __instance.DoSingleTick();
+                        imInSync = false;
+                    }
+                }
             }
-            else
-            {
-                return false;
-            }
+
+            //ReferenceTranspilerMethod(ref ___ticksGameInt);
+            return false;
         }
 
         /*

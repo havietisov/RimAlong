@@ -1,137 +1,105 @@
 ﻿using Harmony;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using Verse;
+using Verse.Sound;
 
 namespace CooperateRim
 {
-    public static class GenericRand
-    {
-        public static System.Random r = new Random(0);
-    }
-    
-    [HarmonyPatch(typeof(Verse.Rand))]
-    [HarmonyPatch("get_Int")]
-    public class RandomNumberGenerator_BasicHash_patch
-    {
-        public static int lastIter;
-        public static int FrameIter;
-        internal static bool shouldLog;
-
-        /*
-const int RAND_MAX = 32767;
-
-public static ulong next = 1;
-
-static int rand()
-{
-next = next * 1103515245 + 12345;
-return (int)(next / 65536) % (RAND_MAX + 1);
-}*/
-
-        public static bool iterationsReset = false;
-
-        [HarmonyPrefix]
-        public static bool GetInt(ref uint ___iterations, ref int __result)
-        {
-            {
-                if (RandomNumberGenerator_BasicHash_patch.lastIter == TickManagerPatch.myTicksValue)
-                {
-                    FrameIter++;
-                }
-                else
-                {
-                    RandomNumberGenerator_BasicHash_patch.FrameIter = 0;
-                }
-                lastIter = TickManagerPatch.myTicksValue;
-                Random r = new Random(TickManagerPatch.myTicksValue + RandomNumberGenerator_BasicHash_patch.FrameIter);
-                __result = r.Next();
-                if (shouldLog)
-                {
-                    CooperateRimming.Log("GetInt + " + lastIter + " :: " + __result);
-                }
-                return false;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Verse.Rand))]
-    [HarmonyPatch("get_Value")]
-    public class RandomNumberGenerator_BasicHash_patch_float
-    {
-        /*
-const int RAND_MAX = 32767;
-
-public static ulong next = 1;
-
-static int rand()
-{
-next = next * 1103515245 + 12345;
-return (int)(next / 65536) % (RAND_MAX + 1);
-}*/
-
-        public static bool iterationsReset = false;
-
-        [HarmonyPrefix]
-        public static bool GetInt(ref uint ___iterations, ref float __result)
-        {
-            {
-                if (RandomNumberGenerator_BasicHash_patch.lastIter == TickManagerPatch.myTicksValue)
-                {
-                    RandomNumberGenerator_BasicHash_patch.FrameIter++;
-                }
-                else
-                {
-                    RandomNumberGenerator_BasicHash_patch.FrameIter = 0;
-                }
-                RandomNumberGenerator_BasicHash_patch.lastIter = TickManagerPatch.myTicksValue;
-                Random r = new Random(TickManagerPatch.myTicksValue + RandomNumberGenerator_BasicHash_patch.FrameIter);
-                __result = (float)r.NextDouble();
-                if (RandomNumberGenerator_BasicHash_patch.shouldLog)
-                {
-                    CooperateRimming.Log("GetValue + " + RandomNumberGenerator_BasicHash_patch.lastIter + " :: " + __result);
-                }
-                return false;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Rand))]
-    [HarmonyPatch("Range")]
-    [HarmonyPatch(new []{ typeof(int), typeof(int)})]
-    public class Rand_patch
+    [HarmonyPatch(typeof(Verse.Sound.SoundRoot), "Update")]
+    public class soundRootPatch
     {
         [HarmonyPrefix]
-        public static bool Range(ref int __result, ref int min, ref int max)
+        public static bool Update()
         {
-            if (min >= max)
-            {
-                __result = min;
-                return false;
-            }
-            __result = GenericRand.r.Next(min, max);
             return false;
         }
     }
 
-    [HarmonyPatch(typeof(Rand))]
-    [HarmonyPatch("Range")]
-    [HarmonyPatch(new[] { typeof(float), typeof(float) })]
-    public class Rand_patch_flpat
+    [HarmonyPatch(typeof(SoundStarter), "PlayOneShotOnCamera")]
+    public class SoundStarterPatchPlayOneShotOnCamera
     {
         [HarmonyPrefix]
-        public static bool Range(ref float __result, ref float min, ref float max)
+        public static bool PlayOneShotOnCamera()
         {
-            if (min >= max)
-            {
-                __result = min;
-                return false;
-            }
-            __result = (float)(GenericRand.r.NextDouble() * (max - min) + min);
             return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(RandomNumberGenerator_BasicHash), "GetHash")]
+    public class GeneralRandPatch
+    {
+        public static int TickID;
+        public static int frameIterID;
+
+        static int MAGIC_CONSTANT_1 = 399699;
+        static int MAGIC_CONSTANT_2 = 674274;
+        static int MAGIC_CONSTANT_3 = -109866;
+        static int MAGIC_CONSTANT_4 = 969870;
+        static int MAGIC_CONSTANT_5 = 540491;
+        static int MAGIC_CONSTANT_6 = -479830;
+        static int MAGIC_CONSTANT_7 = 188869;
+
+        static int hash(int x, int y)
+        {
+
+            int result = x;
+
+            result *= MAGIC_CONSTANT_1 | 1;
+
+            result += MAGIC_CONSTANT_2;
+
+            result = (result >> 32) + (result << 32);
+
+            result ^= MAGIC_CONSTANT_3;
+
+            result += y;
+
+            result *= MAGIC_CONSTANT_4 | 1;
+
+            result += MAGIC_CONSTANT_5;
+
+            result = (result >> 32) + (result << 32);
+
+            result ^= MAGIC_CONSTANT_6;
+
+            result *= MAGIC_CONSTANT_7 | 1;
+
+            return result;
+        }
+
+        public static void Reset()
+        {
+            TickID = 0;
+            frameIterID = 0;
+        }
+
+        [HarmonyPostfix]
+        public static void Prefix(ref uint __result, RandomNumberGenerator_BasicHash __instance, int buffer)
+        {
+            if (CooperateRimming.dumpRand)
+            {
+                int tick = Current.Game == null ? -1 : Find.TickManager.TicksGame;
+                StackTrace tr = new StackTrace();
+                streamholder.WriteLine("====STACK====", "rand");
+
+                foreach (var frame in tr.GetFrames())
+                {
+                    streamholder.WriteLine(frame.GetMethod().ReflectedType + "::" + frame.GetMethod().Name, "rand");
+                }
+
+                streamholder.WriteLine("====END====", "rand");
+                streamholder.WriteLine(__result.ToString() + " seed " + __instance.seed + " and buffer " + buffer + " at tick " + tick, "rand");
+            }
+        }
+
+        private static uint Rotate(uint value, int count)
+        {
+            return (value << count) | (value >> 32 - count);
         }
     }
 }
