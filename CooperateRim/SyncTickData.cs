@@ -290,7 +290,7 @@ namespace CooperateRim
         List<ThingFilterSetAllowCall> thingFilterSetAllowCalls = new List<ThingFilterSetAllowCall>();
         List<string> researches = new List<string>();
 
-        public static int clientCount = 1;
+        public static int clientCount = 2;
         public static string cliendID = "1";
 
         public static bool IsDeserializing;
@@ -401,6 +401,7 @@ namespace CooperateRim
         
         public SyncTickData(SerializationInfo info, StreamingContext ctx)
         {
+            CooperateRimming.dumpRand = true;
             GetVal(ref designations, info, nameof(designations));
             GetVal(ref jobsToSerialize, info, nameof(jobsToSerialize));
             GetVal(ref jobPriorities, info, nameof(jobPriorities));
@@ -475,11 +476,11 @@ namespace CooperateRim
                 AvoidLoop = false;
             }
 
-            CooperateRimming.Log("Deserialized jobs :  " + jobsToSerialize.Count);
+            //CooperateRimming.Log("Deserialized jobs :  " + jobsToSerialize.Count);
 
             List<Thing>[] things = (List<Thing>[])Find.CurrentMap.thingGrid.GetType().GetField("thingGrid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Find.CurrentMap.thingGrid);
 
-            CooperateRimming.Log("thinglist : " + things);
+            //CooperateRimming.Log("thinglist : " + things);
 
             foreach (var _bill in bills)
             {
@@ -769,7 +770,7 @@ namespace CooperateRim
                 
                 if (System.IO.File.Exists(s))
                 {
-                    Rand.PushState(0);
+                    //Rand.pushstate(0);
                     BinaryFormatter ser = new BinaryFormatter();
                     var fs = System.IO.File.OpenRead(s);
                     SyncTickData sd = ser.Deserialize(fs) as SyncTickData;
@@ -781,7 +782,7 @@ namespace CooperateRim
                         Find.CurrentMap.designationManager.AddDesignation(des);
                         AvoidLoop = false;
                     }*/
-                    Rand.PopState();
+                    //Rand.PopState();
                 }
                 
             }

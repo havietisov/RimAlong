@@ -9,6 +9,7 @@ using UnityEngine;
 using HugsLib;
 using System.Runtime.InteropServices;
 using RimWorld.Planet;
+using Verse.AI;
 
 namespace CooperateRim
 {
@@ -16,7 +17,7 @@ namespace CooperateRim
     {
         public override string ModIdentifier => "CooperateRim.CooperateRimming";
         public static List<Pawn> initialPawnList = new List<Pawn>();
-
+        public static bool dumpRand = false;
         public static CooperateRimming inst;
 
         static string cachedStuff = "";
@@ -42,7 +43,7 @@ namespace CooperateRim
         public override void Initialize()
         {
             inst = this;
-
+            (typeof(Rand).GetField("random", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as RandomNumberGenerator).seed = 0;
 
             HarmonyInstance harmony = HarmonyInst;
             Log(System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
@@ -60,7 +61,7 @@ namespace CooperateRim
                     break;
                 }
             }
-
+            
             //thingfilter patch
             {
                 MethodInfo[] targetmethod = typeof(Verse.ThingFilter).GetMethods();
@@ -78,6 +79,18 @@ namespace CooperateRim
                     }
                 }
             }
+
+            /*
+            foreach (string methodName in new[] { "get_Int", "Gaussian" })
+            {
+                foreach (var method in typeof(Rand).GetMethods().Where(u => u.Name == methodName))
+                {
+                    HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.GeneralRandPatch).GetMethod("Prefix"));
+                    HarmonyMethod postfix = new HarmonyMethod(typeof(CooperateRim.GeneralRandPatch).GetMethod("Postfix"));
+                    harmony.Patch(method, prefix, postfix, null);
+                    Log()
+                }
+            }*/
 
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -102,6 +115,32 @@ namespace CooperateRim
                     {
                         MethodInfo targetmethod = AccessTools.Method(t, "DesignateSingleCell");
                         HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_AreaPatch).GetMethod("DesignateSingleCell"));
+                        harmony.Patch(targetmethod, prefix, null, null);
+                    }
+                }
+            }
+
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type t in a.GetTypes())
+                {
+                    if (!t.IsAbstract && t.IsSubclassOf(typeof(ThinkNode)))
+                    {
+                        MethodInfo targetmethod = AccessTools.Method(t, "TryIssueJobPackage");
+                        HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.ThinkNode_patch).GetMethod("TryIssueJobPackage"));
+                        harmony.Patch(targetmethod, prefix, null, null);
+                    }
+                }
+            }
+
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type t in a.GetTypes())
+                {
+                    if (!t.IsAbstract && t.IsSubclassOf(typeof(ThinkNode_JobGiver)))
+                    {
+                        MethodInfo targetmethod = AccessTools.Method(t, "TryGiveJob");
+                        HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.JobGiver_patch).GetMethod("TryGiveJob"));
                         harmony.Patch(targetmethod, prefix, null, null);
                     }
                 }
@@ -209,9 +248,6 @@ namespace CooperateRim
                 if (Widgets.ButtonText(r, "Host game"))
                 {
                     Rand.PushState(0);
-                    GenericRand.r = new System.Random(0);
-                    RandomNumberGenerator_BasicHash_patch.FrameIter = 0;
-                    RandomNumberGenerator_BasicHash_patch.lastIter = 0;
                     Current.Game = new Game();
                     Current.Game.InitData = new GameInitData();
                     Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
@@ -234,7 +270,6 @@ namespace CooperateRim
                         Log("++++++++++++" + p.ToString());
                     }
                     
-                    TickManagerPatch.myTicksValue = 0;
                     TickManagerPatch.nextFrameTime = DateTime.Now;
                     TickManagerPatch.nextSyncTickValue = 0;
                     Page firstConfigPage = Current.Game.Scenario.GetFirstConfigPage();
@@ -244,7 +279,7 @@ namespace CooperateRim
                         initialPawnList.Add(p);
                     }
                     PageUtility.InitGameStart();
-                    RandomNumberGenerator_BasicHash_patch.iterationsReset = false;
+                    Rand.PopState();
                     Log("Startseed : " + stringseed);
                 }
                 r.y += size;

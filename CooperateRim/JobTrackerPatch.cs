@@ -32,4 +32,27 @@ namespace CooperateRim
             }
         }
     }
+
+    [HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
+    [HarmonyPatch("DetermineNextJob")]
+    class JobTrackerPatch_DetermineNextJob
+    {
+        [HarmonyPrefix]
+        public static bool DetermineNextJob(out ThinkTreeDef thinkTree, ref Pawn ___pawn)
+        {
+            /*
+            if (___pawn.thinker.ConstantThinkTree != null)
+            {
+                ThinkResult rr = ___pawn.thinker.ConstantThinkNodeRoot.TryIssueJobPackage(___pawn, default(JobIssueParams));
+                thinkTree = ___pawn.thinker.ConstantThinkTree;
+            }
+            else
+            {
+                thinkTree = null;
+            }*/
+
+            thinkTree = null;
+            return true;
+        }
+    }
 }
