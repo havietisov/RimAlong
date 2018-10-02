@@ -107,18 +107,18 @@ namespace CooperateRim
         }
     }
 
-    [HarmonyPatch(typeof(Pawn))]
+    [HarmonyPatch(typeof(TickList))]
     [HarmonyPatch("Tick")]
     public class TickListPatch_tick
     {
         [HarmonyPrefix]
-        public static void Tick(ref Pawn __instance /*ref List<List<Thing>> ___thingLists, ref TickerType ___tickType*/)
+        public static void Tick(ref Pawn __instance, ref List<List<Thing>> ___thingLists, ref TickerType ___tickType)
         {
             {
                 streamholder.WriteLine("===UPDATE_THING===", "Upd");
                 StackTrace tr = new StackTrace();
                 streamholder.WriteLine("====STACK====", "Upd");
-                /*
+                
                 int TickInterval = -1;
 
                 switch (___tickType)
@@ -136,7 +136,7 @@ namespace CooperateRim
                         TickInterval = -1;
                         break;
 
-                }*/
+                }
 
                 foreach (var frame in tr.GetFrames())
                 {
@@ -144,11 +144,11 @@ namespace CooperateRim
                 }
 
                 streamholder.WriteLine("====END====", "Upd");
-                //var tt = ___thingLists[Find.TickManager.TicksGame % TickInterval];
+                var tt = ___thingLists[Find.TickManager.TicksGame % TickInterval];
 
-                //foreach (var t in tt)
+                foreach (var t in tt)
                 {
-                    streamholder.WriteLine(__instance + " ::: " + "[" + TickManagerPatch.nextSyncTickValue + "]", "Upd");
+                    streamholder.WriteLine(t + " ::: " + "[" + TickManagerPatch.nextSyncTickValue + "] {" + ___thingLists.Count + "}", "Upd");
                 }
 
                 streamholder.WriteLine("//===UPDATE_THING===", "Upd");
