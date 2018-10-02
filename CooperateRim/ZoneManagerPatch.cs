@@ -9,6 +9,7 @@ using System.Diagnostics;
 
 namespace CooperateRim
 {
+
     [HarmonyPatch(typeof(Designator_ZoneAdd))]
     [HarmonyPatch("DesignateMultiCell")]
     public class Designator_zoneAdd
@@ -83,6 +84,46 @@ namespace CooperateRim
         }
     }
 
+    [HarmonyPatch(typeof(Designator_Mine))]
+    [HarmonyPatch("DesignateSingleCell")]
+    public class Designator_Mine__
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(ref Designator __instance, ref IntVec3 loc)
+        {
+            CooperateRimming.Log("Designator_mine designate single cell");
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickData(__instance, loc);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Designator_SmoothSurface))]
+    [HarmonyPatch("DesignateSingleCell")]
+    public class Designator_SmoothSurface__
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(ref Designator __instance, ref IntVec3 c)
+        {
+            CooperateRimming.Log("Designator_SmoothSurface designate single cell");
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickData(__instance, c);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(Designator_Cancel))]
     [HarmonyPatch("DesignateSingleCell")]
     public class Designator_cancel
@@ -100,20 +141,28 @@ namespace CooperateRim
             {
                 return true;
             }
-            /*
-            CooperateRimming.Log("DesignateMultiCell_1");
+        }
+    }
+
+    [HarmonyPatch(typeof(Designator_Cancel))]
+    [HarmonyPatch("DesignateThing")]
+    public class Designator_cancel_
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(ref Designator __instance, ref Thing t)
+        {
+            CooperateRimming.Log("Designator_cancel designate single cell");
             if (!SyncTickData.AvoidLoop)
             {
-                SyncTickData.AppendSyncTickData(__instance, cells);
+                SyncTickData.AppendSyncTickDesignatorApplyToThing(__instance, t, t.Position);
                 return false;
             }
             else
             {
                 return true;
-            }*/
+            }
         }
     }
-
 
     [HarmonyPatch(typeof(CompForbiddable))]
     [HarmonyPatch("set_Forbidden")]
