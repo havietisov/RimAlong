@@ -282,6 +282,14 @@ namespace CooperateRim
             public SVEC3 pos;
         }
 
+        [Serializable]
+        public class DesignatorApplyToThing
+        {
+            public string designatorType;
+            public S_Thing thing;
+            public SVEC3 pos;
+        }
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
@@ -296,6 +304,7 @@ namespace CooperateRim
         List<BILL_REPEAT_CHANGES> bill_repeat_commands = new List<BILL_REPEAT_CHANGES>();
         List<ThingFilterSetAllowCall> thingFilterSetAllowCalls = new List<ThingFilterSetAllowCall>();
         List<DesignatorHuntThing> designatorHuntThingCalls = new List<DesignatorHuntThing>();
+        List<DesignatorApplyToThing> designatorApplyToThingCalls = new List<DesignatorApplyToThing>();
         List<string> researches = new List<string>();
 
         public static int clientCount = 2;
@@ -309,6 +318,11 @@ namespace CooperateRim
         public static void CompForbiddableSetForbiddenCall(string thingID, bool value)
         {
             singleton.ForbiddenCallDataCall.Add(new ForbiddenCallData() { thingID = thingID, value = value });
+        }
+
+        public static void AppendSyncTickDesignatorApplyToThing(Designator d, Thing t, IntVec3 pos)
+        {
+            singleton.designatorApplyToThingCalls.Add(new DesignatorApplyToThing() { designatorType = d.GetType().AssemblyQualifiedName, thing = t, pos = pos });
         }
 
         public static void AppendSyncTickDesignatePrey(Designator_Hunt d, Thing t, IntVec3 pos)
@@ -429,7 +443,7 @@ namespace CooperateRim
             GetVal(ref bills, info, nameof(bills));
             GetVal(ref bill_repeat_commands, info, nameof(bill_repeat_commands));
             GetVal(ref thingFilterSetAllowCalls, info, nameof(thingFilterSetAllowCalls));
-            GetVal(ref designatorHuntThingCalls, info, nameof(designatorHuntThingCalls));
+            GetVal(ref designatorApplyToThingCalls, info, nameof(designatorApplyToThingCalls));
 
             //CooperateRimming.Log("deserialized designations : " + designations.Count);
             foreach (var des in designations)
@@ -706,6 +720,7 @@ namespace CooperateRim
             foreach (var s in designatorCellCalls)
             {
                 AvoidLoop = true;
+                CooperateRimming.Log(s.designatorType);
                 ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateSingleCell(s.cell);
                 //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
                 //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
@@ -721,7 +736,7 @@ namespace CooperateRim
                 AvoidLoop = false;
             }
 
-            foreach (DesignatorHuntThing s in designatorHuntThingCalls)
+            foreach (DesignatorApplyToThing s in designatorApplyToThingCalls)
             {
                 AvoidLoop = true;
                 ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateThing(Find.CurrentMap.thingGrid.ThingsAt(s.pos).First(u => u.ThingID == s.thing.ThingID));
@@ -922,8 +937,9 @@ namespace CooperateRim
                 info.AddValue(nameof(thingFilterSetAllowCalls), thingFilterSetAllowCalls);
             }
             
+            //designator apply thing calls
             {
-                info.AddValue(nameof(designatorHuntThingCalls), designatorHuntThingCalls);
+                info.AddValue(nameof(designatorApplyToThingCalls), designatorApplyToThingCalls);
             }
         }
         
