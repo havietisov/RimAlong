@@ -10,6 +10,7 @@ using Verse.AI;
 
 namespace CooperateRim
 {
+    /*
     [HarmonyPatch(typeof(RCellFinder))]
     [HarmonyPatch("RandomWanderDestFor")]
     class CellFinderPatch
@@ -53,7 +54,7 @@ namespace CooperateRim
             pawn.Map.debugDrawer.FlashCell(__result, 0.4f, "wander");
             return false;
         }
-    }
+    }*/
 
 
     public class Utils
@@ -81,7 +82,7 @@ namespace CooperateRim
         }
     }
 
-
+    
     [HarmonyPatch(typeof(StoreUtility))]
     [HarmonyPatch("TryFindBestBetterStoreCellForWorker")]
     class StoreUtilityPatch

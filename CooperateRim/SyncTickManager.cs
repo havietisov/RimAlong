@@ -97,7 +97,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref int ___ticksGameInt, ref TickManager __instance)
         {
-            Rand.PushState(100);
+            CooperateRimming.dumpRand = true;
             if (sw == null)
             {
                 sw = new Stopwatch();
@@ -105,17 +105,21 @@ namespace CooperateRim
             }
             shouldReallyTick = false;
 
-            if (sw.ElapsedMilliseconds > 85 && !__instance.Paused)
+            if (sw.ElapsedMilliseconds > 20 && !__instance.Paused)
             {
                 sw.Reset();
                 sw.Start();
                 bool canNormallyTick = nextSyncTickValue > ___ticksGameInt;
 
-                CooperateRimming.Log("Frame " + ___ticksGameInt + " canNormallyTick " + canNormallyTick);
+                //CooperateRimming.Log("Frame " + ___ticksGameInt + " canNormallyTick " + canNormallyTick);
 
                 if (canNormallyTick)
                 {
+                    
+                    streamholder.WriteLine("normal tick at " + ___ticksGameInt, "tickstate");
+                    Rand.PushState(___ticksGameInt);
                     __instance.DoSingleTick();
+                    Rand.PopState();
                 }
                 else
                 {
@@ -127,7 +131,7 @@ namespace CooperateRim
 
                     bool allSyncDataAvailable = SyncTickData.tickFileNames(___ticksGameInt).All(u => System.IO.File.Exists(u + ".sync"));
 
-                    CooperateRimming.Log("Frame " + ___ticksGameInt + " : " + " ::: " + allSyncDataAvailable + "[" + ___ticksGameInt + "] :: " + nextSyncTickValue + " [is synced : ] " + imInSync);
+                    //CooperateRimming.Log("Frame " + ___ticksGameInt + " : " + " ::: " + allSyncDataAvailable + "[" + ___ticksGameInt + "] :: " + nextSyncTickValue + " [is synced : ] " + imInSync);
 
                     if (allSyncDataAvailable)
                     {
@@ -136,10 +140,14 @@ namespace CooperateRim
                         CooperateRimming.Log("Synctick happened at " + ___ticksGameInt);
 
                         SyncTickData.IsDeserializing = true;
-                        SyncTickData.Apply(___ticksGameInt);
                         //JobTrackerPatch.FlushCData();
                         shouldReallyTick = true;
+                        streamholder.WriteLine("pre-deserialize tick at " + ___ticksGameInt, "tickstate");
+                        Rand.PushState(___ticksGameInt);
+                        streamholder.WriteLine("data applied at " + ___ticksGameInt, "tickstate");
+                        SyncTickData.Apply(___ticksGameInt);
                         __instance.DoSingleTick();
+                        Rand.PopState();
                         imInSync = false;
                     }
                 }
@@ -185,8 +193,6 @@ namespace CooperateRim
         [HarmonyPostfix]
         public static void Postfix()
         {
-            Rand.PopState();
-
             if (Find.ResearchManager.currentProj != cachedRDef)
             {
                 SyncTickData.AppendSyncTickData(Find.ResearchManager.currentProj);

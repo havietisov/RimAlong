@@ -148,19 +148,18 @@ namespace CooperateRim
     [Serializable]
     public class S_Designation
     {
-        public S_Designation(Designation d)
+        public S_Designation(Designation d, Type t)
         {
             designationDef = d.def.ToString();
             target = d.target;
+            targetType = d.def.targetType;
+            typeName = t.AssemblyQualifiedName;
         }
 
         public string designationDef;
+        public string typeName;
         public S_LocalTargetInfo target;
-
-        public static implicit operator S_Designation(Designation @this)
-        {
-            return new S_Designation(@this);
-        }
+        public TargetType targetType;
     }
 
     [Serializable]
@@ -275,6 +274,14 @@ namespace CooperateRim
             public R_BILL bill;
         }
 
+        [Serializable]
+        public class DesignatorHuntThing
+        {
+            public string designatorType;
+            public S_Thing thing;
+            public SVEC3 pos;
+        }
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
@@ -288,6 +295,7 @@ namespace CooperateRim
         List<R_BILL> bills = new List<R_BILL>();
         List<BILL_REPEAT_CHANGES> bill_repeat_commands = new List<BILL_REPEAT_CHANGES>();
         List<ThingFilterSetAllowCall> thingFilterSetAllowCalls = new List<ThingFilterSetAllowCall>();
+        List<DesignatorHuntThing> designatorHuntThingCalls = new List<DesignatorHuntThing>();
         List<string> researches = new List<string>();
 
         public static int clientCount = 2;
@@ -301,8 +309,14 @@ namespace CooperateRim
         public static void CompForbiddableSetForbiddenCall(string thingID, bool value)
         {
             singleton.ForbiddenCallDataCall.Add(new ForbiddenCallData() { thingID = thingID, value = value });
-        }   
-        
+        }
+
+        public static void AppendSyncTickDesignatePrey(Designator_Hunt d, Thing t, IntVec3 pos)
+        {
+            CooperateRimming.Log(t.PositionHeld + " |||" + pos);
+            //singleton.designatorHuntThingCalls.Add(new DesignatorHuntThing() { designatorType = d.GetType().AssemblyQualifiedName, thing = t, pos = pos });
+        }
+
         public static void AppendSyncTickData(Bill b, IBillGiver giver, BillRepeatModeDef def)
         {
             R_BILL bb = new R_BILL() { recipeDefName = b.recipe.defName, billGiverName = giver.ToString(), targetThing = Find.Selector.SingleSelectedThing };
@@ -314,9 +328,10 @@ namespace CooperateRim
             singleton.bills.Add(new R_BILL() { recipeDefName = b.recipe.defName, billGiverName = giver.ToString(), targetThing = Find.Selector.SingleSelectedThing });
         }
 
-        public static void AppendSyncTickData(Designation des)
+        public static void AppendSyncTickData(Designation des, System.Type designator)
         {
-            singleton.designations.Add(des);
+            CooperateRimming.Log( "XXXXXXXXXXXXXx ++ " + des.def.defName);
+            singleton.designations.Add(new S_Designation(des, designator));
         }
 
         public static void AppendSyncTickData(ResearchProjectDef research)
@@ -391,6 +406,7 @@ namespace CooperateRim
                 }
             }
 
+            CooperateRimming.Log("could not locate designation def : " + name);
             return null;
         }
 
@@ -401,7 +417,6 @@ namespace CooperateRim
         
         public SyncTickData(SerializationInfo info, StreamingContext ctx)
         {
-            CooperateRimming.dumpRand = true;
             GetVal(ref designations, info, nameof(designations));
             GetVal(ref jobsToSerialize, info, nameof(jobsToSerialize));
             GetVal(ref jobPriorities, info, nameof(jobPriorities));
@@ -414,25 +429,50 @@ namespace CooperateRim
             GetVal(ref bills, info, nameof(bills));
             GetVal(ref bill_repeat_commands, info, nameof(bill_repeat_commands));
             GetVal(ref thingFilterSetAllowCalls, info, nameof(thingFilterSetAllowCalls));
+            GetVal(ref designatorHuntThingCalls, info, nameof(designatorHuntThingCalls));
 
-
+            //CooperateRimming.Log("deserialized designations : " + designations.Count);
             foreach (var des in designations)
             {
                 Thing sdt = null;
 
-                foreach (Thing t in Find.CurrentMap.thingGrid.ThingsAt(des.target.cell))
-                {
-                    if (t.ThingID == des.target.thing.ThingID)
-                    {
-                        sdt = t;
-                    }
-                }
 
                 AvoidLoop = true;
-                Find.CurrentMap.designationManager.AddDesignation(new Designation(new LocalTargetInfo(sdt), DefFromString(des.designationDef)));
+                switch (des.targetType)
+                {
+                    case TargetType.Cell:
+                        {
+                            var ddee = ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(des.typeName)).Invoke(null, null)));
+
+                            CooperateRimming.Log("dess : " + ddee);
+                            var ddes = Find.CurrentMap.designationManager.DesignationAt(des.target.cell, DefFromString(des.designationDef));
+
+                            foreach (var v in Find.CurrentMap.designationManager.AllDesignationsAt(des.target.cell))
+                            {
+                                CooperateRimming.Log(v.ToString());
+                            }
+                            //this should be replaced with DesignateSingleCell for mining case!
+                            Find.CurrentMap.designationManager.AddDesignation(new Designation((IntVec3)des.target.cell, DefFromString(des.designationDef)));
+                        }
+                        break;
+                    case TargetType.Thing:
+                        {
+                            foreach (Thing t in Find.CurrentMap.thingGrid.ThingsAt(des.target.cell))
+                            {
+                                if (t.ThingID == des.target.thing.ThingID)
+                                {
+                                    sdt = t;
+                                }
+                            }
+
+                            Find.CurrentMap.designationManager.AddDesignation(new Designation(new LocalTargetInfo(sdt), DefFromString(des.designationDef)));
+                        }
+                        break;
+                }
+
                 AvoidLoop = false;
 
-                //CooperateRimming.Log(des.designationDef);
+                CooperateRimming.Log(des.designationDef);
             }
 
             foreach(var prior in jobPriorities)
@@ -680,7 +720,16 @@ namespace CooperateRim
                 //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
                 AvoidLoop = false;
             }
-            
+
+            foreach (DesignatorHuntThing s in designatorHuntThingCalls)
+            {
+                AvoidLoop = true;
+                ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateThing(Find.CurrentMap.thingGrid.ThingsAt(s.pos).First(u => u.ThingID == s.thing.ThingID));
+                //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
+                //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
+                AvoidLoop = false;
+            }
+
             foreach (var s in designatorSingleCellCalls)
             {
                 {
@@ -811,7 +860,7 @@ namespace CooperateRim
         {
             //designations
             {
-                info.AddValue("designations", designations);
+                info.AddValue(nameof(designations), designations);
             }
 
             //jobs
@@ -871,6 +920,10 @@ namespace CooperateRim
             //thingfilter commands
             {
                 info.AddValue(nameof(thingFilterSetAllowCalls), thingFilterSetAllowCalls);
+            }
+            
+            {
+                info.AddValue(nameof(designatorHuntThingCalls), designatorHuntThingCalls);
             }
         }
         

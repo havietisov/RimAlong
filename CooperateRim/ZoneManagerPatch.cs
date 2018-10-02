@@ -29,6 +29,25 @@ namespace CooperateRim
         }
     }
 
+    [HarmonyPatch(typeof(Designator_Hunt))]
+    [HarmonyPatch("DesignateThing")]
+    public class Designator_Hunt
+    {
+        [HarmonyPrefix]
+        public static bool DesignateThing(Designator_Hunt __instance, Thing t)
+        {
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickDesignatePrey(__instance, t, t.Position);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+            return false;
+        }
+    }
 
     [HarmonyPatch(typeof(Designator_Build))]
     [HarmonyPatch("DesignateSingleCell")]
