@@ -43,6 +43,9 @@ namespace CooperateRim
         public override void Initialize()
         {
             inst = this;
+
+
+            
             (typeof(Rand).GetField("random", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as RandomNumberGenerator).seed = 0;
 
             HarmonyInstance harmony = HarmonyInst;
@@ -145,6 +148,8 @@ namespace CooperateRim
                     }
                 }
             }
+
+            Logger.Message("Field : " + (typeof(Building_Trap)).GetField("autoRearm", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase));
 
             foreach (MethodInfo mi in new[] 
             {

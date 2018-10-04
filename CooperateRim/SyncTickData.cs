@@ -290,6 +290,13 @@ namespace CooperateRim
             public SVEC3 pos;
         }
 
+        [Serializable]
+        public class TRAP_AUTO_REARM_SET
+        {
+            public S_Thing trap;
+            public bool val;
+        }
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
@@ -305,6 +312,7 @@ namespace CooperateRim
         List<ThingFilterSetAllowCall> thingFilterSetAllowCalls = new List<ThingFilterSetAllowCall>();
         List<DesignatorHuntThing> designatorHuntThingCalls = new List<DesignatorHuntThing>();
         List<DesignatorApplyToThing> designatorApplyToThingCalls = new List<DesignatorApplyToThing>();
+        List<TRAP_AUTO_REARM_SET> trapAutoRearms = new List<TRAP_AUTO_REARM_SET>();
         List<string> researches = new List<string>();
 
         public static int clientCount = 2;
@@ -329,6 +337,11 @@ namespace CooperateRim
         {
             CooperateRimming.Log(t.PositionHeld + " |||" + pos);
             //singleton.designatorHuntThingCalls.Add(new DesignatorHuntThing() { designatorType = d.GetType().AssemblyQualifiedName, thing = t, pos = pos });
+        }
+
+        public static void AppendSyncTickData(Building_Trap instt, bool val)
+        {
+            singleton.trapAutoRearms.Add(new TRAP_AUTO_REARM_SET() { trap = instt, val = val });
         }
 
         public static void AppendSyncTickData(Bill b, IBillGiver giver, BillRepeatModeDef def)
@@ -444,6 +457,7 @@ namespace CooperateRim
             GetVal(ref bill_repeat_commands, info, nameof(bill_repeat_commands));
             GetVal(ref thingFilterSetAllowCalls, info, nameof(thingFilterSetAllowCalls));
             GetVal(ref designatorApplyToThingCalls, info, nameof(designatorApplyToThingCalls));
+            GetVal(ref trapAutoRearms, info, nameof(trapAutoRearms));
 
             //CooperateRimming.Log("deserialized designations : " + designations.Count);
             foreach (var des in designations)
@@ -535,6 +549,20 @@ namespace CooperateRim
             List<Thing>[] things = (List<Thing>[])Find.CurrentMap.thingGrid.GetType().GetField("thingGrid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Find.CurrentMap.thingGrid);
 
             //CooperateRimming.Log("thinglist : " + things);
+
+            foreach (var trapI in trapAutoRearms)
+            {
+                Thing trap = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == trapI.trap.ThingID)).First(u => u.ThingID == trapI.trap.ThingID);
+
+                CooperateRimming.Log("Trap ID : " + trap);
+
+                if (trap != null && trap is Building_Trap)
+                {
+                    AvoidLoop = true;
+                    BuildingTrapPatch.SetAutoRearmValue(trap as Building_Trap, trapI.val);
+                    AvoidLoop = false;
+                }
+            }
 
             foreach (var _bill in bills)
             {
@@ -940,6 +968,11 @@ namespace CooperateRim
             //designator apply thing calls
             {
                 info.AddValue(nameof(designatorApplyToThingCalls), designatorApplyToThingCalls);
+            }
+
+            //trap auto rearm value 
+            {
+                info.AddValue(nameof(trapAutoRearms), trapAutoRearms);
             }
         }
         
