@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BillStack.cs" />
+    <Compile Include="BuildingTrapPatch.cs" />
     <Compile Include="CooperateRimming.cs" />
     <Compile Include="DesignationManagerPatch.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
