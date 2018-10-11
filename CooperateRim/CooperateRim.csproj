@@ -70,6 +70,7 @@
     <Compile Include="JobTrackerPatch.cs" />
     <Compile Include="MoveToStandablePatch.cs" />
     <Compile Include="NetworkGame.cs" />
+    <Compile Include="PawnAttackMeleeGizmoUtilityPatch.cs" />
     <Compile Include="Pawn_WorkSettings_patch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandPatch.cs" />
