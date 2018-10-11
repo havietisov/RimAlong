@@ -32,14 +32,91 @@ namespace CooperateRim
 
     [HarmonyPatch(typeof(Designator_Hunt))]
     [HarmonyPatch("DesignateThing")]
-    public class Designator_Hunt
+    public class Designator_Hunt_
     {
         [HarmonyPrefix]
         public static bool DesignateThing(Designator_Hunt __instance, Thing t)
         {
             if (!SyncTickData.AvoidLoop)
             {
-                SyncTickData.AppendSyncTickDesignatePrey(__instance, t, t.Position);
+                SyncTickData.AppendSyncTickDesignatorApplyToThing(__instance, t, t.Position);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Designator_Strip))]
+    [HarmonyPatch("DesignateThing")]
+    public class Designator_strip_
+    {
+        [HarmonyPrefix]
+        public static bool DesignateThing(Designator_Strip __instance, Thing t)
+        {
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickDesignatorApplyToThing(__instance, t, t.Position);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Designator_Claim))]
+    [HarmonyPatch("DesignateSingleCell")]
+    public class Designator_Claim_Tile
+    {
+        [HarmonyPrefix]
+        public static bool DesignateSingleCell(Designator_Tame __instance, IntVec3 c)
+        {
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickData(__instance, c);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Designator_Claim))]
+    [HarmonyPatch("DesignateThing")]
+    public class Designator_Claim_Thing
+    {
+        [HarmonyPrefix]
+        public static bool DesignateThing(Designator_Tame __instance, Thing t)
+        {
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickDesignatorApplyToThing(__instance, t, t.Position);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Designator_Tame))]
+    [HarmonyPatch("DesignateThing")]
+    public class Designator_Tame_
+    {
+        [HarmonyPrefix]
+        public static bool DesignateThing(Designator_Tame __instance, Thing t)
+        {
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickDesignatorApplyToThing(__instance, t, t.Position);
                 return false;
             }
             else
@@ -95,6 +172,26 @@ namespace CooperateRim
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, loc);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Designator_Hunt))]
+    [HarmonyPatch("DesignateThing")]
+    public class Designator_Hunt__
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(Designator __instance, Thing t)
+        {
+            CooperateRimming.Log("Designator_hunt designate single cell");
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickDesignatorApplyToThing(__instance, t, t.Position);
                 return false;
             }
             else

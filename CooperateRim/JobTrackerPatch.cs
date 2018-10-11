@@ -11,11 +11,13 @@ using Verse.AI;
 
 namespace CooperateRim
 {
+    /*
     //TryTakeOrderedJobPrioritizedWork
     [HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
     [HarmonyPatch("TryTakeOrderedJobPrioritizedWork")]
     class JobTrackerPatch
     {
+
         [HarmonyPrefix]
         public static bool TryTakeOrderedJobPrioritizedWork(Job job, WorkGiver giver, IntVec3 cell)
         {
@@ -31,28 +33,49 @@ namespace CooperateRim
                 return true;
             }
         }
-    }
+    }*/
 
     [HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
-    [HarmonyPatch("DetermineNextJob")]
-    class JobTrackerPatch_DetermineNextJob
+    [HarmonyPatch("TryTakeOrderedJob")]
+    class JobTrackerPatch_
     {
         [HarmonyPrefix]
-        public static bool DetermineNextJob(out ThinkTreeDef thinkTree, ref Pawn ___pawn)
+        public static bool TryTakeOrderedJob(Pawn_JobTracker __instance, Job job, JobTag tag, Pawn ___pawn)
         {
-            /*
-            if (___pawn.thinker.ConstantThinkTree != null)
+            //job.def
+            CooperateRimming.Log("TryTakeOrderedJobPrioritizedWork.IsDes : " + SyncTickData.IsDeserializing);
+            if (!SyncTickData.AvoidLoop)
             {
-                ThinkResult rr = ___pawn.thinker.ConstantThinkNodeRoot.TryIssueJobPackage(___pawn, default(JobIssueParams));
-                thinkTree = ___pawn.thinker.ConstantThinkTree;
+                SyncTickData.AllowJobAt(job, ___pawn, tag, ___pawn.Position);
+                return false;
             }
             else
             {
-                thinkTree = null;
-            }*/
-
-            thinkTree = null;
-            return true;
+                return true;
+            }
         }
     }
+
+    //[HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
+    //[HarmonyPatch("DetermineNextJob")]
+    //class JobTrackerPatch_DetermineNextJob
+    //{
+    //    [HarmonyPrefix]
+    //    public static bool DetermineNextJob(out ThinkTreeDef thinkTree, ref Pawn ___pawn)
+    //    {
+
+    //        if (___pawn.thinker.ConstantThinkTree != null)
+    //        {
+    //            ThinkResult rr = ___pawn.thinker.ConstantThinkNodeRoot.TryIssueJobPackage(___pawn, default(JobIssueParams));
+    //            thinkTree = ___pawn.thinker.ConstantThinkTree;
+    //        }
+    //        else
+    //        {
+    //            thinkTree = null;
+    //        }
+
+    //        thinkTree = null;
+    //        return true;
+    //    }
+    //}
 }

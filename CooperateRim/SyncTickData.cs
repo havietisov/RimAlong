@@ -11,6 +11,8 @@ using System.Xml.Serialization;
 using Verse;
 using Verse.AI;
 using System.Linq;
+using System.Reflection;
+using System.IO;
 
 namespace CooperateRim
 {
@@ -181,13 +183,13 @@ namespace CooperateRim
         {
             //public TemporaryJobData tj;
             public SVEC3 cell;
-            public S_WorkGiver giver;
             public S_Pawn pawn;
-            public S_Thing target;
+            public string jobDef;
             public S_LocalTargetInfo jobTargetA;
             public S_LocalTargetInfo jobTargetB;
             public S_LocalTargetInfo jobTargetC;
             public bool forced;
+            public JobTag tag;
         }
 
         [Serializable]
@@ -297,10 +299,29 @@ namespace CooperateRim
             public bool val;
         }
 
+        [Serializable]
+        public class SyncThingFieldCommand
+        {
+            public S_Thing thing;
+            public string typename;
+            public string fieldname;
+            public BindingFlags fieldFlags;
+            public object value;
+        }
+        
+
+        [Serializable]
+        public class PawnDrafted
+        {
+            public S_Thing pawn;
+            public bool value;
+        }
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
         List<FinalJobData> jobsToSerialize = new List<FinalJobData>();
+        List<FinalJobData> jobs2toSerialize = new List<FinalJobData>();
         List<JobPriorityData> jobPriorities = new List<JobPriorityData>();
         List<DesignatorCellCall> designatorCellCalls = new List<DesignatorCellCall>();
         List<DesignatorMultiCellCall> designatorMultiCellCalls = new List<DesignatorMultiCellCall>();
@@ -313,6 +334,9 @@ namespace CooperateRim
         List<DesignatorHuntThing> designatorHuntThingCalls = new List<DesignatorHuntThing>();
         List<DesignatorApplyToThing> designatorApplyToThingCalls = new List<DesignatorApplyToThing>();
         List<TRAP_AUTO_REARM_SET> trapAutoRearms = new List<TRAP_AUTO_REARM_SET>();
+        List<SyncThingFieldCommand> syncFieldCommands = new List<SyncThingFieldCommand>();
+        List<PawnDrafted> pawnDrafts = new List<PawnDrafted>();
+
         List<string> researches = new List<string>();
 
         public static int clientCount = 2;
@@ -337,6 +361,11 @@ namespace CooperateRim
         {
             CooperateRimming.Log(t.PositionHeld + " |||" + pos);
             //singleton.designatorHuntThingCalls.Add(new DesignatorHuntThing() { designatorType = d.GetType().AssemblyQualifiedName, thing = t, pos = pos });
+        }
+
+        public static void AppendSyncFieldForThingCommand(Thing t, FieldInfo fi, BindingFlags flag, object value)
+        {
+            singleton.syncFieldCommands.Add(new SyncThingFieldCommand() { fieldFlags = flag, fieldname = fi.Name, typename = t.GetType().AssemblyQualifiedName, thing = t,  value = value });
         }
 
         public static void AppendSyncTickData(Building_Trap instt, bool val)
@@ -458,6 +487,8 @@ namespace CooperateRim
             GetVal(ref thingFilterSetAllowCalls, info, nameof(thingFilterSetAllowCalls));
             GetVal(ref designatorApplyToThingCalls, info, nameof(designatorApplyToThingCalls));
             GetVal(ref trapAutoRearms, info, nameof(trapAutoRearms));
+            GetVal(ref syncFieldCommands, info, nameof(syncFieldCommands));
+            GetVal(ref pawnDrafts, info, nameof(pawnDrafts));
 
             //CooperateRimming.Log("deserialized designations : " + designations.Count);
             foreach (var des in designations)
@@ -564,6 +595,30 @@ namespace CooperateRim
                 }
             }
 
+            foreach (var fieldInfo in syncFieldCommands)
+            {
+                Thing t = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == fieldInfo.thing.ThingID)).First(u => u.ThingID == fieldInfo.thing.ThingID);
+
+                if (t != null)
+                {
+                    AvoidLoop = true;
+                    t.GetType().GetField(fieldInfo.fieldname, fieldInfo.fieldFlags).SetValue(t, fieldInfo.value);
+                    AvoidLoop = false;
+                }
+            }
+
+            foreach (var draftInfo in pawnDrafts)
+            {
+                Thing t = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == draftInfo.pawn.ThingID)).First(u => u.ThingID == draftInfo.pawn.ThingID);
+
+                if (t != null && t is Pawn)
+                {
+                    AvoidLoop = true;
+                    (t as Pawn).drafter.Drafted = draftInfo.value;
+                    AvoidLoop = false;
+                }
+            }
+
             foreach (var _bill in bills)
             {
                 Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
@@ -634,18 +689,8 @@ namespace CooperateRim
             foreach (var _job in jobsToSerialize)
             {
                 Pawn pawn = null;
-                Thing th = null;
-                WorkTypeDef workTypeDef = null;
+                JobDef workTypeDef = null;
                 
-                foreach (var thing in Find.CurrentMap.thingGrid.ThingsAt(_job.cell))
-                {
-                    if (thing.ThingID == _job.target.ThingID)
-                    {
-                        th = thing;
-                        break;
-                    }
-                }
-
                 foreach (var _pawn in Find.CurrentMap.mapPawns.AllPawns)
                 {
                     if (_pawn.ThingID == _job.pawn.ThingID)
@@ -655,94 +700,62 @@ namespace CooperateRim
                     }
                 }
 
-                foreach (var __workTypeDef in DefDatabase<WorkTypeDef>.AllDefsListForReading)
+                foreach (var __workTypeDef in typeof(JobDefOf).GetFields())
                 {
-                    CooperateRimming.Log("[" + __workTypeDef.defName + " : " + _job.giver.__jobDefName + "]");
+                    CooperateRimming.Log("[" + (__workTypeDef.GetValue(null) as JobDef).defName + " : " + _job.jobDef + "]");
 
-                    if (__workTypeDef.defName == _job.giver.__jobDefName)
+                    if ((__workTypeDef.GetValue(null) as JobDef).defName == _job.jobDef)
                     {
-                        workTypeDef = __workTypeDef;
+                        workTypeDef = (__workTypeDef.GetValue(null) as JobDef);
                         break;
                     }
                 }
 
                 CooperateRimming.Log(">>>>>>>>>>>>>");
                 CooperateRimming.Log("workTypeDef " + (workTypeDef == null ? "null" : workTypeDef.ToString()));
-                CooperateRimming.Log("thing :" + th + "]");
                 CooperateRimming.Log("pawn :" + pawn + "]");
-                CooperateRimming.Log("givers count : " + workTypeDef.workGiversByPriority.Count);
+
+                Job job = new Job(workTypeDef);
 
                 try
                 {
-                    for (int k = 0; k < workTypeDef.workGiversByPriority.Count; k++)
+                    if (_job.jobTargetA != null)
                     {
-                        WorkGiverDef workGiver = workTypeDef.workGiversByPriority[k];
-                        WorkGiver_Scanner workGiver_Scanner = workGiver.Worker as WorkGiver_Scanner;
-
-                        CooperateRimming.Log(workGiver_Scanner == null ? "FOOKIN NULL GIVER worker at " + workGiver.ToString() : workGiver_Scanner.ToString());
-
-                        if (workGiver_Scanner != null && workGiver_Scanner.def != null)
-                        {
-                            CooperateRimming.Log(workGiver_Scanner.def.defName);
-                            CooperateRimming.Log(workGiver_Scanner.def.giverClass + " <> " + _job.giver.jobGiverClass);
-                            if (workGiver_Scanner.def.giverClass.ToString() == _job.giver.jobGiverClass.ToString())
-                            {
-                                Job job = workGiver_Scanner.JobOnThing(pawn, th, forced: _job.forced);
-                                job.playerForced = true;
-                                job.TryMakePreToilReservations(pawn, errorOnFailed: true);
-
-                                try
-                                {
-                                    if (_job.jobTargetA != null)
-                                    {
-                                        job.targetA = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetA.thing.ThingID)).First(u => u.ThingID == _job.jobTargetA.thing.ThingID);
-                                    }
-                                }
-                                catch (Exception ee)
-                                {
-
-                                }
-
-                                try
-                                {
-                                    if (_job.jobTargetB != null)
-                                    {
-                                        job.targetB = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetB.thing.ThingID)).First(u => u.ThingID == _job.jobTargetB.thing.ThingID);
-                                    }
-                                }
-                                catch (Exception ee)
-                                {
-
-                                }
-
-                                try
-                                {
-                                    if (_job.jobTargetC != null)
-                                    {
-                                        job.targetC = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetC.thing.ThingID)).First(u => u.ThingID == _job.jobTargetC.thing.ThingID);
-                                    }
-                                }
-                                catch (Exception ee)
-                                {
-
-                                }
-
-                                AvoidLoop = true;
-                                CooperateRimming.Log("Ordered job : " + job + " : " + pawn.jobs.TryTakeOrderedJobPrioritizedWork(job, workGiver_Scanner, _job.cell));
-                                AvoidLoop = false;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            CooperateRimming.Log("Job giver scanner null? wtf?");
-                        }
+                        job.targetA = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetA.thing.ThingID)).First(u => u.ThingID == _job.jobTargetA.thing.ThingID);
                     }
                 }
                 catch (Exception ee)
                 {
-                    CooperateRimming.Log("[01FFFFFFFFFFFF] " + ee.ToString());
+
                 }
+
+                try
+                {
+                    if (_job.jobTargetB != null)
+                    {
+                        job.targetB = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetB.thing.ThingID)).First(u => u.ThingID == _job.jobTargetB.thing.ThingID);
+                    }
+                }
+                catch (Exception ee)
+                {
+
+                }
+
+                try
+                {
+                    if (_job.jobTargetC != null)
+                    {
+                        job.targetC = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetC.thing.ThingID)).First(u => u.ThingID == _job.jobTargetC.thing.ThingID);
+                    }
+                }
+                catch (Exception ee)
+                {
+
+                }
+
+                SyncTickData.AvoidLoop = true;
+                pawn.jobs.TryTakeOrderedJob(job, _job.tag);
+                SyncTickData.AvoidLoop = false;
             }
 
             foreach (var s in designatorCellCalls)
@@ -835,14 +848,10 @@ namespace CooperateRim
             Bill_production_patch.kkk.Clear();
         }
 
-        internal static void AllowJobAt(Job job, WorkGiver giver, IntVec3 cell)
+        internal static void AllowJobAt(Job job, Pawn pawn, JobTag tag, IntVec3 cell)
         {
-            TemporaryJobData _tj = singleton.jobData.Find(u => u != null && u.__result != null && u.__result.def.defName == job.def.defName);
-            CooperateRimming.Log("gtype : " + giver.def.giverClass + ":" + job.def.defName);
-            if (_tj != null)
             {
-                CooperateRimming.Log("found temporary job to add : " + _tj.__result.def.defName);
-                singleton.jobsToSerialize.Add(new FinalJobData() { cell = cell, giver = giver, forced = _tj.forced, pawn = _tj.pawn, target = _tj.targetThing, jobTargetA = _tj.jobTargetA, jobTargetB = _tj.jobTargetB, jobTargetC = _tj.jobTargetC });
+                singleton.jobsToSerialize.Add(new FinalJobData() { cell = cell, jobDef = job.def.defName, pawn = pawn, jobTargetA = job.targetA, jobTargetB = job.targetB, jobTargetC = job.targetC });
             }
         }
 
@@ -908,10 +917,9 @@ namespace CooperateRim
 
             //jobs
             {
-
                 foreach (var j in jobsToSerialize)
                 {
-                    CooperateRimming.Log("++++ : " + j.giver.__jobDefName);
+                    CooperateRimming.Log("++++ : " + j.jobDef);
                 }
                 info.AddValue(nameof(jobsToSerialize), jobsToSerialize);
             }
@@ -974,6 +982,16 @@ namespace CooperateRim
             {
                 info.AddValue(nameof(trapAutoRearms), trapAutoRearms);
             }
+
+            //direct field sync
+            {
+                info.AddValue(nameof(syncFieldCommands), syncFieldCommands);
+            }
+
+            //pawn draft sync
+            {
+                info.AddValue(nameof(pawnDrafts), pawnDrafts);
+            }
         }
         
         internal static void AppendSyncTickData(Designator instance, IntVec3 cell)
@@ -1009,6 +1027,11 @@ namespace CooperateRim
         internal static void AppendSyncTickDataThingFilterSetAllow(ThingDef thingDef, bool allow, IntVec3 pos, Bill_Production bill)
         {
             singleton.thingFilterSetAllowCalls.Add(new ThingFilterSetAllowCall() { thingDef = thingDef.defName, val = allow, giverPos = pos, bill = bill });
+        }
+
+        internal static void AppendSyncTickDataPawnDrafted(Pawn pawn, bool value)
+        {
+            singleton.pawnDrafts.Add(new PawnDrafted() { pawn = pawn, value = value });
         }
     }
 }
