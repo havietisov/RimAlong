@@ -136,10 +136,12 @@ namespace CooperateRim
         {
             cell = t.Cell;
             thing = t.Thing;
+            hasThing = t.HasThing;
         }
 
         public SVEC3 cell;
         public S_Thing thing;
+        public bool hasThing;
 
         public static implicit operator S_LocalTargetInfo(LocalTargetInfo @this)
         {
@@ -183,13 +185,21 @@ namespace CooperateRim
         {
             //public TemporaryJobData tj;
             public SVEC3 cell;
+            public LocomotionUrgency locomotionUrgency;
+            public HaulMode haulMode;
             public S_Pawn pawn;
             public string jobDef;
             public S_LocalTargetInfo jobTargetA;
             public S_LocalTargetInfo jobTargetB;
             public S_LocalTargetInfo jobTargetC;
-            public bool forced;
+            public bool playerForced;
             public JobTag tag;
+            public bool ignoreDesignations;
+            public bool ignoreForbidden;
+            public bool ignoreAssignment;
+            public bool haulDroppedApparel;
+            public bool restUntilHealed;
+            public bool forceSleep;
         }
 
         [Serializable]
@@ -721,7 +731,14 @@ namespace CooperateRim
                 {
                     if (_job.jobTargetA != null)
                     {
-                        job.targetA = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetA.thing.ThingID)).First(u => u.ThingID == _job.jobTargetA.thing.ThingID);
+                        if (_job.jobTargetA.hasThing)
+                        {
+                            job.targetA = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetA.thing.ThingID)).First(u => u.ThingID == _job.jobTargetA.thing.ThingID);
+                        }
+                        else
+                        {
+                            job.targetA = (IntVec3)_job.jobTargetA.cell;
+                        }
                     }
                 }
                 catch (Exception ee)
@@ -733,7 +750,14 @@ namespace CooperateRim
                 {
                     if (_job.jobTargetB != null)
                     {
-                        job.targetB = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetB.thing.ThingID)).First(u => u.ThingID == _job.jobTargetB.thing.ThingID);
+                        if (_job.jobTargetA.hasThing)
+                        {
+                            job.targetB = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetB.thing.ThingID)).First(u => u.ThingID == _job.jobTargetB.thing.ThingID);
+                        }
+                        else
+                        {
+                            job.targetB = (IntVec3)_job.jobTargetB.cell;
+                        }
                     }
                 }
                 catch (Exception ee)
@@ -745,7 +769,14 @@ namespace CooperateRim
                 {
                     if (_job.jobTargetC != null)
                     {
-                        job.targetC = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetC.thing.ThingID)).First(u => u.ThingID == _job.jobTargetC.thing.ThingID);
+                        if (_job.jobTargetA.hasThing)
+                        {
+                            job.targetC = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetC.thing.ThingID)).First(u => u.ThingID == _job.jobTargetC.thing.ThingID);
+                        }
+                        else
+                        {
+                            job.targetC = (IntVec3)_job.jobTargetC.cell;
+                        }
                     }
                 }
                 catch (Exception ee)
@@ -850,8 +881,16 @@ namespace CooperateRim
 
         internal static void AllowJobAt(Job job, Pawn pawn, JobTag tag, IntVec3 cell)
         {
+            string s = "";
+
+            foreach (var ss in typeof(Job).GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
             {
-                singleton.jobsToSerialize.Add(new FinalJobData() { cell = cell, jobDef = job.def.defName, pawn = pawn, jobTargetA = job.targetA, jobTargetB = job.targetB, jobTargetC = job.targetC });
+                s += "[" + ss.Name + " :: " + ss.GetValue(job) + "]\r\n";
+            }
+            CooperateRimming.Log(s);
+            //CooperateRimming.Log(job.ToString() + " |1| " + job.playerForced + " |2| " + job.forceSleep + " |3| " + job.restUntilHealed + " |4| " + job.haulDroppedApparel + " |5| " + job.ignoreDesignations + " |6| " + job.ignoreJoyTimeAssignment + " |7| " + job.ignoreForbidden + " |8| " + job.locomotionUrgency + " |9| " + job.haulMode + " |10| " + cell + " |11| " + job.def.defName + " |12| " + pawn + " |13| " + job.targetA + " |14| " + job.targetB + " |15| " + job.targetC);
+            {
+                singleton.jobsToSerialize.Add(new FinalJobData() { playerForced = job.playerForced, forceSleep = job.forceSleep, restUntilHealed = job.restUntilHealed, haulDroppedApparel = job.haulDroppedApparel , ignoreDesignations = job.ignoreDesignations , ignoreAssignment = job.ignoreJoyTimeAssignment, ignoreForbidden = job.ignoreForbidden , locomotionUrgency = job.locomotionUrgency, haulMode = job.haulMode, cell = cell, jobDef = job.def.defName, pawn = pawn, jobTargetA = job.targetA, jobTargetB = job.targetB, jobTargetC = job.targetC });
             }
         }
 
