@@ -114,6 +114,22 @@ namespace CooperateRim
             {
                 foreach (Type t in a.GetTypes())
                 {
+                    if (!t.IsAbstract)
+                    {
+                        if (t.IsSubclassOf(typeof(Thing)))
+                        {
+                            MethodInfo targetmethod = AccessTools.Method(t, "GetGizmos");
+                            HarmonyMethod postfix = new HarmonyMethod(typeof(CooperateRim.GenericGizmoPatch).GetMethod("Postfix"));
+                            harmony.Patch(targetmethod, null, postfix, null);
+                        }
+                    }
+                }
+            }
+
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type t in a.GetTypes())
+                {
                     if (!t.IsAbstract && t.IsSubclassOf(typeof(RimWorld.Designator_Area)))
                     {
                         MethodInfo targetmethod = AccessTools.Method(t, "DesignateSingleCell");

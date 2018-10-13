@@ -10,6 +10,7 @@ using Verse;
 
 namespace CooperateRim
 {
+    /*
     [HarmonyPatch(typeof(Pawn_DraftController), "set_Drafted")]
     public class Pawn_DraftControllerPatch
     {
@@ -164,5 +165,5 @@ namespace CooperateRim
             __result = li;
             return false;
         }
-    }
+    }*/
 }

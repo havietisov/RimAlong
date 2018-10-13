@@ -66,6 +66,7 @@
     <Compile Include="DesignationManagerPatch.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
     <Compile Include="GenConstructPatch.cs" />
+    <Compile Include="GenericGizmoPatch.cs" />
     <Compile Include="HighResolutionTimer.cs" />
     <Compile Include="JobTrackerPatch.cs" />
     <Compile Include="MoveToStandablePatch.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="WindowStackPatch.cs" />
     <Compile Include="WorkGiverPatch.cs" />
     <Compile Include="ZoneManagerPatch.cs" />
+    <Compile Include="Zone_GrowingPatch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
