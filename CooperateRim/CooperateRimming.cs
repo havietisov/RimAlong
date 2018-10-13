@@ -125,12 +125,25 @@ namespace CooperateRim
                     }
                 }
             }
-
+            /*
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (Type t in a.GetTypes())
                 {
                     if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)))
+                    {
+                        MethodInfo targetmethod = AccessTools.Method(t, "FinalizeDesignationSucceeded");
+                        HarmonyMethod prefix_1 = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("FinalizeDesignationSucceeded"));
+                        harmony.Patch(targetmethod, prefix_1, null, null);
+                    }
+                }
+            }*/
+
+            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type t in a.GetTypes())
+                {
+                    if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)) && t != typeof(Designator_ZoneDelete))
                     {
                         MethodInfo targetmethod = AccessTools.Method(t, "DesignateSingleCell");
                         HarmonyMethod prefix_1 = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateSingleCell_1"));
@@ -151,7 +164,7 @@ namespace CooperateRim
             {
                 foreach (Type t in a.GetTypes())
                 {
-                    if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)))
+                    if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)) && t != typeof(Designator_ZoneDelete))
                     {
                         MethodInfo targetmethod = AccessTools.Method(t, "DesignateMultiCell");
                         HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateMultiCell"));
@@ -164,7 +177,7 @@ namespace CooperateRim
             {
                 foreach (Type t in a.GetTypes())
                 {
-                    if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)))
+                    if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)) && t != typeof(Designator_ZoneDelete))
                     {
                         MethodInfo targetmethod = AccessTools.Method(t, "DesignateThing");
                         HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateThing"));
