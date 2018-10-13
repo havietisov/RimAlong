@@ -84,6 +84,7 @@
     <Compile Include="WorkGiverPatch.cs" />
     <Compile Include="ZoneManagerPatch.cs" />
     <Compile Include="Zone_GrowingPatch.cs" />
+    <Compile Include="Zone_patch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

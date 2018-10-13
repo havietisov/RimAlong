@@ -8,6 +8,27 @@ using Verse;
 
 namespace CooperateRim
 {
+    [HarmonyPatch(typeof(Designator_ZoneDelete))]
+    [HarmonyPatch("DesignateSingleCell")]
+    class Designator_patch__
+    {
+        [HarmonyPrefix]
+        public static bool DesignateSingleCell_1(ref Designator __instance, ref IntVec3 c)
+        {
+            CooperateRimming.Log("DELETE : " + __instance.GetType().AssemblyQualifiedName + ".DesignateSingleCell");
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickData(__instance, c);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+    }
+
     //[HarmonyPatch(typeof(Designator_AreaBuildRoof))]
     //[HarmonyPatch("DesignateSingleCell")]
     class Designator_patch
@@ -53,6 +74,22 @@ namespace CooperateRim
             {
                 return true;
             }
+        }
+
+        public static bool FinalizeDesignationSucceeded(ref Designator __instance)
+        {
+            CooperateRimming.Log("FinalizeDesignationSucceeded");
+            return true;
+            /*
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickDataFinalizeDesignationSucceeded(__instance);
+                return false;
+            }
+            else
+            {
+                return true;
+            }*/
         }
 
         public static bool DesignateThing(Designator __instance, Thing t)

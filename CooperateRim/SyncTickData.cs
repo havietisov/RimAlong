@@ -359,6 +359,7 @@ namespace CooperateRim
         List<PawnDrafted> pawnDrafts = new List<PawnDrafted>();
         List<COMMAND_TOGGLE_INDEXED_CALLS> toggleCommandIndexedCalls = new List<COMMAND_TOGGLE_INDEXED_CALLS>();
         List<Zone_set_plant> setZonePlants = new List<Zone_set_plant>();
+        List<SerializableZoneData> deleteZones = new List<SerializableZoneData>();
         
         List<string> researches = new List<string>();
 
@@ -519,6 +520,7 @@ namespace CooperateRim
             GetVal(ref pawnDrafts, info, nameof(pawnDrafts));
             GetVal(ref toggleCommandIndexedCalls, info, nameof(toggleCommandIndexedCalls));
             GetVal(ref setZonePlants, info, nameof(setZonePlants));
+            GetVal(ref deleteZones, info, nameof(deleteZones));
 
             //CooperateRimming.Log("deserialized designations : " + designations.Count);
             foreach (var des in designations)
@@ -625,6 +627,13 @@ namespace CooperateRim
                     AvoidLoop = false;
                 }
             }*/
+
+            foreach (var zi in deleteZones)
+            {
+                AvoidLoop = true;
+                Find.CurrentMap.zoneManager.AllZones.First(u => u.ID == zi.zoneID).Delete();
+                AvoidLoop = false;
+            }
 
             foreach (var fieldInfo in syncFieldCommands)
             {
@@ -1127,6 +1136,11 @@ namespace CooperateRim
             {
                 info.AddValue(nameof(setZonePlants), setZonePlants);
             }
+
+            //deleted zones
+            {
+                info.AddValue(nameof(deleteZones), deleteZones);
+            }
         }
 
         public static void AppendSyncTickDataCommand_toggle_call_by_index(Thing t, int number)
@@ -1173,6 +1187,17 @@ namespace CooperateRim
         internal static void AppendSyncTickDataPawnDrafted(Pawn pawn, bool value)
         {
             singleton.pawnDrafts.Add(new PawnDrafted() { pawn = pawn, value = value });
+        }
+
+        internal static void AppendSyncTickDataFinalizeDesignationSucceeded(Designator instance)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static void AppendSyncTickDataDeleteZone(Zone instance)
+        {
+            CooperateRimming.Log(instance.ToString());
+            singleton.deleteZones.Add(new SerializableZoneData() { zoneID = instance.ID });
         }
     }
 }
