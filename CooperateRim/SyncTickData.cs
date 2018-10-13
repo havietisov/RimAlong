@@ -127,8 +127,7 @@ namespace CooperateRim
             return new S_Thing(@this);
         }
     }
-
-
+    
     [Serializable]
     public class S_LocalTargetInfo
     {
@@ -214,10 +213,7 @@ namespace CooperateRim
         public class SerializableZoneData
         {
             public int zoneID;
-            public string zoneName;
-            public string zoneType;
         }
-
 
         [Serializable]
         public class DesignatorCellCall
@@ -327,6 +323,21 @@ namespace CooperateRim
             public bool value;
         }
 
+        [Serializable]
+        public class COMMAND_TOGGLE_INDEXED_CALLS
+        {
+            public S_Thing thing;
+            public SVEC3 location;
+            public int gizmo_index;
+        }
+
+        [Serializable]
+        public class Zone_set_plant
+        {
+            public string plantDef;
+            public SerializableZoneData zoneData;
+        }
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
@@ -346,10 +357,12 @@ namespace CooperateRim
         List<TRAP_AUTO_REARM_SET> trapAutoRearms = new List<TRAP_AUTO_REARM_SET>();
         List<SyncThingFieldCommand> syncFieldCommands = new List<SyncThingFieldCommand>();
         List<PawnDrafted> pawnDrafts = new List<PawnDrafted>();
-
+        List<COMMAND_TOGGLE_INDEXED_CALLS> toggleCommandIndexedCalls = new List<COMMAND_TOGGLE_INDEXED_CALLS>();
+        List<Zone_set_plant> setZonePlants = new List<Zone_set_plant>();
+        
         List<string> researches = new List<string>();
 
-        public static int clientCount = 2;
+        public static int clientCount = 1;
         public static string cliendID = "1";
 
         public static bool IsDeserializing;
@@ -383,6 +396,11 @@ namespace CooperateRim
             singleton.trapAutoRearms.Add(new TRAP_AUTO_REARM_SET() { trap = instt, val = val });
         }
 
+        public static void AppendSyncTickData(Zone_Growing __instance, ThingDef plantDef)
+        {
+            singleton.setZonePlants.Add(new Zone_set_plant() {  plantDef = plantDef.defName, zoneData = new SerializableZoneData() { zoneID = __instance.ID } });
+        }
+
         public static void AppendSyncTickData(Bill b, IBillGiver giver, BillRepeatModeDef def)
         {
             R_BILL bb = new R_BILL() { recipeDefName = b.recipe.defName, billGiverName = giver.ToString(), targetThing = Find.Selector.SingleSelectedThing };
@@ -410,12 +428,12 @@ namespace CooperateRim
         {
             if (j.__result != null)
             {
-                CooperateRimming.Log("new sync tick temporaty job defname : " + j.__result.def.defName);
+                //CooperateRimming.Log("new sync tick temporaty job defname : " + j.__result.def.defName);
                 singleton.jobData.Add(j);
             }
             else
             {
-                CooperateRimming.Log("temp job data is null");
+                //CooperateRimming.Log("temp job data is null");
             }
         }
 
@@ -499,6 +517,8 @@ namespace CooperateRim
             GetVal(ref trapAutoRearms, info, nameof(trapAutoRearms));
             GetVal(ref syncFieldCommands, info, nameof(syncFieldCommands));
             GetVal(ref pawnDrafts, info, nameof(pawnDrafts));
+            GetVal(ref toggleCommandIndexedCalls, info, nameof(toggleCommandIndexedCalls));
+            GetVal(ref setZonePlants, info, nameof(setZonePlants));
 
             //CooperateRimming.Log("deserialized designations : " + designations.Count);
             foreach (var des in designations)
@@ -524,6 +544,7 @@ namespace CooperateRim
                             Find.CurrentMap.designationManager.AddDesignation(new Designation((IntVec3)des.target.cell, DefFromString(des.designationDef)));
                         }
                         break;
+
                     case TargetType.Thing:
                         {
                             foreach (Thing t in Find.CurrentMap.thingGrid.ThingsAt(des.target.cell))
@@ -540,7 +561,6 @@ namespace CooperateRim
                 }
 
                 AvoidLoop = false;
-
                 CooperateRimming.Log(des.designationDef);
             }
 
@@ -591,6 +611,7 @@ namespace CooperateRim
 
             //CooperateRimming.Log("thinglist : " + things);
 
+            /*
             foreach (var trapI in trapAutoRearms)
             {
                 Thing trap = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == trapI.trap.ThingID)).First(u => u.ThingID == trapI.trap.ThingID);
@@ -603,7 +624,7 @@ namespace CooperateRim
                     BuildingTrapPatch.SetAutoRearmValue(trap as Building_Trap, trapI.val);
                     AvoidLoop = false;
                 }
-            }
+            }*/
 
             foreach (var fieldInfo in syncFieldCommands)
             {
@@ -817,6 +838,40 @@ namespace CooperateRim
                 AvoidLoop = false;
             }
 
+            foreach (COMMAND_TOGGLE_INDEXED_CALLS call in toggleCommandIndexedCalls)
+            {
+                AvoidLoop = true;
+                Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(call.location).First(u => u.ThingID == call.thing.ThingID);
+
+                IEnumerator<Gizmo> gizmoI = issuer.GetGizmos().GetEnumerator();
+                CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::index  = " +  call.gizmo_index);
+                for (int i = 0; i <= call.gizmo_index; i++)
+                {
+                    if (!gizmoI.MoveNext())
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::cycle  = " + i);
+                        if (i == call.gizmo_index)
+                        {
+                            if (gizmoI.Current is Command_Toggle)
+                            {
+                                (gizmoI.Current as Command_Toggle).toggleAction();
+                            }
+
+                            if (gizmoI.Current is Command_Action)
+                            {
+                                (gizmoI.Current as Command_Action).action();
+                            }
+                        }
+                    }
+                }
+
+                AvoidLoop = false;
+            }
+
             foreach (var s in designatorSingleCellCalls)
             {
                 {
@@ -848,6 +903,37 @@ namespace CooperateRim
                         }
                     }
                 }
+            }
+
+            foreach (var s in setZonePlants)
+            {
+                SyncTickData.AvoidLoop = true;
+
+                foreach (var z in Find.CurrentMap.zoneManager.AllZones)
+                {
+                    CooperateRimming.Log(z.ID + " ++ " + s.zoneData.zoneID);
+
+                    if (z.ID == s.zoneData.zoneID)
+                    {
+                        if (z != null && z is Zone_Growing)
+                        {
+                            (z as Zone_Growing).SetPlantDefToGrow(DefDatabase<ThingDef>.AllDefs.First(u => u.defName == s.plantDef));
+                        }
+                        else
+                        {
+                            if (z == null)
+                            {
+                                CooperateRimming.Log("fukken zero!");
+                            }
+                            else
+                            {
+                                CooperateRimming.Log("z is not growing");
+                            }
+                        }
+                    }
+                }
+                
+                AvoidLoop = false;
             }
 
             foreach (var s in ForbiddenCallDataCall)
@@ -965,12 +1051,12 @@ namespace CooperateRim
 
             //job priorities
             {
-                info.AddValue("jobPriorities", jobPriorities);
+                info.AddValue(nameof(jobPriorities), jobPriorities);
             }
 
             //designator cell calls
             {
-                info.AddValue("designatorCellCalls", designatorCellCalls);
+                info.AddValue(nameof(designatorCellCalls), designatorCellCalls);
             }
 
             //designator multicellcalls
@@ -1031,8 +1117,24 @@ namespace CooperateRim
             {
                 info.AddValue(nameof(pawnDrafts), pawnDrafts);
             }
+
+            //command toggle sync
+            {
+                info.AddValue(nameof(toggleCommandIndexedCalls), toggleCommandIndexedCalls);
+            }
+
+            //set zone plants 
+            {
+                info.AddValue(nameof(setZonePlants), setZonePlants);
+            }
         }
-        
+
+        public static void AppendSyncTickDataCommand_toggle_call_by_index(Thing t, int number)
+        {
+            CooperateRimming.Log(t + " || " + number);
+            singleton.toggleCommandIndexedCalls.Add(new COMMAND_TOGGLE_INDEXED_CALLS() { thing = t, location = t.Position, gizmo_index = number });
+        }
+
         internal static void AppendSyncTickData(Designator instance, IntVec3 cell)
         {
             singleton.designatorCellCalls.Add(new DesignatorCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName });    

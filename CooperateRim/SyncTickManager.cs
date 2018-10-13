@@ -137,7 +137,7 @@ namespace CooperateRim
                     {
                         IsSyncTick = true;
                         nextSyncTickValue = ___ticksGameInt + 10;
-                        CooperateRimming.Log("Synctick happened at " + ___ticksGameInt);
+                        //CooperateRimming.Log("Synctick happened at " + ___ticksGameInt);
 
                         SyncTickData.IsDeserializing = true;
                         //JobTrackerPatch.FlushCData();
