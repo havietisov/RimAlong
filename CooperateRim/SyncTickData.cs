@@ -363,7 +363,7 @@ namespace CooperateRim
         
         List<string> researches = new List<string>();
 
-        public static int clientCount = 1;
+        public static int clientCount = 2;
         public static string cliendID = "1";
 
         public static bool IsDeserializing;
