@@ -1,4 +1,3 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2047
@@ -6,6 +5,8 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CooperateRim", "CooperateRim\CooperateRim.csproj", "{59511D22-BD23-4042-802B-0491A6C972FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RimLauncher", "RimLauncher\RimLauncher.csproj", "{0C46493E-CC22-4EC6-9E53-FB06608847BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamworksTest", "SteamworksTest\SteamworksTest.csproj", "{2FADFD22-CCFF-4E28-AFF2-0BF01D366CDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +22,10 @@ Global
 		{0C46493E-CC22-4EC6-9E53-FB06608847BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C46493E-CC22-4EC6-9E53-FB06608847BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C46493E-CC22-4EC6-9E53-FB06608847BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FADFD22-CCFF-4E28-AFF2-0BF01D366CDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FADFD22-CCFF-4E28-AFF2-0BF01D366CDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FADFD22-CCFF-4E28-AFF2-0BF01D366CDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FADFD22-CCFF-4E28-AFF2-0BF01D366CDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
