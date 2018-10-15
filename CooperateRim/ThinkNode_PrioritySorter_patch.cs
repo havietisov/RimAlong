@@ -21,8 +21,8 @@ namespace CooperateRim
                 _sw.Add(filename, System.IO.File.AppendText(@"D:\CoopReplays\" + (filename) + SyncTickData.cliendID + ".txt"));
             }
 
-            _sw[filename].WriteLine(s);
-            _sw[filename].Flush();
+            //_sw[filename].WriteLine(s);
+            //_sw[filename].Flush();
         }
     }
 

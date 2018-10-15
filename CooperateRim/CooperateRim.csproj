@@ -70,6 +70,7 @@
     <Compile Include="HighResolutionTimer.cs" />
     <Compile Include="JobTrackerPatch.cs" />
     <Compile Include="MoveToStandablePatch.cs" />
+    <Compile Include="netDemo.cs" />
     <Compile Include="NetworkGame.cs" />
     <Compile Include="PawnAttackMeleeGizmoUtilityPatch.cs" />
     <Compile Include="Pawn_WorkSettings_patch.cs" />
@@ -93,7 +94,7 @@
   <PropertyGroup>
     <PostBuildEvent>copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\CooperateRim.dll" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
 copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\CooperateRim.pdb" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
-copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\Troschuetz.Random.dll" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
+copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\NetDemoLib.dll" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
 del D:\CoopReplays\*.* /s /q</PostBuildEvent>
   </PropertyGroup>
 </Project>

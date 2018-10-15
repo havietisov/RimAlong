@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using Verse;
 
@@ -22,76 +24,10 @@ namespace CooperateRim
         public static int nextSyncTickValue = 0;
         public static int clientsInSync = 0;
         public static bool imInSync;
-
+        public static int syncRoundLength = 10;
         public static bool IsSyncTick;
         
-        public static bool Prepare()
-        {
-            return true;
-        }
-        /*
-        public static void ReferenceTranspilerMethod(ref int ticksGameInt)
-        {
-            shouldReallyTick = false;
-            IsSyncTick = false;
-            SyncTickData.IsDeserializing = false;
-            {
-                if (DateTime.Now.Ticks > nextFrameTime.Ticks)
-                {
-                    bool expectToSync = nextSyncTickValue == myTicksValue;
-                    
-                    if (!imSynced)
-                    {
-                        if (expectToSync)
-                        {
-                            SyncTickData.FlushSyncTickData(myTicksValue);
-                            imSynced = true;
-                        }
-                    }
-
-                    bool allSyncDataAvailable = SyncTickData.tickFileNames(myTicksValue).All(u => System.IO.File.Exists(u + ".sync"));
-
-                    //CooperateRimming.Log("Frame " + myTicksValue + " : " + expectToSync + " ::: " + allSyncDataAvailable + "[" + myTicksValue + "] :: " + nextSyncTickValue + " [is synced : ] " + imSynced);
-
-                    if (!expectToSync || (expectToSync && allSyncDataAvailable))
-                    {
-                        if (expectToSync)
-                        {
-                            IsSyncTick = true;
-                            nextSyncTickValue = myTicksValue + 10;
-                            //CooperateRimming.Log("Synctick happened at " + myTicksValue);
-
-                            SyncTickData.IsDeserializing = true;
-                            SyncTickData.Apply(myTicksValue);
-                            imSynced = false;
-                            //JobTrackerPatch.FlushCData();
-                        }
-                        myTicksValue++;
-                        shouldReallyTick = true;
-                    }
-                    
-                    nextFrameTime = DateTime.Now + TimeSpan.FromSeconds(0.05);
-                }
-
-                ticksGameInt = myTicksValue;
-            }
-        }*/
-
-        public static bool TestInjMethod()
-        {
-            return true;
-        }
-
-        public static void ILSourceMethod(Action originalMethod)
-        {
-            TestInjMethod();
-        }
-
-        public static void Retr()
-        {
-
-        }
-
+        
         static Stopwatch sw;
 
         [HarmonyPrefix]
@@ -105,7 +41,7 @@ namespace CooperateRim
             }
             shouldReallyTick = false;
 
-            if (sw.ElapsedMilliseconds > 20 && !__instance.Paused)
+            if (sw.ElapsedMilliseconds > 100 && !__instance.Paused)
             {
                 sw.Reset();
                 sw.Start();
@@ -128,15 +64,22 @@ namespace CooperateRim
                         SyncTickData.FlushSyncTickData(___ticksGameInt);
                         imInSync = true;
                     }
-
+#if FILE_TRANSFER
                     bool allSyncDataAvailable = SyncTickData.tickFileNames(___ticksGameInt).All(u => System.IO.File.Exists(u + ".sync"));
+#else
+                    NetDemo.FrameData fd = null;
+                    NetDemo.SendStateRequest(___ticksGameInt, SyncTickData.cliendID);
+                    NetDemo.TryGetPackets(false, u => { fd = u; });
+
+                    bool allSyncDataAvailable = fd != null;
+#endif
 
                     //CooperateRimming.Log("Frame " + ___ticksGameInt + " : " + " ::: " + allSyncDataAvailable + "[" + ___ticksGameInt + "] :: " + nextSyncTickValue + " [is synced : ] " + imInSync);
 
                     if (allSyncDataAvailable)
                     {
                         IsSyncTick = true;
-                        nextSyncTickValue = ___ticksGameInt + 10;
+                        nextSyncTickValue = ___ticksGameInt + syncRoundLength;
                         //CooperateRimming.Log("Synctick happened at " + ___ticksGameInt);
 
                         SyncTickData.IsDeserializing = true;
@@ -145,7 +88,15 @@ namespace CooperateRim
                         streamholder.WriteLine("pre-deserialize tick at " + ___ticksGameInt, "tickstate");
                         Rand.PushState(___ticksGameInt);
                         streamholder.WriteLine("data applied at " + ___ticksGameInt, "tickstate");
-                        SyncTickData.Apply(___ticksGameInt);
+                        
+                        foreach(var data in fd.frameData)
+                        {
+                            BinaryFormatter ser = new BinaryFormatter();
+                            MemoryStream fs = new System.IO.MemoryStream(data);
+                            SyncTickData sd = ser.Deserialize(fs) as SyncTickData;
+                        }
+
+                        //SyncTickData.Apply(___ticksGameInt);
                         __instance.DoSingleTick();
                         Rand.PopState();
                         imInSync = false;

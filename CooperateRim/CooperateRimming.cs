@@ -10,6 +10,7 @@ using HugsLib;
 using System.Runtime.InteropServices;
 using RimWorld.Planet;
 using Verse.AI;
+using Steamworks;
 
 namespace CooperateRim
 {
@@ -43,7 +44,8 @@ namespace CooperateRim
         public override void Initialize()
         {
             inst = this;
-
+            NetDemo.log = CooperateRimming.Log;
+            NetDemo.setupCallbacks();
 
             
             (typeof(Rand).GetField("random", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as RandomNumberGenerator).seed = 0;
@@ -59,7 +61,7 @@ namespace CooperateRim
                 string sname = @"D:\CoopReplays\" + i + ".lock";
                 if (!System.IO.File.Exists(sname))
                 {
-                    SyncTickData.cliendID = i.ToString();
+                    SyncTickData.cliendID = i;
                     System.IO.File.CreateText(sname).Close();
                     break;
                 }
@@ -307,7 +309,7 @@ namespace CooperateRim
                 GUI.EndGroup();
             }
         }
-        
+
         public class Dialog_Coop : Window
         {
             public override void DoWindowContents(Rect inRect)
@@ -318,6 +320,7 @@ namespace CooperateRim
                 r.width = 150;
                 if (Widgets.ButtonText(r, "Host game"))
                 {
+                    NetDemo.WaitForConnection(NetDemo.m_RemoteSteamId, SyncTickData.clientCount);
                     Rand.PushState(0);
                     Current.Game = new Game();
                     Current.Game.InitData = new GameInitData();

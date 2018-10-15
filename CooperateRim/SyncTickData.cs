@@ -364,7 +364,7 @@ namespace CooperateRim
         List<string> researches = new List<string>();
 
         public static int clientCount = 2;
-        public static string cliendID = "1";
+        public static int cliendID = 1;
 
         public static bool IsDeserializing;
         public static bool AvoidLoop;
@@ -462,6 +462,7 @@ namespace CooperateRim
             {
                 try
                 {
+#if FILE_TRANSFER
                     string s = @"D:\CoopReplays\_" + tickNum + "client_" + cliendID + ".xml";
                     
                     //CooperateRimming.Log("Written : " + s);
@@ -473,6 +474,17 @@ namespace CooperateRim
                     fs.Flush();
                     fs.Close();
                     System.IO.File.WriteAllText(s + ".sync", "");
+#else
+                    BinaryFormatter ser = new BinaryFormatter();
+                    SyncTickData buffered = singleton;
+                    MemoryStream fs = new MemoryStream();
+                    singleton = new SyncTickData();
+                    ser.Serialize(fs, buffered);
+                    fs.Flush();
+                    byte[] fsd = fs.GetBuffer();
+                    NetDemo.PushStateToDirectory(cliendID, tickNum, fsd, 0);
+                    fs.Close();
+#endif
                 }
                 catch (Exception ee)
                 {
@@ -502,95 +514,90 @@ namespace CooperateRim
         
         public SyncTickData(SerializationInfo info, StreamingContext ctx)
         {
-            GetVal(ref designations, info, nameof(designations));
-            GetVal(ref jobsToSerialize, info, nameof(jobsToSerialize));
-            GetVal(ref jobPriorities, info, nameof(jobPriorities));
-            GetVal(ref designatorCellCalls, info, nameof(designatorCellCalls));
-            GetVal(ref designatorMultiCellCalls, info, nameof(designatorMultiCellCalls));
-            GetVal(ref ForbiddenCallDataCall, info, nameof(ForbiddenCallDataCall));
-            GetVal(ref designatorSingleCellCalls, info, nameof(designatorSingleCellCalls));
-            GetVal(ref designatorAreaCallData, info, nameof(designatorAreaCallData));
-            GetVal(ref researches, info, nameof(researches));
-            GetVal(ref bills, info, nameof(bills));
-            GetVal(ref bill_repeat_commands, info, nameof(bill_repeat_commands));
-            GetVal(ref thingFilterSetAllowCalls, info, nameof(thingFilterSetAllowCalls));
-            GetVal(ref designatorApplyToThingCalls, info, nameof(designatorApplyToThingCalls));
-            GetVal(ref trapAutoRearms, info, nameof(trapAutoRearms));
-            GetVal(ref syncFieldCommands, info, nameof(syncFieldCommands));
-            GetVal(ref pawnDrafts, info, nameof(pawnDrafts));
-            GetVal(ref toggleCommandIndexedCalls, info, nameof(toggleCommandIndexedCalls));
-            GetVal(ref setZonePlants, info, nameof(setZonePlants));
-            GetVal(ref deleteZones, info, nameof(deleteZones));
-
-            //CooperateRimming.Log("deserialized designations : " + designations.Count);
-            foreach (var des in designations)
+            CooperateRimming.Log("SyncTickData::.ctor");
+            int lockD = 0;
+            try
             {
-                Thing sdt = null;
+                GetVal(ref designations, info, nameof(designations));
+                GetVal(ref jobsToSerialize, info, nameof(jobsToSerialize));
+                GetVal(ref jobPriorities, info, nameof(jobPriorities));
+                GetVal(ref designatorCellCalls, info, nameof(designatorCellCalls));
+                GetVal(ref designatorMultiCellCalls, info, nameof(designatorMultiCellCalls));
+                GetVal(ref ForbiddenCallDataCall, info, nameof(ForbiddenCallDataCall));
+                GetVal(ref designatorSingleCellCalls, info, nameof(designatorSingleCellCalls));
+                GetVal(ref designatorAreaCallData, info, nameof(designatorAreaCallData));
+                GetVal(ref researches, info, nameof(researches));
+                GetVal(ref bills, info, nameof(bills));
+                GetVal(ref bill_repeat_commands, info, nameof(bill_repeat_commands));
+                GetVal(ref thingFilterSetAllowCalls, info, nameof(thingFilterSetAllowCalls));
+                GetVal(ref designatorApplyToThingCalls, info, nameof(designatorApplyToThingCalls));
+                GetVal(ref trapAutoRearms, info, nameof(trapAutoRearms));
+                GetVal(ref syncFieldCommands, info, nameof(syncFieldCommands));
+                GetVal(ref pawnDrafts, info, nameof(pawnDrafts));
+                GetVal(ref toggleCommandIndexedCalls, info, nameof(toggleCommandIndexedCalls));
+                GetVal(ref setZonePlants, info, nameof(setZonePlants));
+                GetVal(ref deleteZones, info, nameof(deleteZones));
 
-
-                AvoidLoop = true;
-                switch (des.targetType)
+                //CooperateRimming.Log("deserialized designations : " + designations.Count);
+                lockD = 1;
+                foreach (var des in designations)
                 {
-                    case TargetType.Cell:
-                        {
-                            var ddee = ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(des.typeName)).Invoke(null, null)));
+                    Thing sdt = null;
 
-                            CooperateRimming.Log("dess : " + ddee);
-                            var ddes = Find.CurrentMap.designationManager.DesignationAt(des.target.cell, DefFromString(des.designationDef));
 
-                            foreach (var v in Find.CurrentMap.designationManager.AllDesignationsAt(des.target.cell))
+                    AvoidLoop = true;
+                    switch (des.targetType)
+                    {
+                        case TargetType.Cell:
                             {
-                                CooperateRimming.Log(v.ToString());
-                            }
-                            //this should be replaced with DesignateSingleCell for mining case!
-                            Find.CurrentMap.designationManager.AddDesignation(new Designation((IntVec3)des.target.cell, DefFromString(des.designationDef)));
-                        }
-                        break;
+                                var ddee = ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(des.typeName)).Invoke(null, null)));
 
-                    case TargetType.Thing:
-                        {
-                            foreach (Thing t in Find.CurrentMap.thingGrid.ThingsAt(des.target.cell))
-                            {
-                                if (t.ThingID == des.target.thing.ThingID)
+                                CooperateRimming.Log("dess : " + ddee);
+                                var ddes = Find.CurrentMap.designationManager.DesignationAt(des.target.cell, DefFromString(des.designationDef));
+
+                                foreach (var v in Find.CurrentMap.designationManager.AllDesignationsAt(des.target.cell))
                                 {
-                                    sdt = t;
+                                    CooperateRimming.Log(v.ToString());
                                 }
+                                //this should be replaced with DesignateSingleCell for mining case!
+                                Find.CurrentMap.designationManager.AddDesignation(new Designation((IntVec3)des.target.cell, DefFromString(des.designationDef)));
                             }
+                            break;
 
-                            Find.CurrentMap.designationManager.AddDesignation(new Designation(new LocalTargetInfo(sdt), DefFromString(des.designationDef)));
+                        case TargetType.Thing:
+                            {
+                                foreach (Thing t in Find.CurrentMap.thingGrid.ThingsAt(des.target.cell))
+                                {
+                                    if (t.ThingID == des.target.thing.ThingID)
+                                    {
+                                        sdt = t;
+                                    }
+                                }
+
+                                Find.CurrentMap.designationManager.AddDesignation(new Designation(new LocalTargetInfo(sdt), DefFromString(des.designationDef)));
+                            }
+                            break;
+                    }
+
+                    AvoidLoop = false;
+                    CooperateRimming.Log(des.designationDef);
+                }
+
+                lockD = 2;
+                foreach (var prior in jobPriorities)
+                {
+                    WorkTypeDef _wtd = null;
+                    Pawn pawn = null;
+
+                    foreach (var __workTypeDef in DefDatabase<WorkTypeDef>.AllDefsListForReading)
+                    {
+                        if (__workTypeDef.defName == prior.w.defName)
+                        {
+                            _wtd = __workTypeDef;
                         }
-                        break;
-                }
-
-                AvoidLoop = false;
-                CooperateRimming.Log(des.designationDef);
-            }
-
-            foreach(var prior in jobPriorities)
-            {
-                WorkTypeDef _wtd = null;
-                Pawn pawn = null;
-
-                foreach (var __workTypeDef in DefDatabase<WorkTypeDef>.AllDefsListForReading)
-                {
-                    if (__workTypeDef.defName == prior.w.defName)
-                    {
-                        _wtd = __workTypeDef;
                     }
-                }
 
-                foreach (var _pawn in Find.CurrentMap.mapPawns.AllPawns)
-                {
-                    if (_pawn.ThingID == prior.p.ThingID)
-                    {
-                        pawn = _pawn;
-                        break;
-                    }
-                }
-
-                if (pawn == null)
-                {
-                    foreach (var _pawn in CooperateRimming.initialPawnList)
+                    foreach (var _pawn in Find.CurrentMap.mapPawns.AllPawns)
                     {
                         if (_pawn.ThingID == prior.p.ThingID)
                         {
@@ -598,380 +605,413 @@ namespace CooperateRim
                             break;
                         }
                     }
-                }
 
-                //CooperateRimming.Log("Find.GameInitData : " + Find.GameInitData);
-                //CooperateRimming.Log("pawn priority : " + pawn);
-                AvoidLoop = true;
-                pawn.workSettings.SetPriority(_wtd, prior.priority);
-                AvoidLoop = false;
-            }
+                    if (pawn == null)
+                    {
+                        foreach (var _pawn in CooperateRimming.initialPawnList)
+                        {
+                            if (_pawn.ThingID == prior.p.ThingID)
+                            {
+                                pawn = _pawn;
+                                break;
+                            }
+                        }
+                    }
 
-            //CooperateRimming.Log("Deserialized jobs :  " + jobsToSerialize.Count);
-
-            List<Thing>[] things = (List<Thing>[])Find.CurrentMap.thingGrid.GetType().GetField("thingGrid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Find.CurrentMap.thingGrid);
-
-            //CooperateRimming.Log("thinglist : " + things);
-
-            /*
-            foreach (var trapI in trapAutoRearms)
-            {
-                Thing trap = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == trapI.trap.ThingID)).First(u => u.ThingID == trapI.trap.ThingID);
-
-                CooperateRimming.Log("Trap ID : " + trap);
-
-                if (trap != null && trap is Building_Trap)
-                {
+                    //CooperateRimming.Log("Find.GameInitData : " + Find.GameInitData);
+                    //CooperateRimming.Log("pawn priority : " + pawn);
                     AvoidLoop = true;
-                    BuildingTrapPatch.SetAutoRearmValue(trap as Building_Trap, trapI.val);
+                    pawn.workSettings.SetPriority(_wtd, prior.priority);
                     AvoidLoop = false;
                 }
-            }*/
 
-            foreach (var zi in deleteZones)
-            {
-                AvoidLoop = true;
-                Find.CurrentMap.zoneManager.AllZones.First(u => u.ID == zi.zoneID).Delete();
-                AvoidLoop = false;
-            }
+                //CooperateRimming.Log("Deserialized jobs :  " + jobsToSerialize.Count);
 
-            foreach (var fieldInfo in syncFieldCommands)
-            {
-                Thing t = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == fieldInfo.thing.ThingID)).First(u => u.ThingID == fieldInfo.thing.ThingID);
+                List<Thing>[] things = (List<Thing>[])Find.CurrentMap.thingGrid.GetType().GetField("thingGrid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Find.CurrentMap.thingGrid);
 
-                if (t != null)
+                //CooperateRimming.Log("thinglist : " + things);
+
+                /*
+                foreach (var trapI in trapAutoRearms)
+                {
+                    Thing trap = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == trapI.trap.ThingID)).First(u => u.ThingID == trapI.trap.ThingID);
+
+                    CooperateRimming.Log("Trap ID : " + trap);
+
+                    if (trap != null && trap is Building_Trap)
+                    {
+                        AvoidLoop = true;
+                        BuildingTrapPatch.SetAutoRearmValue(trap as Building_Trap, trapI.val);
+                        AvoidLoop = false;
+                    }
+                }*/
+
+                lockD = 3;
+                foreach (var zi in deleteZones)
                 {
                     AvoidLoop = true;
-                    t.GetType().GetField(fieldInfo.fieldname, fieldInfo.fieldFlags).SetValue(t, fieldInfo.value);
+                    Find.CurrentMap.zoneManager.AllZones.First(u => u.ID == zi.zoneID).Delete();
                     AvoidLoop = false;
                 }
-            }
 
-            foreach (var draftInfo in pawnDrafts)
-            {
-                Thing t = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == draftInfo.pawn.ThingID)).First(u => u.ThingID == draftInfo.pawn.ThingID);
-
-                if (t != null && t is Pawn)
+                lockD = 4;
+                foreach (var fieldInfo in syncFieldCommands)
                 {
-                    AvoidLoop = true;
-                    (t as Pawn).drafter.Drafted = draftInfo.value;
-                    AvoidLoop = false;
-                }
-            }
+                    Thing t = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == fieldInfo.thing.ThingID)).First(u => u.ThingID == fieldInfo.thing.ThingID);
 
-            foreach (var _bill in bills)
-            {
-                Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
-
-                CooperateRimming.Log("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
-
-                foreach (var rec in issuer.def.AllRecipes)
-                {
-                    if (rec.defName == _bill.recipeDefName)
+                    if (t != null)
                     {
                         AvoidLoop = true;
-                        (issuer as IBillGiver).BillStack.AddBill(BillUtility.MakeNewBill(rec));
+                        t.GetType().GetField(fieldInfo.fieldname, fieldInfo.fieldFlags).SetValue(t, fieldInfo.value);
                         AvoidLoop = false;
-                        break;
                     }
                 }
-            }
 
-            foreach (var comm in bill_repeat_commands)
-            {
-                var _bill = comm.owner;
-                Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
-
-                CooperateRimming.Log("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
-
-                foreach (var rec in issuer.def.AllRecipes)
+                lockD = 5;
+                foreach (var draftInfo in pawnDrafts)
                 {
-                    if (rec.defName == _bill.recipeDefName)
+                    Thing t = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == draftInfo.pawn.ThingID)).First(u => u.ThingID == draftInfo.pawn.ThingID);
+
+                    if (t != null && t is Pawn)
                     {
                         AvoidLoop = true;
-                        foreach (var ___bill in (issuer as IBillGiver).BillStack.Bills)
-                        {
-                            if (___bill is Bill_Production && ___bill.recipe.defName == _bill.recipeDefName)
-                            {
-                                (___bill as Bill_Production).repeatMode = (BillRepeatModeDef)typeof(BillRepeatModeDefOf).GetFields().First(u => (u.GetValue(null) as BillRepeatModeDef).defName == comm.modeDefName).GetValue(null);
-                            }
-                        }
+                        (t as Pawn).drafter.Drafted = draftInfo.value;
                         AvoidLoop = false;
-                        break;
                     }
                 }
-            }
-            
-            foreach (var a in thingFilterSetAllowCalls)
-            {
-                var _bill = a.bill;
-                Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(a.giverPos).First(u => u.ThingID == _bill.targetThing.ThingID);
-                CooperateRimming.Log("thing filter issuer : " + (issuer == null ? "null" : issuer.ToString()));
-                
-                foreach (var rec in issuer.def.AllRecipes)
+
+                lockD = 6;
+                foreach (var _bill in bills)
                 {
-                    if (rec.defName == _bill.recipeDefName)
+                    Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
+
+                    CooperateRimming.Log("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
+
+                    foreach (var rec in issuer.def.AllRecipes)
                     {
-                        AvoidLoop = true;
-                        foreach (var ___bill in (issuer as IBillGiver).BillStack.Bills)
+                        if (rec.defName == _bill.recipeDefName)
                         {
-                            if (___bill is Bill_Production && ___bill.recipe.defName == _bill.recipeDefName)
+                            AvoidLoop = true;
+                            (issuer as IBillGiver).BillStack.AddBill(BillUtility.MakeNewBill(rec));
+                            AvoidLoop = false;
+                            break;
+                        }
+                    }
+                }
+
+                lockD = 7;
+                foreach (var comm in bill_repeat_commands)
+                {
+                    var _bill = comm.owner;
+                    Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
+
+                    CooperateRimming.Log("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
+
+                    foreach (var rec in issuer.def.AllRecipes)
+                    {
+                        if (rec.defName == _bill.recipeDefName)
+                        {
+                            AvoidLoop = true;
+                            foreach (var ___bill in (issuer as IBillGiver).BillStack.Bills)
                             {
-                                (___bill as Bill_Production).ingredientFilter.SetAllow(DefDatabase<ThingDef>.AllDefsListForReading.First(u => u.defName == a.thingDef), a.val);
-                            }
-                        }
-                        AvoidLoop = false;
-                        break;
-                    }
-                }
-            }
-
-            foreach (var _job in jobsToSerialize)
-            {
-                Pawn pawn = null;
-                JobDef workTypeDef = null;
-                
-                foreach (var _pawn in Find.CurrentMap.mapPawns.AllPawns)
-                {
-                    if (_pawn.ThingID == _job.pawn.ThingID)
-                    {
-                        pawn = _pawn;
-                        break;
-                    }
-                }
-
-                foreach (var __workTypeDef in typeof(JobDefOf).GetFields())
-                {
-                    CooperateRimming.Log("[" + (__workTypeDef.GetValue(null) as JobDef).defName + " : " + _job.jobDef + "]");
-
-                    if ((__workTypeDef.GetValue(null) as JobDef).defName == _job.jobDef)
-                    {
-                        workTypeDef = (__workTypeDef.GetValue(null) as JobDef);
-                        break;
-                    }
-                }
-
-                CooperateRimming.Log(">>>>>>>>>>>>>");
-                CooperateRimming.Log("workTypeDef " + (workTypeDef == null ? "null" : workTypeDef.ToString()));
-                CooperateRimming.Log("pawn :" + pawn + "]");
-
-                Job job = new Job(workTypeDef);
-
-                try
-                {
-                    if (_job.jobTargetA != null)
-                    {
-                        if (_job.jobTargetA.hasThing)
-                        {
-                            job.targetA = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetA.thing.ThingID)).First(u => u.ThingID == _job.jobTargetA.thing.ThingID);
-                        }
-                        else
-                        {
-                            job.targetA = (IntVec3)_job.jobTargetA.cell;
-                        }
-                    }
-                }
-                catch (Exception ee)
-                {
-
-                }
-
-                try
-                {
-                    if (_job.jobTargetB != null)
-                    {
-                        if (_job.jobTargetA.hasThing)
-                        {
-                            job.targetB = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetB.thing.ThingID)).First(u => u.ThingID == _job.jobTargetB.thing.ThingID);
-                        }
-                        else
-                        {
-                            job.targetB = (IntVec3)_job.jobTargetB.cell;
-                        }
-                    }
-                }
-                catch (Exception ee)
-                {
-
-                }
-
-                try
-                {
-                    if (_job.jobTargetC != null)
-                    {
-                        if (_job.jobTargetA.hasThing)
-                        {
-                            job.targetC = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetC.thing.ThingID)).First(u => u.ThingID == _job.jobTargetC.thing.ThingID);
-                        }
-                        else
-                        {
-                            job.targetC = (IntVec3)_job.jobTargetC.cell;
-                        }
-                    }
-                }
-                catch (Exception ee)
-                {
-
-                }
-
-                SyncTickData.AvoidLoop = true;
-                pawn.jobs.TryTakeOrderedJob(job, _job.tag);
-                SyncTickData.AvoidLoop = false;
-            }
-
-            foreach (var s in designatorCellCalls)
-            {
-                AvoidLoop = true;
-                CooperateRimming.Log(s.designatorType);
-                ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateSingleCell(s.cell);
-                //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
-                //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
-                AvoidLoop = false;
-            }
-
-            foreach (DesignatorMultiCellCall s in designatorMultiCellCalls)
-            {
-                AvoidLoop = true;
-                ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
-                //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
-                //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
-                AvoidLoop = false;
-            }
-
-            foreach (DesignatorApplyToThing s in designatorApplyToThingCalls)
-            {
-                AvoidLoop = true;
-                ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateThing(Find.CurrentMap.thingGrid.ThingsAt(s.pos).First(u => u.ThingID == s.thing.ThingID));
-                //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
-                //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
-                AvoidLoop = false;
-            }
-
-            foreach (COMMAND_TOGGLE_INDEXED_CALLS call in toggleCommandIndexedCalls)
-            {
-                AvoidLoop = true;
-                Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(call.location).First(u => u.ThingID == call.thing.ThingID);
-
-                IEnumerator<Gizmo> gizmoI = issuer.GetGizmos().GetEnumerator();
-                CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::index  = " +  call.gizmo_index);
-                for (int i = 0; i <= call.gizmo_index; i++)
-                {
-                    if (!gizmoI.MoveNext())
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::cycle  = " + i);
-                        if (i == call.gizmo_index)
-                        {
-                            if (gizmoI.Current is Command_Toggle)
-                            {
-                                (gizmoI.Current as Command_Toggle).toggleAction();
-                            }
-
-                            if (gizmoI.Current is Command_Action)
-                            {
-                                (gizmoI.Current as Command_Action).action();
-                            }
-                        }
-                    }
-                }
-
-                AvoidLoop = false;
-            }
-
-            foreach (var s in designatorSingleCellCalls)
-            {
-                {
-                    List<DesignationCategoryDef> allDefsListForReading = DefDatabase<DesignationCategoryDef>.AllDefsListForReading;
-                    for (int i = 0; i < allDefsListForReading.Count; i++)
-                    {
-                        List<Designator> allResolvedDesignators = allDefsListForReading[i].AllResolvedDesignators;
-                        for (int j = 0; j < allResolvedDesignators.Count; j++)
-                        {
-                            {
-                                AvoidLoop = true;
-                                Designator_Build dsf = allResolvedDesignators[j] as Designator_Build;
-
-                                if (null != dsf)
+                                if (___bill is Bill_Production && ___bill.recipe.defName == _bill.recipeDefName)
                                 {
-                                    if (dsf.PlacingDef.defName == s.thingDefName)
-                                    {
-                                        dsf.GetType().GetField("placingRot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(dsf, (Rot4)s.rot);
-                                        if (s.StuffDefName != null)
-                                        {
-                                            dsf.SetStuffDef(DefDatabase<ThingDef>.AllDefs.First(u => u.defName == s.StuffDefName));
-                                        }
-                                        dsf.DesignateSingleCell(s.cell);
-                                    }
+                                    (___bill as Bill_Production).repeatMode = (BillRepeatModeDef)typeof(BillRepeatModeDefOf).GetFields().First(u => (u.GetValue(null) as BillRepeatModeDef).defName == comm.modeDefName).GetValue(null);
                                 }
-
-                                AvoidLoop = false;
                             }
+                            AvoidLoop = false;
+                            break;
                         }
                     }
                 }
-            }
 
-            foreach (var s in setZonePlants)
-            {
-                SyncTickData.AvoidLoop = true;
-
-                foreach (var z in Find.CurrentMap.zoneManager.AllZones)
+                lockD = 8;
+                foreach (var a in thingFilterSetAllowCalls)
                 {
-                    CooperateRimming.Log(z.ID + " ++ " + s.zoneData.zoneID);
+                    var _bill = a.bill;
+                    Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(a.giverPos).First(u => u.ThingID == _bill.targetThing.ThingID);
+                    CooperateRimming.Log("thing filter issuer : " + (issuer == null ? "null" : issuer.ToString()));
 
-                    if (z.ID == s.zoneData.zoneID)
+                    foreach (var rec in issuer.def.AllRecipes)
                     {
-                        if (z != null && z is Zone_Growing)
+                        if (rec.defName == _bill.recipeDefName)
                         {
-                            (z as Zone_Growing).SetPlantDefToGrow(DefDatabase<ThingDef>.AllDefs.First(u => u.defName == s.plantDef));
-                        }
-                        else
-                        {
-                            if (z == null)
+                            AvoidLoop = true;
+                            foreach (var ___bill in (issuer as IBillGiver).BillStack.Bills)
                             {
-                                CooperateRimming.Log("fukken zero!");
+                                if (___bill is Bill_Production && ___bill.recipe.defName == _bill.recipeDefName)
+                                {
+                                    (___bill as Bill_Production).ingredientFilter.SetAllow(DefDatabase<ThingDef>.AllDefsListForReading.First(u => u.defName == a.thingDef), a.val);
+                                }
+                            }
+                            AvoidLoop = false;
+                            break;
+                        }
+                    }
+                }
+
+                lockD = 9;
+                foreach (var _job in jobsToSerialize)
+                {
+                    Pawn pawn = null;
+                    JobDef workTypeDef = null;
+
+                    foreach (var _pawn in Find.CurrentMap.mapPawns.AllPawns)
+                    {
+                        if (_pawn.ThingID == _job.pawn.ThingID)
+                        {
+                            pawn = _pawn;
+                            break;
+                        }
+                    }
+
+                    foreach (var __workTypeDef in typeof(JobDefOf).GetFields())
+                    {
+                        CooperateRimming.Log("[" + (__workTypeDef.GetValue(null) as JobDef).defName + " : " + _job.jobDef + "]");
+
+                        if ((__workTypeDef.GetValue(null) as JobDef).defName == _job.jobDef)
+                        {
+                            workTypeDef = (__workTypeDef.GetValue(null) as JobDef);
+                            break;
+                        }
+                    }
+
+                    CooperateRimming.Log(">>>>>>>>>>>>>");
+                    CooperateRimming.Log("workTypeDef " + (workTypeDef == null ? "null" : workTypeDef.ToString()));
+                    CooperateRimming.Log("pawn :" + pawn + "]");
+
+                    Job job = new Job(workTypeDef);
+
+                    try
+                    {
+                        if (_job.jobTargetA != null)
+                        {
+                            if (_job.jobTargetA.hasThing)
+                            {
+                                job.targetA = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetA.thing.ThingID)).First(u => u.ThingID == _job.jobTargetA.thing.ThingID);
                             }
                             else
                             {
-                                CooperateRimming.Log("z is not growing");
+                                job.targetA = (IntVec3)_job.jobTargetA.cell;
+                            }
+                        }
+                    }
+                    catch (Exception ee)
+                    {
+
+                    }
+
+                    try
+                    {
+                        if (_job.jobTargetB != null)
+                        {
+                            if (_job.jobTargetA.hasThing)
+                            {
+                                job.targetB = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetB.thing.ThingID)).First(u => u.ThingID == _job.jobTargetB.thing.ThingID);
+                            }
+                            else
+                            {
+                                job.targetB = (IntVec3)_job.jobTargetB.cell;
+                            }
+                        }
+                    }
+                    catch (Exception ee)
+                    {
+
+                    }
+
+                    try
+                    {
+                        if (_job.jobTargetC != null)
+                        {
+                            if (_job.jobTargetA.hasThing)
+                            {
+                                job.targetC = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _job.jobTargetC.thing.ThingID)).First(u => u.ThingID == _job.jobTargetC.thing.ThingID);
+                            }
+                            else
+                            {
+                                job.targetC = (IntVec3)_job.jobTargetC.cell;
+                            }
+                        }
+                    }
+                    catch (Exception ee)
+                    {
+
+                    }
+
+                    SyncTickData.AvoidLoop = true;
+                    pawn.jobs.TryTakeOrderedJob(job, _job.tag);
+                    SyncTickData.AvoidLoop = false;
+                }
+
+                lockD = 10;
+                foreach (var s in designatorCellCalls)
+                {
+                    AvoidLoop = true;
+                    CooperateRimming.Log(s.designatorType);
+                    ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateSingleCell(s.cell);
+                    //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
+                    //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
+                    AvoidLoop = false;
+                }
+
+                lockD = 11 ;
+                foreach (DesignatorMultiCellCall s in designatorMultiCellCalls)
+                {
+                    AvoidLoop = true;
+                    ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
+                    //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
+                    //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
+                    AvoidLoop = false;
+                }
+
+                lockD = 12;
+                foreach (DesignatorApplyToThing s in designatorApplyToThingCalls)
+                {
+                    AvoidLoop = true;
+                    ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateThing(Find.CurrentMap.thingGrid.ThingsAt(s.pos).First(u => u.ThingID == s.thing.ThingID));
+                    //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
+                    //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
+                    AvoidLoop = false;
+                }
+
+                lockD = 13;
+                foreach (COMMAND_TOGGLE_INDEXED_CALLS call in toggleCommandIndexedCalls)
+                {
+                    AvoidLoop = true;
+                    Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(call.location).First(u => u.ThingID == call.thing.ThingID);
+
+                    IEnumerator<Gizmo> gizmoI = issuer.GetGizmos().GetEnumerator();
+                    CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::index  = " + call.gizmo_index);
+                    for (int i = 0; i <= call.gizmo_index; i++)
+                    {
+                        if (!gizmoI.MoveNext())
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::cycle  = " + i);
+                            if (i == call.gizmo_index)
+                            {
+                                if (gizmoI.Current is Command_Toggle)
+                                {
+                                    (gizmoI.Current as Command_Toggle).toggleAction();
+                                }
+
+                                if (gizmoI.Current is Command_Action)
+                                {
+                                    (gizmoI.Current as Command_Action).action();
+                                }
+                            }
+                        }
+                    }
+
+                    AvoidLoop = false;
+                }
+
+                lockD = 14;
+                foreach (var s in designatorSingleCellCalls)
+                {
+                    {
+                        List<DesignationCategoryDef> allDefsListForReading = DefDatabase<DesignationCategoryDef>.AllDefsListForReading;
+                        for (int i = 0; i < allDefsListForReading.Count; i++)
+                        {
+                            List<Designator> allResolvedDesignators = allDefsListForReading[i].AllResolvedDesignators;
+                            for (int j = 0; j < allResolvedDesignators.Count; j++)
+                            {
+                                {
+                                    AvoidLoop = true;
+                                    Designator_Build dsf = allResolvedDesignators[j] as Designator_Build;
+
+                                    if (null != dsf)
+                                    {
+                                        if (dsf.PlacingDef.defName == s.thingDefName)
+                                        {
+                                            dsf.GetType().GetField("placingRot", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(dsf, (Rot4)s.rot);
+                                            if (s.StuffDefName != null)
+                                            {
+                                                dsf.SetStuffDef(DefDatabase<ThingDef>.AllDefs.First(u => u.defName == s.StuffDefName));
+                                            }
+                                            dsf.DesignateSingleCell(s.cell);
+                                        }
+                                    }
+
+                                    AvoidLoop = false;
+                                }
                             }
                         }
                     }
                 }
-                
-                AvoidLoop = false;
-            }
 
-            foreach (var s in ForbiddenCallDataCall)
-            {
-                Thing th = null;
-
-                foreach (var thing in Find.CurrentMap.spawnedThings)
+                lockD = 15;
+                foreach (var s in setZonePlants)
                 {
-                    if (thing.ThingID == s.thingID)
+                    SyncTickData.AvoidLoop = true;
+
+                    foreach (var z in Find.CurrentMap.zoneManager.AllZones)
                     {
-                        th = thing;
-                        break;
+                        CooperateRimming.Log(z.ID + " ++ " + s.zoneData.zoneID);
+
+                        if (z.ID == s.zoneData.zoneID)
+                        {
+                            if (z != null && z is Zone_Growing)
+                            {
+                                (z as Zone_Growing).SetPlantDefToGrow(DefDatabase<ThingDef>.AllDefs.First(u => u.defName == s.plantDef));
+                            }
+                            else
+                            {
+                                if (z == null)
+                                {
+                                    CooperateRimming.Log("fukken zero!");
+                                }
+                                else
+                                {
+                                    CooperateRimming.Log("z is not growing");
+                                }
+                            }
+                        }
                     }
+
+                    AvoidLoop = false;
                 }
 
-                AvoidLoop = true;
-                //((ThingWithComps)(th)).GetComp<CompForbiddable>();
-                ForbidUtility.SetForbidden(th, s.value, true);
-                //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateThing(th);
-                AvoidLoop = false;
-            }
-            
-            foreach (string s in researches)
-            {
-                TickManagerPatch.cachedRDef = DefDatabase<ResearchProjectDef>.AllDefsListForReading.Find(u => u.defName == s);
-                Find.ResearchManager.currentProj = TickManagerPatch.cachedRDef;
-            }
+                lockD = 16;
+                foreach (var s in ForbiddenCallDataCall)
+                {
+                    Thing th = null;
 
-            Bill_production_patch.kkk.Clear();
+                    foreach (var thing in Find.CurrentMap.spawnedThings)
+                    {
+                        if (thing.ThingID == s.thingID)
+                        {
+                            th = thing;
+                            break;
+                        }
+                    }
+
+                    AvoidLoop = true;
+                    //((ThingWithComps)(th)).GetComp<CompForbiddable>();
+                    ForbidUtility.SetForbidden(th, s.value, true);
+                    //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateThing(th);
+                    AvoidLoop = false;
+                }
+
+                lockD = 17;
+                foreach (string s in researches)
+                {
+                    TickManagerPatch.cachedRDef = DefDatabase<ResearchProjectDef>.AllDefsListForReading.Find(u => u.defName == s);
+                    Find.ResearchManager.currentProj = TickManagerPatch.cachedRDef;
+                }
+
+                lockD = 18;
+                Bill_production_patch.kkk.Clear();
+            }
+            catch (Exception ee)
+            {
+                CooperateRimming.Log("sync tick data exception at stage " + lockD);
+            }
+            CooperateRimming.Log("/SyncTickData::.ctor");
         }
 
         internal static void AllowJobAt(Job job, Pawn pawn, JobTag tag, IntVec3 cell)
@@ -1000,6 +1040,7 @@ namespace CooperateRim
         public static void Apply(int tickNum)
         {
             //CooperateRimming.Log("Applied frame " + tickNum);
+#if FILE_TRANSFER
             foreach (string s in tickFileNames(tickNum))
             {
                 
@@ -1021,6 +1062,10 @@ namespace CooperateRim
                 }
                 
             }
+    
+#else
+            
+#endif
         }
 
         void Serialize(IntVec3 pos, SerializationInfo info, string prefix)
