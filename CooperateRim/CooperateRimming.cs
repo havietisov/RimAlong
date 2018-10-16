@@ -46,8 +46,7 @@ namespace CooperateRim
             inst = this;
             NetDemo.log = CooperateRimming.Log;
             NetDemo.setupCallbacks();
-
-            
+            //Verse.DirectXmlSaver.XElementFromObject
             (typeof(Rand).GetField("random", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as RandomNumberGenerator).seed = 0;
 
             HarmonyInstance harmony = HarmonyInst;
@@ -55,17 +54,7 @@ namespace CooperateRim
             List<Type> typesToPatch = new List<Type>();
             List<Type> designatorInheritees = new List<Type>();
             List<Type> leftOverTypes = new List<Type>();
-
-            for (int i = 0; i < SyncTickData.clientCount; i++)
-            {
-                string sname = @"D:\CoopReplays\" + i + ".lock";
-                if (!System.IO.File.Exists(sname))
-                {
-                    SyncTickData.cliendID = i;
-                    System.IO.File.CreateText(sname).Close();
-                    break;
-                }
-            }
+            
             
             //thingfilter patch
             {
@@ -320,7 +309,7 @@ namespace CooperateRim
                 r.width = 150;
                 if (Widgets.ButtonText(r, "Host game"))
                 {
-                    NetDemo.WaitForConnection(NetDemo.m_RemoteSteamId, SyncTickData.clientCount);
+                    NetDemo.WaitForConnection();
                     Rand.PushState(0);
                     Current.Game = new Game();
                     Current.Game.InitData = new GameInitData();

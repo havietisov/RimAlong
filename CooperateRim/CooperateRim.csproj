@@ -43,8 +43,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
+    <Reference Include="CookComputing.XmlRpcV2, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d6e17aa302004d, processorArchitecture=MSIL">
+      <HintPath>..\packages\xmlrpcnet.3.0.0.266\lib\net20\CookComputing.XmlRpcV2.dll</HintPath>
+    </Reference>
     <Reference Include="HugsLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\UnlimitedHugs.Rimworld.HugsLib.5.0.0\lib\net35\HugsLib.dll</HintPath>
+    </Reference>
+    <Reference Include="LiteDB, Version=4.1.4.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiteDB.4.1.4\lib\net35\LiteDB.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -69,11 +75,13 @@
     <Compile Include="GenericGizmoPatch.cs" />
     <Compile Include="HighResolutionTimer.cs" />
     <Compile Include="JobTrackerPatch.cs" />
+    <Compile Include="LocalDB.cs" />
     <Compile Include="MoveToStandablePatch.cs" />
     <Compile Include="netDemo.cs" />
     <Compile Include="NetworkGame.cs" />
     <Compile Include="PawnAttackMeleeGizmoUtilityPatch.cs" />
     <Compile Include="Pawn_WorkSettings_patch.cs" />
+    <Compile Include="PirateRPC.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandPatch.cs" />
     <Compile Include="StoreUtility.cs" />

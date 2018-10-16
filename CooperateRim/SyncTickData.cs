@@ -364,7 +364,13 @@ namespace CooperateRim
         List<string> researches = new List<string>();
 
         public static int clientCount = 2;
-        public static int cliendID = 1;
+        public static int cliendID = -1;
+
+        public static void SetClientID(int id)
+        {
+            CooperateRimming.Log("RECEIVED CLIENT ID = " + id);
+            cliendID = id;
+        }
 
         public static bool IsDeserializing;
         public static bool AvoidLoop;
@@ -475,15 +481,16 @@ namespace CooperateRim
                     fs.Close();
                     System.IO.File.WriteAllText(s + ".sync", "");
 #else
-                    BinaryFormatter ser = new BinaryFormatter();
-                    SyncTickData buffered = singleton;
-                    MemoryStream fs = new MemoryStream();
-                    singleton = new SyncTickData();
-                    ser.Serialize(fs, buffered);
-                    fs.Flush();
-                    byte[] fsd = fs.GetBuffer();
-                    NetDemo.PushStateToDirectory(cliendID, tickNum, fsd, 0);
-                    fs.Close();
+
+                    if (cliendID > -1)
+                    {
+                        BinaryFormatter ser = new BinaryFormatter();
+                        SyncTickData buffered = singleton;
+                        MemoryStream fs = new MemoryStream();
+                        singleton = new SyncTickData();
+                        NetDemo.PushStateToDirectory(cliendID, tickNum, buffered, 0);
+                        fs.Close();
+                    }
 #endif
                 }
                 catch (Exception ee)
@@ -515,28 +522,36 @@ namespace CooperateRim
         public SyncTickData(SerializationInfo info, StreamingContext ctx)
         {
             CooperateRimming.Log("SyncTickData::.ctor");
+
+            GetVal(ref designations, info, nameof(designations));
+            GetVal(ref jobsToSerialize, info, nameof(jobsToSerialize));
+            GetVal(ref jobPriorities, info, nameof(jobPriorities));
+            GetVal(ref designatorCellCalls, info, nameof(designatorCellCalls));
+            GetVal(ref designatorMultiCellCalls, info, nameof(designatorMultiCellCalls));
+            GetVal(ref ForbiddenCallDataCall, info, nameof(ForbiddenCallDataCall));
+            GetVal(ref designatorSingleCellCalls, info, nameof(designatorSingleCellCalls));
+            GetVal(ref designatorAreaCallData, info, nameof(designatorAreaCallData));
+            GetVal(ref researches, info, nameof(researches));
+            GetVal(ref bills, info, nameof(bills));
+            GetVal(ref bill_repeat_commands, info, nameof(bill_repeat_commands));
+            GetVal(ref thingFilterSetAllowCalls, info, nameof(thingFilterSetAllowCalls));
+            GetVal(ref designatorApplyToThingCalls, info, nameof(designatorApplyToThingCalls));
+            GetVal(ref trapAutoRearms, info, nameof(trapAutoRearms));
+            GetVal(ref syncFieldCommands, info, nameof(syncFieldCommands));
+            GetVal(ref pawnDrafts, info, nameof(pawnDrafts));
+            GetVal(ref toggleCommandIndexedCalls, info, nameof(toggleCommandIndexedCalls));
+            GetVal(ref setZonePlants, info, nameof(setZonePlants));
+            GetVal(ref deleteZones, info, nameof(deleteZones));
+
+            CooperateRimming.Log("/SyncTickData::.ctor");
+        }
+
+        public void AcceptResult()
+        {
             int lockD = 0;
+
             try
             {
-                GetVal(ref designations, info, nameof(designations));
-                GetVal(ref jobsToSerialize, info, nameof(jobsToSerialize));
-                GetVal(ref jobPriorities, info, nameof(jobPriorities));
-                GetVal(ref designatorCellCalls, info, nameof(designatorCellCalls));
-                GetVal(ref designatorMultiCellCalls, info, nameof(designatorMultiCellCalls));
-                GetVal(ref ForbiddenCallDataCall, info, nameof(ForbiddenCallDataCall));
-                GetVal(ref designatorSingleCellCalls, info, nameof(designatorSingleCellCalls));
-                GetVal(ref designatorAreaCallData, info, nameof(designatorAreaCallData));
-                GetVal(ref researches, info, nameof(researches));
-                GetVal(ref bills, info, nameof(bills));
-                GetVal(ref bill_repeat_commands, info, nameof(bill_repeat_commands));
-                GetVal(ref thingFilterSetAllowCalls, info, nameof(thingFilterSetAllowCalls));
-                GetVal(ref designatorApplyToThingCalls, info, nameof(designatorApplyToThingCalls));
-                GetVal(ref trapAutoRearms, info, nameof(trapAutoRearms));
-                GetVal(ref syncFieldCommands, info, nameof(syncFieldCommands));
-                GetVal(ref pawnDrafts, info, nameof(pawnDrafts));
-                GetVal(ref toggleCommandIndexedCalls, info, nameof(toggleCommandIndexedCalls));
-                GetVal(ref setZonePlants, info, nameof(setZonePlants));
-                GetVal(ref deleteZones, info, nameof(deleteZones));
 
                 //CooperateRimming.Log("deserialized designations : " + designations.Count);
                 lockD = 1;
@@ -855,7 +870,7 @@ namespace CooperateRim
                     AvoidLoop = false;
                 }
 
-                lockD = 11 ;
+                lockD = 11;
                 foreach (DesignatorMultiCellCall s in designatorMultiCellCalls)
                 {
                     AvoidLoop = true;
@@ -1011,7 +1026,6 @@ namespace CooperateRim
             {
                 CooperateRimming.Log("sync tick data exception at stage " + lockD);
             }
-            CooperateRimming.Log("/SyncTickData::.ctor");
         }
 
         internal static void AllowJobAt(Job job, Pawn pawn, JobTag tag, IntVec3 cell)

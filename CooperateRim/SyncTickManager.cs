@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using Verse;
 
 namespace CooperateRim
@@ -24,11 +25,10 @@ namespace CooperateRim
         public static int nextSyncTickValue = 0;
         public static int clientsInSync = 0;
         public static bool imInSync;
-        public static int syncRoundLength = 10;
+        public static int syncRoundLength = 15;
         public static bool IsSyncTick;
-        
-        
         static Stopwatch sw;
+        static Stopwatch ACKSW = new Stopwatch();
 
         [HarmonyPrefix]
         public static bool Prefix(ref int ___ticksGameInt, ref TickManager __instance)
@@ -41,7 +41,7 @@ namespace CooperateRim
             }
             shouldReallyTick = false;
 
-            if (sw.ElapsedMilliseconds > 100 && !__instance.Paused)
+            if (sw.ElapsedMilliseconds > 10 && !__instance.Paused)
             {
                 sw.Reset();
                 sw.Start();
@@ -51,7 +51,6 @@ namespace CooperateRim
 
                 if (canNormallyTick)
                 {
-                    
                     streamholder.WriteLine("normal tick at " + ___ticksGameInt, "tickstate");
                     Rand.PushState(___ticksGameInt);
                     __instance.DoSingleTick();
@@ -67,11 +66,12 @@ namespace CooperateRim
 #if FILE_TRANSFER
                     bool allSyncDataAvailable = SyncTickData.tickFileNames(___ticksGameInt).All(u => System.IO.File.Exists(u + ".sync"));
 #else
-                    NetDemo.FrameData fd = null;
-                    NetDemo.SendStateRequest(___ticksGameInt, SyncTickData.cliendID);
-                    NetDemo.TryGetPackets(false, u => { fd = u; });
-
-                    bool allSyncDataAvailable = fd != null;
+                    if (SyncTickData.cliendID > -1)
+                    {
+                        NetDemo.SendStateRequest(___ticksGameInt, SyncTickData.cliendID);
+                    }
+                    
+                    bool allSyncDataAvailable = NetDemo.HasAllDataForFrame(___ticksGameInt);
 #endif
 
                     //CooperateRimming.Log("Frame " + ___ticksGameInt + " : " + " ::: " + allSyncDataAvailable + "[" + ___ticksGameInt + "] :: " + nextSyncTickValue + " [is synced : ] " + imInSync);
@@ -88,14 +88,20 @@ namespace CooperateRim
                         streamholder.WriteLine("pre-deserialize tick at " + ___ticksGameInt, "tickstate");
                         Rand.PushState(___ticksGameInt);
                         streamholder.WriteLine("data applied at " + ___ticksGameInt, "tickstate");
-                        
-                        foreach(var data in fd.frameData)
-                        {
-                            BinaryFormatter ser = new BinaryFormatter();
-                            MemoryStream fs = new System.IO.MemoryStream(data);
-                            SyncTickData sd = ser.Deserialize(fs) as SyncTickData;
-                        }
 
+                        for (; NetDemo.dispatchedActionCounter > 0;) { }
+                        Interlocked.Increment(ref NetDemo.dispatchedActionCounter);
+                        try
+                        {
+                            NetDemo.dispatchedActions.ForEach(u => u());
+                        }
+                        catch(Exception ee)
+                        {
+                            CooperateRimming.Log(ee.ToString());
+                        }
+                        
+                        NetDemo.dispatchedActions.Clear();
+                        Interlocked.Decrement(ref NetDemo.dispatchedActionCounter);
                         //SyncTickData.Apply(___ticksGameInt);
                         __instance.DoSingleTick();
                         Rand.PopState();
