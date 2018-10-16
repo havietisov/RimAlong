@@ -4,13 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2FADFD22-CCFF-4E28-AFF2-0BF01D366CDC}</ProjectGuid>
+    <ProjectGuid>{E087DBF9-FE1B-4538-BBD9-3583CF0A3AE6}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SteamworksTest</RootNamespace>
-    <AssemblyName>SteamworksTest</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <RootNamespace>RemoteDirectoryServer</RootNamespace>
+    <AssemblyName>RemoteDirectoryServer</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -32,6 +31,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CookComputing.XmlRpcServerV2, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d6e17aa302004d, processorArchitecture=MSIL">
+      <HintPath>..\packages\xmlrpcnet-server.3.0.0.266\lib\net20\CookComputing.XmlRpcServerV2.dll</HintPath>
+    </Reference>
+    <Reference Include="CookComputing.XmlRpcV2, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d6e17aa302004d, processorArchitecture=MSIL">
+      <HintPath>..\packages\xmlrpcnet.3.0.0.266\lib\net20\CookComputing.XmlRpcV2.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -44,19 +49,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CooperateRim\CooperateRim.csproj">
-      <Project>{59511d22-bd23-4042-802b-0491a6c972fb}</Project>
+      <Project>{59511D22-BD23-4042-802B-0491A6C972FB}</Project>
       <Name>CooperateRim</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy "D:\Projects\CooperateRim\tps\Windows-x64\steam_api64.dll" "D:\Projects\CooperateRim\SteamworksTest\bin\Debug" /y
-copy "D:\Projects\CooperateRim\tps\Windows-x64\steam_appid.txt" "D:\Projects\CooperateRim\SteamworksTest\bin\Debug" /y
-copy "D:\Projects\CooperateRim\tps\Windows-x64\Steamworks.NET.dll" "D:\Projects\CooperateRim\SteamworksTest\bin\Debug" /y
-</PostBuildEvent>
-  </PropertyGroup>
 </Project>

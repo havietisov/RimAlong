@@ -18,7 +18,7 @@ namespace CooperateRim
         {
             if (!_sw.ContainsKey(filename))
             {
-                _sw.Add(filename, System.IO.File.AppendText(@"D:\CoopReplays\" + (filename) + SyncTickData.cliendID + ".txt"));
+                //_sw.Add(filename, System.IO.File.AppendText(@"D:\CoopReplays\" + (filename) + SyncTickData.cliendID + ".txt"));
             }
 
             //_sw[filename].WriteLine(s);
