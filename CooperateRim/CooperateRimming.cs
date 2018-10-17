@@ -10,7 +10,6 @@ using HugsLib;
 using System.Runtime.InteropServices;
 using RimWorld.Planet;
 using Verse.AI;
-using Steamworks;
 
 namespace CooperateRim
 {

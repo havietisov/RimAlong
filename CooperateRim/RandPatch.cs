@@ -68,8 +68,7 @@ namespace CooperateRim
         }
     }
 
-    [HarmonyPatch(typeof(Sample))]
-    [HarmonyPatch(new[] { typeof(SubSoundDef) })]
+    [HarmonyPatch(typeof(Sample), MethodType.Constructor, new Type[] { typeof(SubSoundDef) })]
     public class Sample_patch
     {
         [HarmonyPrefix]
