@@ -1,5 +1,4 @@
 ﻿using CooperateRim;
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,10 +27,11 @@ public class NetDemo
         tc = new TcpClient("127.0.0.1", 12345);
         ns = tc.GetStream();
 
+
         Thread t = new Thread(() => 
         {
-            for (; streamLocker > 0;) { }
-            Interlocked.Increment(ref streamLocker);
+            for (; Interlocked.CompareExchange(ref streamLocker, 1, 0) == 0;) { }
+            
             try
             {
                 PirateRPC.PirateRPC.SendInvocation(ns, u =>
@@ -55,6 +55,16 @@ public class NetDemo
 
             for (int i =0; ; i++ )
             {
+                if (ns.DataAvailable)
+                {
+                    PirateRPC.PirateRPC.ReceiveInvocation(ns);
+                }
+                else
+                {
+                    Thread.Sleep(50);
+                }
+
+                /*
                 Thread.Sleep(100);
                 Log("ack " + i);
                 for (; streamLocker > 0;) { }
@@ -69,7 +79,7 @@ public class NetDemo
                     log(ee.ToString());
                 }
 
-                Interlocked.Decrement(ref streamLocker);
+                Interlocked.Decrement(ref streamLocker);*/
             };
         });
 
