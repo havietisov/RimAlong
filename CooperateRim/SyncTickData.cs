@@ -360,7 +360,13 @@ namespace CooperateRim
         List<COMMAND_TOGGLE_INDEXED_CALLS> toggleCommandIndexedCalls = new List<COMMAND_TOGGLE_INDEXED_CALLS>();
         List<Zone_set_plant> setZonePlants = new List<Zone_set_plant>();
         List<SerializableZoneData> deleteZones = new List<SerializableZoneData>();
-        
+
+        public void DebugLog()
+        {
+            NetDemo.log(nameof(toggleCommandIndexedCalls) + "::" + toggleCommandIndexedCalls.Count);
+            //CooperateRimming.Log();
+        }
+
         List<string> researches = new List<string>();
 
         public static int clientCount = 2;
@@ -454,7 +460,7 @@ namespace CooperateRim
 
         }
 
-        public static void FlushSyncTickData(int tickNum)
+        public static bool FlushSyncTickData(int tickNum)
         {
             /*if (new System.Collections.ICollection[]
             {
@@ -488,14 +494,18 @@ namespace CooperateRim
                         SyncTickData buffered = singleton;
                         MemoryStream fs = new MemoryStream();
                         singleton = new SyncTickData();
+
                         NetDemo.PushStateToDirectory(cliendID, tickNum, buffered, 0);
                         fs.Close();
+                        return true;
                     }
+                    return false;
 #endif
                 }
                 catch (Exception ee)
                 {
                     CooperateRimming.Log(ee.ToString());
+                    return false;
                 }
             }
         }
@@ -521,8 +531,6 @@ namespace CooperateRim
         
         public SyncTickData(SerializationInfo info, StreamingContext ctx)
         {
-            CooperateRimming.Log("SyncTickData::.ctor");
-
             GetVal(ref designations, info, nameof(designations));
             GetVal(ref jobsToSerialize, info, nameof(jobsToSerialize));
             GetVal(ref jobPriorities, info, nameof(jobPriorities));
@@ -542,8 +550,6 @@ namespace CooperateRim
             GetVal(ref toggleCommandIndexedCalls, info, nameof(toggleCommandIndexedCalls));
             GetVal(ref setZonePlants, info, nameof(setZonePlants));
             GetVal(ref deleteZones, info, nameof(deleteZones));
-
-            CooperateRimming.Log("/SyncTickData::.ctor");
         }
 
         public void AcceptResult()

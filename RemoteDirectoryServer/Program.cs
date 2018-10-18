@@ -18,6 +18,14 @@ namespace RemoteDirectoryServer
             AsyncCallback acceptor = null;
             Console.WriteLine("RimAlong server version 0.0.0.1, codename \"shabby\", ready to rumble!");
             CooperateRim.SyncTickData.cliendID = 0;
+            /*
+            for (int i = 0; i < 3; i++)
+            {
+                for (int l = 0; l < CooperateRim.SyncTickData.clientCount; l++)
+                {
+                    LocalDB.PushData(CooperateRim.TickManagerPatch.syncRoundLength * i, l, new CooperateRim.SyncTickData());
+                }
+            }*/
 
             lst.BeginAcceptTcpClient(acceptor = u => 
             {
@@ -28,7 +36,11 @@ namespace RemoteDirectoryServer
 
                 for (; tcc.Connected ; )
                 {
-                    PirateRPC.PirateRPC.ReceiveInvocation(ns);
+                    Thread.Sleep(1);
+                    if (ns.DataAvailable)
+                    {
+                        PirateRPC.PirateRPC.ReceiveInvocation(ns);
+                    }
                 };
 
                 Console.WriteLine("client lost");

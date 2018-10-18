@@ -28,7 +28,7 @@ namespace CooperateRim
         public static int syncRoundLength = 15;
         public static bool IsSyncTick;
         static Stopwatch sw;
-        static Stopwatch ACKSW = new Stopwatch();
+        static Stopwatch ACKSW;
 
         [HarmonyPrefix]
         public static bool Prefix(ref int ___ticksGameInt, ref TickManager __instance)
@@ -37,75 +37,88 @@ namespace CooperateRim
             if (sw == null)
             {
                 sw = new Stopwatch();
+                ACKSW = new Stopwatch();
                 sw.Start();
+                ACKSW.Start();
             }
             shouldReallyTick = false;
 
-            if (sw.ElapsedMilliseconds > 10 && !__instance.Paused)
+            if (sw.ElapsedMilliseconds > 200 && !__instance.Paused)
             {
                 sw.Reset();
                 sw.Start();
-                bool canNormallyTick = nextSyncTickValue > ___ticksGameInt;
+                bool canNormallyTick = nextSyncTickValue > Verse.Find.TickManager.TicksGame;
 
                 //CooperateRimming.Log("Frame " + ___ticksGameInt + " canNormallyTick " + canNormallyTick);
 
                 if (canNormallyTick)
                 {
-                    streamholder.WriteLine("normal tick at " + ___ticksGameInt, "tickstate");
-                    Rand.PushState(___ticksGameInt);
+                    CooperateRimming.Log("normal tick at " + Verse.Find.TickManager.TicksGame + " nsync " + nextSyncTickValue);
+                    Rand.PushState(Verse.Find.TickManager.TicksGame);
                     __instance.DoSingleTick();
                     Rand.PopState();
                 }
                 else
                 {
-                    if (!imInSync)
+                    if (nextSyncTickValue == Verse.Find.TickManager.TicksGame)
                     {
-                        SyncTickData.FlushSyncTickData(___ticksGameInt);
-                        imInSync = true;
-                    }
+                        if (!imInSync)
+                        {
+                            imInSync = SyncTickData.FlushSyncTickData(Verse.Find.TickManager.TicksGame);
+                        }
 #if FILE_TRANSFER
                     bool allSyncDataAvailable = SyncTickData.tickFileNames(___ticksGameInt).All(u => System.IO.File.Exists(u + ".sync"));
 #else
-                    if (SyncTickData.cliendID > -1)
-                    {
-                        NetDemo.SendStateRequest(___ticksGameInt, SyncTickData.cliendID);
-                    }
-                    
-                    bool allSyncDataAvailable = NetDemo.HasAllDataForFrame(___ticksGameInt);
+                        if (SyncTickData.cliendID > -1 && ACKSW.ElapsedMilliseconds > 50)
+                        {
+                            ACKSW.Reset();
+                            ACKSW.Start();
+                            CooperateRimming.Log("Sending state request for " + Verse.Find.TickManager.TicksGame);
+                            NetDemo.SendStateRequest(Verse.Find.TickManager.TicksGame, SyncTickData.cliendID);
+                        }
 #endif
 
-                    //CooperateRimming.Log("Frame " + ___ticksGameInt + " : " + " ::: " + allSyncDataAvailable + "[" + ___ticksGameInt + "] :: " + nextSyncTickValue + " [is synced : ] " + imInSync);
+                        //CooperateRimming.Log("Frame " + ___ticksGameInt + " : " + " ::: " + allSyncDataAvailable + "[" + ___ticksGameInt + "] :: " + nextSyncTickValue + " [is synced : ] " + imInSync);
 
-                    if (allSyncDataAvailable)
-                    {
-                        IsSyncTick = true;
-                        nextSyncTickValue = ___ticksGameInt + syncRoundLength;
-                        //CooperateRimming.Log("Synctick happened at " + ___ticksGameInt);
+                        Action onA = LocalDB.OnApply;
 
-                        SyncTickData.IsDeserializing = true;
-                        //JobTrackerPatch.FlushCData();
-                        shouldReallyTick = true;
-                        streamholder.WriteLine("pre-deserialize tick at " + ___ticksGameInt, "tickstate");
-                        Rand.PushState(___ticksGameInt);
-                        streamholder.WriteLine("data applied at " + ___ticksGameInt, "tickstate");
-
-                        for (; NetDemo.dispatchedActionCounter > 0;) { }
-                        Interlocked.Increment(ref NetDemo.dispatchedActionCounter);
-                        try
+                        if (NetDemo.HasAllDataForFrame(Verse.Find.TickManager.TicksGame))
                         {
-                            NetDemo.dispatchedActions.ForEach(u => u());
+                            IsSyncTick = true;
+
+                            //CooperateRimming.Log("Synctick happened at " + ___ticksGameInt);
+
+                            SyncTickData.IsDeserializing = true;
+                            //JobTrackerPatch.FlushCData();
+                            shouldReallyTick = true;
+                            streamholder.WriteLine("pre-deserialize tick at " + Verse.Find.TickManager.TicksGame, "tickstate");
+                            Rand.PushState(Verse.Find.TickManager.TicksGame);
+                            streamholder.WriteLine("data applied at " + Verse.Find.TickManager.TicksGame, "tickstate");
+
+                            //lock (LocalDB.OnApply)
+                            {
+                                try
+                                {
+                                    CooperateRimming.Log("applying at tick " + Verse.Find.TickManager.TicksGame);
+
+                                    NetDemo.Receive();
+                                    //Interlocked.Exchange(ref LocalDB.OnApply, null);
+                                    //LocalDB.clientLocalStorage.ForEach(u => u.Value.AcceptResult());
+
+                                    nextSyncTickValue = Verse.Find.TickManager.TicksGame + syncRoundLength;
+                                }
+                                catch (Exception ee)
+                                {
+                                    CooperateRimming.Log(ee.ToString());
+                                }
+
+                                LocalDB.clientLocalStorage.Clear();
+                            }
+                            //SyncTickData.Apply(___ticksGameInt);
+                            __instance.DoSingleTick();
+                            Rand.PopState();
+                            imInSync = false;
                         }
-                        catch(Exception ee)
-                        {
-                            CooperateRimming.Log(ee.ToString());
-                        }
-                        
-                        NetDemo.dispatchedActions.Clear();
-                        Interlocked.Decrement(ref NetDemo.dispatchedActionCounter);
-                        //SyncTickData.Apply(___ticksGameInt);
-                        __instance.DoSingleTick();
-                        Rand.PopState();
-                        imInSync = false;
                     }
                 }
             }
@@ -113,7 +126,7 @@ namespace CooperateRim
             //ReferenceTranspilerMethod(ref ___ticksGameInt);
             return false;
         }
-
+        
         /*
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> MyTranspiler(IEnumerable<CodeInstruction> instr, MethodBase __originalMethod)
@@ -144,7 +157,7 @@ namespace CooperateRim
             }
         }
         */
-        
+
         public static ResearchProjectDef cachedRDef;
 
         [HarmonyPostfix]
