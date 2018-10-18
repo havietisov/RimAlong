@@ -14,6 +14,7 @@ public class NetDemo
     public static int dispatchedActionCounter;
     static TcpClient tc;
     static NetworkStream ns;
+    public static LinkedList<NetworkStream> allClients = new LinkedList<NetworkStream>();
     static int streamLocker;
 
     static void Log(string s)
@@ -23,9 +24,12 @@ public class NetDemo
     
     public static void WaitForConnection()
     {
-        tc = new TcpClient("127.0.0.1", 12345);
+        tc = new TcpClient();
+        tc.Client.NoDelay = true;
+        tc.Connect("127.0.0.1", 12345);
         ns = tc.GetStream();
 
+        
         try
         {
             PirateRPC.PirateRPC.SendInvocation(ns, u =>
@@ -52,6 +56,7 @@ public class NetDemo
             
             try
             {
+                /*
                 PirateRPC.PirateRPC.SendInvocation(ns, u =>
                 {
                     int cid = SyncTickData.cliendID;
@@ -63,7 +68,7 @@ public class NetDemo
                     {
                         SyncTickData.SetClientID(cid);
                     });
-                });
+                });*/
             }
             catch (Exception ee)
             {
@@ -80,7 +85,7 @@ public class NetDemo
                 }
                 else
                 {
-                    Thread.Sleep(50);
+                    Thread.Sleep(10);
                 }
 
                 /*
@@ -107,7 +112,7 @@ public class NetDemo
 
     public static bool HasAllDataForFrame(int frameID)
     {
-        return ns.DataAvailable;
+        return ns.DataAvailable;// ns.DataAvailable;
     }
 
     public static void Receive()
@@ -131,6 +136,7 @@ public class NetDemo
         PirateRPC.PirateRPC.SendInvocation(ns, u => 
         {
             LocalDB.PushData(tickID, sourceID, data);
+            LocalDB.TryDistributeData(tickID);
         });
     }
 }

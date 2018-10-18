@@ -22,13 +22,27 @@ namespace CooperateRim
         public static DateTime nextFrameTime;
         // public static int myTicksValue;
 
-        public static int nextSyncTickValue = 0;
+        public static int nextProcessionTick = 0;
+        public static int nextCommunicationTick = 0;
         public static int clientsInSync = 0;
         public static bool imInSync;
-        public static int syncRoundLength = 15;
+        public static int syncRoundLength = 30;
+        public static int syncTickRoundOffset = 5;
         public static bool IsSyncTick;
         static Stopwatch sw;
         static Stopwatch ACKSW;
+
+        public static void SetSyncTickValue(int val)
+        {
+            //CooperateRimming.Log("new sync tick value :" + val);
+            nextProcessionTick = val;
+        }
+
+        public static SyncTickData[] cachedData;
+        public static void SetCachedData(SyncTickData[] __cd)
+        {
+            cachedData = __cd;
+        }
 
         [HarmonyPrefix]
         public static bool Prefix(ref int ___ticksGameInt, ref TickManager __instance)
@@ -43,46 +57,58 @@ namespace CooperateRim
             }
             shouldReallyTick = false;
 
-            if (sw.ElapsedMilliseconds > 200 && !__instance.Paused)
+            if (sw.ElapsedMilliseconds > 10 && !__instance.Paused)
             {
                 sw.Reset();
                 sw.Start();
-                bool canNormallyTick = nextSyncTickValue > Verse.Find.TickManager.TicksGame;
+                bool canNormallyTick = nextProcessionTick > Verse.Find.TickManager.TicksGame;
 
                 //CooperateRimming.Log("Frame " + ___ticksGameInt + " canNormallyTick " + canNormallyTick);
 
                 if (canNormallyTick)
                 {
-                    CooperateRimming.Log("normal tick at " + Verse.Find.TickManager.TicksGame + " nsync " + nextSyncTickValue);
+                    //CooperateRimming.Log("normal tick at " + Verse.Find.TickManager.TicksGame + " nsync " + nextSyncTickValue);
                     Rand.PushState(Verse.Find.TickManager.TicksGame);
                     __instance.DoSingleTick();
                     Rand.PopState();
                 }
-                else
+
+                if (SyncTickData.cliendID > -1 && ACKSW.ElapsedMilliseconds > 50)
                 {
-                    if (nextSyncTickValue == Verse.Find.TickManager.TicksGame)
+                    ACKSW.Reset();
+                    ACKSW.Start();
+                    //CooperateRimming.Log("Sending state request for " + nextSyncTickValue);
+                    //NetDemo.SendStateRequest(nextSyncTickValue, SyncTickData.cliendID);
+                }
+
+                if (NetDemo.HasAllDataForFrame(Verse.Find.TickManager.TicksGame))
+                {
+                    NetDemo.Receive();
+                }
+
+                if (!imInSync)
+                {
+                    if (nextCommunicationTick == Verse.Find.TickManager.TicksGame)
                     {
-                        if (!imInSync)
-                        {
-                            imInSync = SyncTickData.FlushSyncTickData(Verse.Find.TickManager.TicksGame);
-                        }
+                        imInSync = SyncTickData.FlushSyncTickData(nextProcessionTick + syncRoundLength * syncTickRoundOffset);
+                    }
+                }
+
+                {
+                    if (nextProcessionTick == Verse.Find.TickManager.TicksGame)
+                    {
+                       
 #if FILE_TRANSFER
                     bool allSyncDataAvailable = SyncTickData.tickFileNames(___ticksGameInt).All(u => System.IO.File.Exists(u + ".sync"));
 #else
-                        if (SyncTickData.cliendID > -1 && ACKSW.ElapsedMilliseconds > 50)
-                        {
-                            ACKSW.Reset();
-                            ACKSW.Start();
-                            CooperateRimming.Log("Sending state request for " + Verse.Find.TickManager.TicksGame);
-                            NetDemo.SendStateRequest(Verse.Find.TickManager.TicksGame, SyncTickData.cliendID);
-                        }
+                        
 #endif
 
                         //CooperateRimming.Log("Frame " + ___ticksGameInt + " : " + " ::: " + allSyncDataAvailable + "[" + ___ticksGameInt + "] :: " + nextSyncTickValue + " [is synced : ] " + imInSync);
 
                         Action onA = LocalDB.OnApply;
 
-                        if (NetDemo.HasAllDataForFrame(Verse.Find.TickManager.TicksGame))
+                        if(cachedData != null)
                         {
                             IsSyncTick = true;
 
@@ -99,13 +125,22 @@ namespace CooperateRim
                             {
                                 try
                                 {
-                                    CooperateRimming.Log("applying at tick " + Verse.Find.TickManager.TicksGame);
+                                    //CooperateRimming.Log("applying at tick " + Verse.Find.TickManager.TicksGame);
 
-                                    NetDemo.Receive();
+                                    var cd = cachedData;
+                                    cachedData = null;
+
+                                    foreach (var a in cd)
+                                    {
+                                        a.AcceptResult();
+                                    }
+                                    
+                                    TickManagerPatch.SetSyncTickValue(nextProcessionTick + syncRoundLength);
+                                    nextCommunicationTick += syncRoundLength;
                                     //Interlocked.Exchange(ref LocalDB.OnApply, null);
                                     //LocalDB.clientLocalStorage.ForEach(u => u.Value.AcceptResult());
 
-                                    nextSyncTickValue = Verse.Find.TickManager.TicksGame + syncRoundLength;
+                                    //nextSyncTickValue = Verse.Find.TickManager.TicksGame + syncRoundLength;
                                 }
                                 catch (Exception ee)
                                 {
@@ -115,7 +150,7 @@ namespace CooperateRim
                                 LocalDB.clientLocalStorage.Clear();
                             }
                             //SyncTickData.Apply(___ticksGameInt);
-                            __instance.DoSingleTick();
+                            //__instance.DoSingleTick();
                             Rand.PopState();
                             imInSync = false;
                         }

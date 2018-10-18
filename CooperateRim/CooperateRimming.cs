@@ -333,7 +333,7 @@ namespace CooperateRim
                     }
                     
                     TickManagerPatch.nextFrameTime = DateTime.Now;
-                    TickManagerPatch.nextSyncTickValue = 0;
+                    TickManagerPatch.nextProcessionTick = 0;
                     Page firstConfigPage = Current.Game.Scenario.GetFirstConfigPage();
 
                     foreach (var p in Find.GameInitData.startingAndOptionalPawns)

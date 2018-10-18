@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.Threading;
 using CooperateRim;
-
+using System.Net.Sockets;
 
 public class LocalDB
 {
@@ -17,7 +17,7 @@ public class LocalDB
 
     public static void AddPlayerState(int ind)
     {
-        playerStateTable.Add(ind, 0);
+        playerStateTable.Add(ind, -100);
     }
 
     public static void SetOnApply(Action a)
@@ -32,6 +32,7 @@ public class LocalDB
     
     public static void PushData(int tickID, int playerID, SyncTickData sd)
     {
+        
         if (!data.ContainsKey(tickID))
         {
             data.Add(tickID, new SyncTickData[SyncTickData.clientCount]);
@@ -42,44 +43,37 @@ public class LocalDB
             log("player state : " + GetStringFor(tickID, playerID));
             data[tickID][playerID] = sd;
         }
+
     }
 
+    static int minPlayerTick = 99999;
+
+    static int GetSTICKV()
+    {
+        return TickManagerPatch.nextProcessionTick;
+    }
 
     public static void NotifyClientNeedData(int tickID, int clientID, int clientCount, Stream stream)
     {
         log("client notification : " + GetStringFor(tickID, clientID));
-        List<SyncTickData> sdl = new List<SyncTickData>();
+        
 
         if (!playerStateTable.ContainsKey(clientID))
         {
             AddPlayerState(clientID);
         }
 
-        if (HasFullData(tickID, clientCount) && playerStateTable[clientID] < tickID)
+        foreach (var a in playerStateTable)
         {
-            sdl = new List<SyncTickData>(data[tickID]);
-
-            foreach (var a in sdl)
-            {
-                a.DebugLog();
-                a.AcceptResult();
-            }
-
-            PirateRPC.PirateRPC.SendInvocation(stream, s =>
-            {
-                CooperateRimming.Log("invocation callback received for tick " + tickID + ", local tick " + Verse.Find.TickManager.TicksGame );
-                
-                {
-                    foreach (var a in sdl)
-                    {
-                        a.DebugLog();
-                        a.AcceptResult();
-                    }
-                }
-            });
-
-            playerStateTable[clientID] = tickID;
+            minPlayerTick = a.Value;
+            break;
         }
+
+        foreach (var a in playerStateTable)
+        {
+            minPlayerTick = Math.Min(minPlayerTick, a.Value);
+        }
+        
     }
         
         
@@ -91,6 +85,32 @@ public class LocalDB
         }
             
         return true;
+    }
+
+    public static Action<Stream> GetCallback(SyncTickData[] ds)
+    {
+        return u => { TickManagerPatch.SetCachedData(ds); };
+    }
+
+    public static void TryDistributeData(int tickID)
+    {
+        List<SyncTickData> sdl = new List<SyncTickData>();
+
+        if (HasFullData(tickID, SyncTickData.clientCount)/* && playerStateTable[clientID] < tickID*/)
+        {
+            sdl = new List<SyncTickData>(data[tickID]);
+
+            foreach (var __ns in NetDemo.allClients)
+            {
+                foreach (var a in sdl)
+                {
+                    a.DebugLog();
+                }
+
+                PirateRPC.PirateRPC.SendInvocation(__ns, GetCallback(sdl.ToArray()));
+
+            }
+        }
     }
 }
 
