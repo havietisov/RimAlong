@@ -7,6 +7,7 @@ using System.Text;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
+using CooperateRim;
 
 namespace PirateRPC
 {
@@ -69,6 +70,12 @@ namespace PirateRPC
             }
         }
 
+        [Serializable]
+        public class Message
+        {
+            public List<SyncTickData> sdl;
+        }
+
         public static void SendInvocation(Stream s, Action<Stream> act)
         {
             MemoryStream initialBuffer = new MemoryStream();
@@ -82,6 +89,7 @@ namespace PirateRPC
         }
 
         static int counter;
+        static object of = "";
 
         public static void ReceiveInvocation(Stream s)
         {
@@ -90,20 +98,17 @@ namespace PirateRPC
             byte[] b = Convert.FromBase64String(ss);
             MemoryStream ms = new MemoryStream(b);
             BinaryFormatter bf = new BinaryFormatter();
-
-            for (; counter > 0;) { }
-            Interlocked.Increment(ref counter);
-
-            try
+            
             {
-                (bf.Deserialize(ms) as Modification).Apply(s);
+                try
+                {
+                    (bf.Deserialize(ms) as Modification).Apply(s);
+                }
+                catch (Exception ee) { NetDemo.log(ee.ToString()); }
+                finally
+                {
+                }
             }
-            catch (Exception ee) { }
-            finally
-            {
-            }
-
-            Interlocked.Decrement(ref counter);
         }
     }
 }

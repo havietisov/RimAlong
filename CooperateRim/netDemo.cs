@@ -11,7 +11,6 @@ using System.Threading;
 public class NetDemo
 {
     public static Action<string> log = u => { new Action(Console.WriteLine).BeginInvoke(k => { Console.WriteLine(u); }, u); };
-    public static List<Action> dispatchedActions = new List<Action>();
     public static int dispatchedActionCounter;
     static TcpClient tc;
     static NetworkStream ns;
@@ -27,10 +26,29 @@ public class NetDemo
         tc = new TcpClient("127.0.0.1", 12345);
         ns = tc.GetStream();
 
+        try
+        {
+            PirateRPC.PirateRPC.SendInvocation(ns, u =>
+            {
+                int cid = SyncTickData.cliendID;
+                Interlocked.Increment(ref SyncTickData.cliendID);
+                Log("sending client id " + cid);
+
+                PirateRPC.PirateRPC.SendInvocation(u, k =>
+                {
+                    SyncTickData.SetClientID(cid);
+                });
+            });
+        }
+        catch (Exception ee)
+        {
+            log(ee.ToString());
+        }
+
 
         Thread t = new Thread(() => 
         {
-            for (; Interlocked.CompareExchange(ref streamLocker, 1, 0) == 0;) { }
+            //for (; Interlocked.CompareExchange(ref streamLocker, 1, 0) == 0;) { }
             
             try
             {
@@ -38,6 +56,7 @@ public class NetDemo
                 {
                     int cid = SyncTickData.cliendID;
                     Interlocked.Increment(ref SyncTickData.cliendID);
+                    LocalDB.AddPlayerState(cid);
                     Log("sending client id " + cid);
 
                     PirateRPC.PirateRPC.SendInvocation(u, k => 
@@ -51,7 +70,7 @@ public class NetDemo
                 log(ee.ToString());
             }
 
-            Interlocked.Decrement(ref streamLocker);
+            //Interlocked.Decrement(ref streamLocker);
 
             for (int i =0; ; i++ )
             {
@@ -83,33 +102,28 @@ public class NetDemo
             };
         });
 
-        t.Start();
+        //t.Start();
     }
 
     public static bool HasAllDataForFrame(int frameID)
     {
-        for (; dispatchedActionCounter > 0;) { Thread.SpinWait(1000); }
-        Interlocked.Increment(ref dispatchedActionCounter);
-        bool res = dispatchedActions.Count > 0;
-        Interlocked.Decrement(ref dispatchedActionCounter);
-        return res;
+        return ns.DataAvailable;
     }
-    
+
+    public static void Receive()
+    {
+        PirateRPC.PirateRPC.ReceiveInvocation(ns);
+    }
+
     public static void setupCallbacks()
     {
         LocalDB.log = log;
-        LocalDB.dispatcher = u => 
-        {
-            for (; dispatchedActionCounter > 0;) { Thread.SpinWait(1000); }
-            Interlocked.Increment(ref dispatchedActionCounter);
-            dispatchedActions.Add(u);
-            Interlocked.Decrement(ref dispatchedActionCounter);
-        };
     }
     
     public static void SendStateRequest(int frameID, int sourceID)
     {
-        PirateRPC.PirateRPC.SendInvocation(ns, u => { LocalDB.NotifyClientNeedData(frameID, sourceID, SyncTickData.clientCount, u); });
+        int fid = frameID;
+        PirateRPC.PirateRPC.SendInvocation(ns, u => { LocalDB.NotifyClientNeedData(fid, sourceID, SyncTickData.clientCount, u); });
     }
     
     public static void PushStateToDirectory(int sourceID, int tickID, SyncTickData data, int channelID)
