@@ -494,7 +494,7 @@ namespace CooperateRim
                         SyncTickData buffered = singleton;
                         MemoryStream fs = new MemoryStream();
                         singleton = new SyncTickData();
-
+                        CooperateRimming.Log("sending data for tick " + tickNum);
                         NetDemo.PushStateToDirectory(cliendID, tickNum, buffered, 0);
                         fs.Close();
                         return true;

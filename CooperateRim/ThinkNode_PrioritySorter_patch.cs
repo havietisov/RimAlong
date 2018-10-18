@@ -42,7 +42,7 @@ namespace CooperateRim
                 }
 
                 streamholder.WriteLine("====END====", "thinktree_");
-                streamholder.WriteLine(pawn + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextSyncTickValue + "]", "thinktree_");
+                streamholder.WriteLine(pawn + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextProcessionTick + "]", "thinktree_");
                 streamholder.WriteLine("//===FRM===", "thinktree_");
             }
             //CooperateRimming.Log(pawn  + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextSyncTickValue + "]");
@@ -67,7 +67,7 @@ namespace CooperateRim
                 }
 
                 streamholder.WriteLine("====END====", "RegisterThing");
-                streamholder.WriteLine(t + " ::: " + "[" + TickManagerPatch.nextSyncTickValue + "]", "RegisterThing");
+                streamholder.WriteLine(t + " ::: " + "[" + TickManagerPatch.nextProcessionTick + "]", "RegisterThing");
                 streamholder.WriteLine("//===REGISTER_THING===", "RegisterThing");
             }
         }
@@ -148,7 +148,7 @@ namespace CooperateRim
 
                 foreach (var t in tt)
                 {
-                    streamholder.WriteLine(t + " ::: " + "[" + TickManagerPatch.nextSyncTickValue + "] {" + ___thingLists.Count + "}", "Upd");
+                    streamholder.WriteLine(t + " ::: " + "[" + TickManagerPatch.nextProcessionTick + "] {" + ___thingLists.Count + "}", "Upd");
                 }
 
                 streamholder.WriteLine("//===UPDATE_THING===", "Upd");
@@ -162,18 +162,18 @@ namespace CooperateRim
         {
             //if(pawn.ToString() == "Peters")
             {
-                streamholder.WriteLine("===JOB===", "JobGiver__" + TickManagerPatch.nextSyncTickValue + "__");
+                streamholder.WriteLine("===JOB===", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
                 StackTrace tr = new StackTrace();
-                streamholder.WriteLine("====STACK====", "JobGiver__" + TickManagerPatch.nextSyncTickValue + "__");
+                streamholder.WriteLine("====STACK====", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
 
                 foreach (var frame in tr.GetFrames())
                 {
-                    streamholder.WriteLine(frame.GetMethod().ReflectedType + "::" + frame.GetMethod().Name, "JobGiver__" + TickManagerPatch.nextSyncTickValue + "__");
+                    streamholder.WriteLine(frame.GetMethod().ReflectedType + "::" + frame.GetMethod().Name, "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
                 }
 
-                streamholder.WriteLine("====END====", "JobGiver__" + TickManagerPatch.nextSyncTickValue + "__");
-                streamholder.WriteLine(pawn + " ::: " + __instance.GetType().ToString() +  "::TryGiveJob :: " + "[" + TickManagerPatch.nextSyncTickValue + "]", "JobGiver__" + TickManagerPatch.nextSyncTickValue + "__");
-                streamholder.WriteLine("//===JOB===", "JobGiver__" + TickManagerPatch.nextSyncTickValue + "__");
+                streamholder.WriteLine("====END====", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
+                streamholder.WriteLine(pawn + " ::: " + __instance.GetType().ToString() +  "::TryGiveJob :: " + "[" + TickManagerPatch.nextProcessionTick + "]", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
+                streamholder.WriteLine("//===JOB===", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
             }
             //CooperateRimming.Log(pawn  + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextSyncTickValue + "]");
         }
