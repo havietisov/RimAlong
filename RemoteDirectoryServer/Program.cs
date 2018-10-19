@@ -6,13 +6,17 @@ using System.Net.Sockets;
 using System.Net;
 using PirateRPC;
 using System.Threading;
-
+//NEVER run server with debugger attached!
 namespace RemoteDirectoryServer
 {
     class Program
     {
         static void Main(string[] args)
         {
+            int workers;
+            int completions;
+            ThreadPool.GetMinThreads(out workers, out completions);
+            bool res = ThreadPool.SetMinThreads(4, 4);
             TcpListener lst = new TcpListener(IPAddress.Any, 12345);
             lst.Server.NoDelay = true;
             lst.Start();
@@ -50,7 +54,6 @@ namespace RemoteDirectoryServer
             
             for (; ; )
             {
-                Thread.Sleep(100);
             }
         }
     }

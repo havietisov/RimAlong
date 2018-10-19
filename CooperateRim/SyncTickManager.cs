@@ -26,8 +26,8 @@ namespace CooperateRim
         public static int nextCommunicationTick = 0;
         public static int clientsInSync = 0;
         public static bool imInSync;
-        public static int syncRoundLength = 30;
-        public static int syncTickRoundOffset = 5;
+        public static int syncRoundLength = 18;
+        public static int syncTickRoundOffset = 4;
         public static bool IsSyncTick;
         static Stopwatch sw;
         static Stopwatch ACKSW;
@@ -56,6 +56,11 @@ namespace CooperateRim
                 ACKSW.Start();
             }
             shouldReallyTick = false;
+            
+            if (NetDemo.HasAllDataForFrame(Verse.Find.TickManager.TicksGame))
+            {
+                NetDemo.Receive();
+            }
 
             if (sw.ElapsedMilliseconds > 10 && !__instance.Paused)
             {
@@ -81,10 +86,6 @@ namespace CooperateRim
                     //NetDemo.SendStateRequest(nextSyncTickValue, SyncTickData.cliendID);
                 }
 
-                if (NetDemo.HasAllDataForFrame(Verse.Find.TickManager.TicksGame))
-                {
-                    NetDemo.Receive();
-                }
 
                 if (!imInSync)
                 {
