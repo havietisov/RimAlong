@@ -22,11 +22,11 @@ public class NetDemo
         log(s);
     }
     
-    public static void WaitForConnection()
+    public static void WaitForConnection(string host)
     {
         tc = new TcpClient();
         tc.Client.NoDelay = true;
-        tc.Connect("127.0.0.1", 12345);
+        tc.Connect(host, 12345);
         ns = tc.GetStream();
 
         
@@ -49,65 +49,15 @@ public class NetDemo
             log(ee.ToString());
         }
 
-
-        Thread t = new Thread(() => 
+        Thread t = new Thread( ()=> 
         {
-            //for (; Interlocked.CompareExchange(ref streamLocker, 1, 0) == 0;) { }
-            
-            try
+            for (;  ; )
             {
-                /*
-                PirateRPC.PirateRPC.SendInvocation(ns, u =>
-                {
-                    int cid = SyncTickData.cliendID;
-                    Interlocked.Increment(ref SyncTickData.cliendID);
-                    LocalDB.AddPlayerState(cid);
-                    Log("sending client id " + cid);
-
-                    PirateRPC.PirateRPC.SendInvocation(u, k => 
-                    {
-                        SyncTickData.SetClientID(cid);
-                    });
-                });*/
+                PirateRPC.PirateRPC.ReceiveInvocation(ns);
             }
-            catch (Exception ee)
-            {
-                log(ee.ToString());
-            }
+        } );
 
-            //Interlocked.Decrement(ref streamLocker);
-
-            for (int i =0; ; i++ )
-            {
-                if (ns.DataAvailable)
-                {
-                    PirateRPC.PirateRPC.ReceiveInvocation(ns);
-                }
-                else
-                {
-                    Thread.Sleep(10);
-                }
-
-                /*
-                Thread.Sleep(100);
-                Log("ack " + i);
-                for (; streamLocker > 0;) { }
-                Interlocked.Increment(ref streamLocker);
-
-                try
-                {
-                    PirateRPC.PirateRPC.ReceiveInvocation(ns);
-                }
-                catch (Exception ee)
-                {
-                    log(ee.ToString());
-                }
-
-                Interlocked.Decrement(ref streamLocker);*/
-            };
-        });
-
-        //t.Start();
+        t.Start();
     }
 
     public static bool HasAllDataForFrame(int frameID)
@@ -117,7 +67,7 @@ public class NetDemo
 
     public static void Receive()
     {
-        PirateRPC.PirateRPC.ReceiveInvocation(ns);
+       // PirateRPC.PirateRPC.ReceiveInvocation(ns);
     }
 
     public static void setupCallbacks()

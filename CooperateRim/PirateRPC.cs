@@ -78,14 +78,36 @@ namespace PirateRPC
 
         public static void SendInvocation(Stream s, Action<Stream> act)
         {
+            DateTime dt12 = DateTime.Now;
+
             MemoryStream initialBuffer = new MemoryStream();
             BinaryFormatter bf = new BinaryFormatter();
             bf.Serialize(initialBuffer, new Modification(act));
             initialBuffer.Flush();
             string ss = Convert.ToBase64String(initialBuffer.GetBuffer());
-            BinaryWriter bw = new BinaryWriter(s);
+            MemoryStream ms2 = new MemoryStream();
+            BinaryWriter bw = new BinaryWriter(ms2);
             bw.Write(ss);
-            s.Flush();
+            ms2.Flush();
+            byte[] buff = ms2.GetBuffer();
+
+
+            NetDemo.log("Serialization took " + (DateTime.Now - dt12).TotalMilliseconds);
+
+            dt12 = DateTime.Now;
+            DateTime dt1 = DateTime.Now;
+            s.Write(buff, 0, (int)ms2.Length);
+            NetDemo.log("sync write ended in " + (DateTime.Now - dt1).TotalMilliseconds);
+            /*
+            s.BeginWrite(buff, 0, , u =>
+            {
+                NetDemo.log("async callback delay " + (DateTime.Now - dt12).TotalMilliseconds);
+                
+                (u.AsyncState as Stream).EndWrite(u);
+                (u.AsyncState as Stream).Flush();
+                NetDemo.log("async write ended in " + (DateTime.Now - dt1).TotalMilliseconds);
+                //NetDemo.log("async write ended in "  + (DateTime.Now - dt1).TotalMilliseconds);
+            }, s);*/
         }
 
         static int counter;

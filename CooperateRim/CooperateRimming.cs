@@ -298,6 +298,8 @@ namespace CooperateRim
             }
         }
 
+        static string hostName = "LENOVO";
+
         public class Dialog_Coop : Window
         {
             public override void DoWindowContents(Rect inRect)
@@ -306,9 +308,9 @@ namespace CooperateRim
                 Rect r = inRect;
                 r.height = size - 1;
                 r.width = 150;
-                if (Widgets.ButtonText(r, "Host game"))
+                if (Widgets.ButtonText(r, "Connect to "))
                 {
-                    NetDemo.WaitForConnection();
+                    NetDemo.WaitForConnection(hostName);
                     Rand.PushState(0);
                     Current.Game = new Game();
                     Current.Game.InitData = new GameInitData();
@@ -345,8 +347,9 @@ namespace CooperateRim
                     Log("Startseed : " + stringseed);
                 }
                 r.y += size;
-                Widgets.ButtonText(r, "Connect to"); r.y += size;
-                Widgets.Label(r, "hey, motherfuckers!");
+                Widgets.ButtonText(r, "MEANINGLESS BUTTON"); r.y += size;
+                hostName = Widgets.TextArea(r, hostName);
+                //Widgets.Label(r, "hey, motherfuckers!");
             }
 
             static void ErrorHandler(System.Exception ex)

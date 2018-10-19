@@ -89,15 +89,19 @@ public class LocalDB
 
     public static Action<Stream> GetCallback(SyncTickData[] ds)
     {
-        return u => { TickManagerPatch.SetCachedData(ds); };
+        DateTime dt = DateTime.UtcNow;
+        return u => { TickManagerPatch.SetCachedData(ds); CooperateRimming.Log("Message delivery took " + (DateTime.UtcNow - dt).TotalMilliseconds.ToString()); };
     }
 
     public static void TryDistributeData(int tickID)
     {
         List<SyncTickData> sdl = new List<SyncTickData>();
 
+        DateTime dt = DateTime.Now;
         if (HasFullData(tickID, SyncTickData.clientCount)/* && playerStateTable[clientID] < tickID*/)
         {
+            NetDemo.log("dictionary lookup took " + (DateTime.Now - dt).TotalMilliseconds);
+
             sdl = new List<SyncTickData>(data[tickID]);
 
             foreach (var __ns in NetDemo.allClients)
@@ -107,10 +111,14 @@ public class LocalDB
                     a.DebugLog();
                 }
 
+                DateTime _dt = DateTime.Now;
                 PirateRPC.PirateRPC.SendInvocation(__ns, GetCallback(sdl.ToArray()));
-
+                NetDemo.log("invocation took " + (DateTime.Now - dt).TotalMilliseconds);
             }
+
+            data.Remove(tickID);
         }
+
     }
 }
 
