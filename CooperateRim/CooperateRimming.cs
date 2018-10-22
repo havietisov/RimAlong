@@ -43,7 +43,7 @@ namespace CooperateRim
         public override void Initialize()
         {
             inst = this;
-            NetDemo.log = CooperateRimming.Log;
+            //NetDemo.log = CooperateRimming.Log;
             NetDemo.setupCallbacks();
             //Verse.DirectXmlSaver.XElementFromObject
             (typeof(Rand).GetField("random", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as RandomNumberGenerator).seed = 0;
