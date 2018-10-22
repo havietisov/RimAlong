@@ -92,12 +92,12 @@ namespace PirateRPC
             byte[] buff = ms2.GetBuffer();
 
 
-            NetDemo.log("Serialization took " + (DateTime.Now - dt12).TotalMilliseconds);
+            //NetDemo.log("Serialization took " + (DateTime.Now - dt12).TotalMilliseconds);
 
             dt12 = DateTime.Now;
             DateTime dt1 = DateTime.Now;
             s.Write(buff, 0, (int)ms2.Length);
-            NetDemo.log("sync write ended in " + (DateTime.Now - dt1).TotalMilliseconds);
+            //NetDemo.log("sync write ended in " + (DateTime.Now - dt1).TotalMilliseconds);
             /*
             s.BeginWrite(buff, 0, , u =>
             {

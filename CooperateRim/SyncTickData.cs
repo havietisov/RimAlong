@@ -13,6 +13,7 @@ using Verse.AI;
 using System.Linq;
 using System.Reflection;
 using System.IO;
+using System.Xml.Linq;
 
 namespace CooperateRim
 {
@@ -59,6 +60,11 @@ namespace CooperateRim
         public static implicit operator SVEC3(IntVec3 @this)
         {
             return new SVEC3(@this);
+        }
+
+        public override string ToString()
+        {
+            return "(" + x + ", " + y + ", " + z + ")";
         }
     }
 
@@ -281,7 +287,7 @@ namespace CooperateRim
             public SVEC3 giverPos;
             public R_BILL bill;
         }
-
+        
         [Serializable]
         public class DesignatorHuntThing
         {
@@ -314,7 +320,7 @@ namespace CooperateRim
             public BindingFlags fieldFlags;
             public object value;
         }
-        
+
 
         [Serializable]
         public class PawnDrafted
@@ -338,6 +344,41 @@ namespace CooperateRim
             public SerializableZoneData zoneData;
         }
 
+        [Serializable]
+        public class ThingFilterSetWorkerCall
+        {
+            public S_Thing worker;
+            public SVEC3 giverPos;
+            public R_BILL bill;
+        }
+
+        [Serializable]
+        public class IndexedBillConfigRestrictionOptionCall
+        {
+            public S_Thing pawn;
+            public SVEC3 giverPos;
+            public R_BILL bill;
+            public int restrictOptionIndex;
+        }
+
+        [Serializable]
+        public class ThingFilterDelta
+        {
+            public string thingDefName;
+            public bool value;
+            public S_Thing context;
+            public int[] zone;
+        };
+
+        [Serializable]
+        public class ThingFilterDeltaSpecial
+        {
+            public string specialThingDefName;
+            public bool value;
+            public S_Thing context;
+            public int[] zone;
+        };
+
         List<TemporaryJobData> jobData = new List<TemporaryJobData>();
 
         List<S_Designation> designations = new List<S_Designation>();
@@ -352,6 +393,7 @@ namespace CooperateRim
         List<R_BILL> bills = new List<R_BILL>();
         List<BILL_REPEAT_CHANGES> bill_repeat_commands = new List<BILL_REPEAT_CHANGES>();
         List<ThingFilterSetAllowCall> thingFilterSetAllowCalls = new List<ThingFilterSetAllowCall>();
+        List<ThingFilterSetWorkerCall> thingFilterSetWorkerCalls = new List<ThingFilterSetWorkerCall>();
         List<DesignatorHuntThing> designatorHuntThingCalls = new List<DesignatorHuntThing>();
         List<DesignatorApplyToThing> designatorApplyToThingCalls = new List<DesignatorApplyToThing>();
         List<TRAP_AUTO_REARM_SET> trapAutoRearms = new List<TRAP_AUTO_REARM_SET>();
@@ -360,6 +402,16 @@ namespace CooperateRim
         List<COMMAND_TOGGLE_INDEXED_CALLS> toggleCommandIndexedCalls = new List<COMMAND_TOGGLE_INDEXED_CALLS>();
         List<Zone_set_plant> setZonePlants = new List<Zone_set_plant>();
         List<SerializableZoneData> deleteZones = new List<SerializableZoneData>();
+        List<IndexedBillConfigRestrictionOptionCall> indexedBillConfigRestrictionOptionCalls = new List<IndexedBillConfigRestrictionOptionCall>();
+        List<ThingFilterDelta> thingFiltersData = new List<ThingFilterDelta>();
+        List<ThingFilterDeltaSpecial> thingFiltersDataSpecial = new List<ThingFilterDeltaSpecial>();
+
+        class DirtyThingFilter
+        {
+            public ThingFilter filter;
+            public SVEC3 giverPos;
+            public Bill bill;
+        }
 
         public void DebugLog()
         {
@@ -369,7 +421,7 @@ namespace CooperateRim
 
         List<string> researches = new List<string>();
 
-        public static int clientCount = 2;
+        public static int clientCount = 1;
         public static int cliendID = -1;
 
         public static void SetClientID(int id)
@@ -401,7 +453,7 @@ namespace CooperateRim
 
         public static void AppendSyncFieldForThingCommand(Thing t, FieldInfo fi, BindingFlags flag, object value)
         {
-            singleton.syncFieldCommands.Add(new SyncThingFieldCommand() { fieldFlags = flag, fieldname = fi.Name, typename = t.GetType().AssemblyQualifiedName, thing = t,  value = value });
+            singleton.syncFieldCommands.Add(new SyncThingFieldCommand() { fieldFlags = flag, fieldname = fi.Name, typename = t.GetType().AssemblyQualifiedName, thing = t, value = value });
         }
 
         public static void AppendSyncTickData(Building_Trap instt, bool val)
@@ -411,7 +463,7 @@ namespace CooperateRim
 
         public static void AppendSyncTickData(Zone_Growing __instance, ThingDef plantDef)
         {
-            singleton.setZonePlants.Add(new Zone_set_plant() {  plantDef = plantDef.defName, zoneData = new SerializableZoneData() { zoneID = __instance.ID } });
+            singleton.setZonePlants.Add(new Zone_set_plant() { plantDef = plantDef.defName, zoneData = new SerializableZoneData() { zoneID = __instance.ID } });
         }
 
         public static void AppendSyncTickData(Bill b, IBillGiver giver, BillRepeatModeDef def)
@@ -427,13 +479,13 @@ namespace CooperateRim
 
         public static void AppendSyncTickData(Designation des, System.Type designator)
         {
-            CooperateRimming.Log( "XXXXXXXXXXXXXx ++ " + des.def.defName);
+            CooperateRimming.Log("XXXXXXXXXXXXXx ++ " + des.def.defName);
             singleton.designations.Add(new S_Designation(des, designator));
         }
 
         public static void AppendSyncTickData(ResearchProjectDef research)
         {
-            
+
             singleton.researches.Add(research.defName);
         }
 
@@ -528,7 +580,7 @@ namespace CooperateRim
         {
             tVar = (List<T2>)(info.GetValue(name, typeof(List<T2>)));
         }
-        
+
         public SyncTickData(SerializationInfo info, StreamingContext ctx)
         {
             GetVal(ref designations, info, nameof(designations));
@@ -550,6 +602,10 @@ namespace CooperateRim
             GetVal(ref toggleCommandIndexedCalls, info, nameof(toggleCommandIndexedCalls));
             GetVal(ref setZonePlants, info, nameof(setZonePlants));
             GetVal(ref deleteZones, info, nameof(deleteZones));
+            GetVal(ref thingFilterSetWorkerCalls, info, nameof(thingFilterSetWorkerCalls));
+            GetVal(ref indexedBillConfigRestrictionOptionCalls, info, nameof(indexedBillConfigRestrictionOptionCalls));
+            GetVal(ref thingFiltersData, info, nameof(thingFiltersData));
+            GetVal(ref thingFiltersDataSpecial, info, nameof(thingFiltersDataSpecial));
         }
 
         public void AcceptResult()
@@ -900,10 +956,19 @@ namespace CooperateRim
                 foreach (COMMAND_TOGGLE_INDEXED_CALLS call in toggleCommandIndexedCalls)
                 {
                     AvoidLoop = true;
-                    Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(call.location).First(u => u.ThingID == call.thing.ThingID);
+                    Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == call.thing.ThingID)).First(u => u.ThingID == call.thing.ThingID);
+
+                    //Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(call.location).First(u => u.ThingID == call.thing.ThingID);
 
                     IEnumerator<Gizmo> gizmoI = issuer.GetGizmos().GetEnumerator();
                     CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::index  = " + call.gizmo_index);
+
+                    //if (call.location != issuer.Position)
+                    {
+                        CooperateRimming.Log("positions for COMMAND_TOGGLE_INDEXED_CALLS location:" + call.location + " |position| " + issuer.Position + " |position held| " + issuer.PositionHeld);
+                    }
+
+                    //CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::Position " + );
                     for (int i = 0; i <= call.gizmo_index; i++)
                     {
                         if (!gizmoI.MoveNext())
@@ -1026,12 +1091,118 @@ namespace CooperateRim
                 }
 
                 lockD = 18;
+                {
+                    foreach (IndexedBillConfigRestrictionOptionCall call in indexedBillConfigRestrictionOptionCalls)
+                    {
+                        AvoidLoop = true;
+                        Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(call.giverPos).First(u => u.ThingID == call.bill.targetThing.ThingID);
+
+                        CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::index " + call.restrictOptionIndex);
+
+                        foreach (var rec in issuer.def.AllRecipes)
+                        {
+                            CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::recipe " + rec.defName + " == " + call.bill.recipeDefName);
+
+                            if (rec.defName == call.bill.recipeDefName)
+                            {
+                                AvoidLoop = true;
+                                foreach (var ___bill in (issuer as IBillGiver).BillStack.Bills)
+                                {
+                                    CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::bill " + ___bill.recipe.defName);
+
+                                    if (___bill is Bill_Production && ___bill.recipe.defName == call.bill.recipeDefName)
+                                    {
+                                        Dialog_BillConfig dialog = new Dialog_BillConfig(___bill as Bill_Production, call.giverPos);
+                                        CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::option <-1>");
+                                        int index = 0;
+                                        foreach (var element in (IEnumerable < Widgets.DropdownMenuElement<Pawn>>)dialog.GetType().GetMethod("GeneratePawnRestrictionOptions", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(dialog, new object[] { }))
+                                        {
+                                            CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::option " + index);
+
+                                            if (index == call.restrictOptionIndex)
+                                            {
+                                                ___bill.pawnRestriction = element.payload;
+                                                CooperateRimming.Log(">>>>>>>>>>>>> element called!");
+                                            }
+
+                                            index++;
+                                        }
+                                        CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::option <~~~>");
+                                    }
+                                }
+                            }
+                        }
+
+                        AvoidLoop = false;
+                    }
+                }
+                lockD = 19;
+
+                foreach (var filterData in thingFiltersData)
+                {
+                    AvoidLoop = true;
+                    IStoreSettingsParent storeSettings = null;
+                    if (filterData.zone != null)
+                    {
+                        Zone z = Find.CurrentMap.zoneManager.AllZones.First(u => u.ID == filterData.zone[0]);
+                        if (z as IStoreSettingsParent != null)
+                        {
+                            storeSettings = z as IStoreSettingsParent;
+                        }
+                    }
+
+                    if (storeSettings == null)
+                    {
+                        Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == filterData.context.ThingID)).First(u => u.ThingID == filterData.context.ThingID);
+                        storeSettings = issuer as IStoreSettingsParent;
+                    }
+
+                    if (storeSettings != null)
+                    {
+                        storeSettings.GetStoreSettings().filter.SetAllow(DefDatabase<ThingDef>.GetNamed(filterData.thingDefName, true), filterData.value);
+                    }
+
+                    AvoidLoop = false;
+                }
+
+                lockD = 20;
+
+                foreach (var filterData in thingFiltersDataSpecial)
+                {
+                    AvoidLoop = true;
+                    IStoreSettingsParent storeSettings = null;
+                    if (filterData.zone != null)
+                    {
+                        Zone z = Find.CurrentMap.zoneManager.AllZones.First(u => u.ID == filterData.zone[0]);
+                        if (z as IStoreSettingsParent != null)
+                        {
+                            storeSettings = z as IStoreSettingsParent;
+                        }
+                    }
+
+                    if (storeSettings == null)
+                    {
+                        Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == filterData.context.ThingID)).First(u => u.ThingID == filterData.context.ThingID);
+                        storeSettings = issuer as IStoreSettingsParent;
+                    }
+
+                    if (storeSettings != null)
+                    {
+                        storeSettings.GetStoreSettings().filter.SetAllow(DefDatabase<SpecialThingFilterDef>.GetNamed(filterData.specialThingDefName, true), filterData.value);
+                    }
+
+                    AvoidLoop = false;
+                }
+
+                lockD = 21;
                 Bill_production_patch.kkk.Clear();
             }
             catch (Exception ee)
             {
-                CooperateRimming.Log("sync tick data exception at stage " + lockD);
+                CooperateRimming.Log("sync tick data exception at stage " + lockD + "\r\n" + ee.ToString());
             }
+
+            AvoidLoop = false;
         }
 
         internal static void AllowJobAt(Job job, Pawn pawn, JobTag tag, IntVec3 cell)
@@ -1045,7 +1216,7 @@ namespace CooperateRim
             CooperateRimming.Log(s);
             //CooperateRimming.Log(job.ToString() + " |1| " + job.playerForced + " |2| " + job.forceSleep + " |3| " + job.restUntilHealed + " |4| " + job.haulDroppedApparel + " |5| " + job.ignoreDesignations + " |6| " + job.ignoreJoyTimeAssignment + " |7| " + job.ignoreForbidden + " |8| " + job.locomotionUrgency + " |9| " + job.haulMode + " |10| " + cell + " |11| " + job.def.defName + " |12| " + pawn + " |13| " + job.targetA + " |14| " + job.targetB + " |15| " + job.targetC);
             {
-                singleton.jobsToSerialize.Add(new FinalJobData() { playerForced = job.playerForced, forceSleep = job.forceSleep, restUntilHealed = job.restUntilHealed, haulDroppedApparel = job.haulDroppedApparel , ignoreDesignations = job.ignoreDesignations , ignoreAssignment = job.ignoreJoyTimeAssignment, ignoreForbidden = job.ignoreForbidden , locomotionUrgency = job.locomotionUrgency, haulMode = job.haulMode, cell = cell, jobDef = job.def.defName, pawn = pawn, jobTargetA = job.targetA, jobTargetB = job.targetB, jobTargetC = job.targetC });
+                singleton.jobsToSerialize.Add(new FinalJobData() { playerForced = job.playerForced, forceSleep = job.forceSleep, restUntilHealed = job.restUntilHealed, haulDroppedApparel = job.haulDroppedApparel, ignoreDesignations = job.ignoreDesignations, ignoreAssignment = job.ignoreJoyTimeAssignment, ignoreForbidden = job.ignoreForbidden, locomotionUrgency = job.locomotionUrgency, haulMode = job.haulMode, cell = cell, jobDef = job.def.defName, pawn = pawn, jobTargetA = job.targetA, jobTargetB = job.targetB, jobTargetC = job.targetC });
             }
         }
 
@@ -1084,13 +1255,13 @@ namespace CooperateRim
             }
     
 #else
-            
+
 #endif
         }
 
         void Serialize(IntVec3 pos, SerializationInfo info, string prefix)
         {
-            
+
         }
 
         /*
@@ -1171,7 +1342,7 @@ namespace CooperateRim
             {
                 info.AddValue(nameof(thingFilterSetAllowCalls), thingFilterSetAllowCalls);
             }
-            
+
             //designator apply thing calls
             {
                 info.AddValue(nameof(designatorApplyToThingCalls), designatorApplyToThingCalls);
@@ -1206,6 +1377,26 @@ namespace CooperateRim
             {
                 info.AddValue(nameof(deleteZones), deleteZones);
             }
+
+            //set worker calls
+            {
+                info.AddValue(nameof(thingFilterSetWorkerCalls), thingFilterSetWorkerCalls);
+            }
+
+            //indexed bill config calls
+            {
+                info.AddValue(nameof(indexedBillConfigRestrictionOptionCalls), indexedBillConfigRestrictionOptionCalls);
+            }
+
+            //thingfilters to sync
+            {
+                info.AddValue(nameof(thingFiltersData), thingFiltersData);
+            }
+
+            //special thingfilters to sync
+            {
+                info.AddValue(nameof(thingFiltersDataSpecial), thingFiltersDataSpecial);
+            }
         }
 
         public static void AppendSyncTickDataCommand_toggle_call_by_index(Thing t, int number)
@@ -1216,7 +1407,7 @@ namespace CooperateRim
 
         internal static void AppendSyncTickData(Designator instance, IntVec3 cell)
         {
-            singleton.designatorCellCalls.Add(new DesignatorCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName });    
+            singleton.designatorCellCalls.Add(new DesignatorCellCall() { cell = cell, designatorType = instance.GetType().AssemblyQualifiedName });
         }
 
         static IEnumerable<T2> ConvertAll<T1, T2>(IEnumerable<T1> @this, Func<T1, T2> converter)
@@ -1244,11 +1435,16 @@ namespace CooperateRim
             singleton.designatorCellCalls.Add(new DesignatorCellCall { designatorType = instance.GetType().AssemblyQualifiedName, cell = c });
         }
 
-        internal static void AppendSyncTickDataThingFilterSetAllow(ThingDef thingDef, bool allow, IntVec3 pos, Bill_Production bill)
+        public static void AppendSyncTickDataThingFilterSetAllow(ThingDef thingDef, bool allow, IntVec3 pos, Bill_Production bill)
         {
             singleton.thingFilterSetAllowCalls.Add(new ThingFilterSetAllowCall() { thingDef = thingDef.defName, val = allow, giverPos = pos, bill = bill });
         }
 
+        public static void AppendSyncTickDataSetWorker(Thing worker, IntVec3 pos, Bill_Production bill)
+        {
+            singleton.thingFilterSetWorkerCalls.Add(new ThingFilterSetWorkerCall() { worker = worker, giverPos = pos, bill = bill });
+        }
+        
         internal static void AppendSyncTickDataPawnDrafted(Pawn pawn, bool value)
         {
             singleton.pawnDrafts.Add(new PawnDrafted() { pawn = pawn, value = value });
@@ -1263,6 +1459,21 @@ namespace CooperateRim
         {
             CooperateRimming.Log(instance.ToString());
             singleton.deleteZones.Add(new SerializableZoneData() { zoneID = instance.ID });
+        }
+
+        internal static void AppendSyncTickDataIndexedBillConfigRestrictionOptionCall(Pawn p, int index, Bill_Production bill, IntVec3 billGiverPos)
+        {
+            singleton.indexedBillConfigRestrictionOptionCalls.Add(new IndexedBillConfigRestrictionOptionCall() { bill = bill, giverPos = billGiverPos, pawn = p, restrictOptionIndex = index });
+        }
+
+        internal static void AppendSyncTickDataDeltaFilter(ThingDef thing, Thing singleSelectedThing, Zone selectedZone, bool value)
+        {
+            singleton.thingFiltersData.Add(new ThingFilterDelta() { context = singleSelectedThing, zone = selectedZone == null ? null : new int[] { selectedZone.ID }, value = value, thingDefName = thing.defName });
+        }
+
+        internal static void AppendSyncTickDataDeltaFilterSpecial(SpecialThingFilterDef thingDef, Thing singleSelectedThing, Zone selectedZone, bool value)
+        {
+            singleton.thingFiltersDataSpecial.Add(new ThingFilterDeltaSpecial() { context = singleSelectedThing, zone = selectedZone == null ? null : new int[] { selectedZone.ID }, value = value, specialThingDefName = thingDef.defName });
         }
     }
 }
