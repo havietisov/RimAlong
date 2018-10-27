@@ -1195,7 +1195,6 @@ namespace CooperateRim
                 }
 
                 lockD = 21;
-                Bill_production_patch.kkk.Clear();
             }
             catch (Exception ee)
             {

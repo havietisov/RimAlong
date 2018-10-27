@@ -118,6 +118,7 @@ namespace PirateRPC
             BinaryReader br = new BinaryReader(s);
             string ss = br.ReadString();
             byte[] b = Convert.FromBase64String(ss);
+            NetDemo.log("RPC size : " + b.Length);
             MemoryStream ms = new MemoryStream(b);
             BinaryFormatter bf = new BinaryFormatter();
             

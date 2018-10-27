@@ -7,6 +7,59 @@ using System.Text;
 
 namespace CooperateRim
 {
+    [HarmonyPatch(typeof(BillStack))]
+    [HarmonyPatch("AddBill")]
+    public class BillStackPatch
+    {
+        [HarmonyPrefix]
+        public static bool AddBill(ref Bill bill, BillStack __instance)
+        {
+            if (!SyncTickData.AvoidLoop)
+            {
+                CooperateRimming.Log(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
+                SyncTickData.AppendSyncTickData(bill, __instance.billGiver);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        [HarmonyPostfix]
+        public static void Postfix(BillStack __instance, Bill bill)
+        {
+            ReverseBillTable.Associate(bill, __instance);
+        }
+    }
+
+    [HarmonyPatch(typeof(BillStack))]
+    [HarmonyPatch("Delete")]
+    public class BillStackPatchDelete
+    {
+        [HarmonyPrefix]
+        public static bool Delete(ref Bill bill, BillStack __instance)
+        {
+            if (!SyncTickData.AvoidLoop)
+            {
+                CooperateRimming.Log(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
+                SyncTickData.AppendSyncTickData(bill, __instance.billGiver);
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        [HarmonyPostfix]
+        public static void Postfix(BillStack __instance, Bill bill)
+        {
+            ReverseBillTable.Associate(bill, __instance);
+        }
+    }
+
+    /*
     [HarmonyPatch(typeof(RimWorld.BillStack))]
     [HarmonyPatch("AddBill")]
     public class BillStackPatch
@@ -78,5 +131,5 @@ namespace CooperateRim
                 }
             }
         }
-    }
+    }*/
 }
