@@ -22,6 +22,14 @@ namespace CooperateRim
 
         static string cachedStuff = "";
 
+        public HarmonyInstance harmonyInst
+        {
+            get
+            {
+                return base.HarmonyInst;
+            }
+        }
+
         public static void Log(string val)
         {
             if (inst != null && inst.Logger != null)
@@ -40,6 +48,18 @@ namespace CooperateRim
             }
         }
 
+        static void InitBullshit()
+        {
+
+
+            CooperateRim.ParrotWrapper.ParrotPatchExpressiontarget<Action<tester, int, string>>((__instance, ___internal_value, name_something) => __instance.DoSomething(name_something));
+            tester t = new tester();
+            t.DoSomething("1");
+            SyncTickData.AvoidLoop = true;
+            t.DoSomething("2");
+
+        }
+
         public override void Initialize()
         {
             inst = this;
@@ -53,8 +73,9 @@ namespace CooperateRim
             List<Type> typesToPatch = new List<Type>();
             List<Type> designatorInheritees = new List<Type>();
             List<Type> leftOverTypes = new List<Type>();
-            
-            
+
+            InitBullshit();
+
             //thingfilter patch
             {
                 MethodInfo[] targetmethod = typeof(Verse.ThingFilter).GetMethods();
@@ -246,6 +267,7 @@ namespace CooperateRim
             {
                 //harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
+
         }
         
         [HarmonyPatch(typeof(MainMenuDrawer))]

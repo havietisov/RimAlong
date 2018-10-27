@@ -32,7 +32,6 @@ public class LocalDB
     
     public static void PushData(int tickID, int playerID, SyncTickData sd)
     {
-        
         if (!data.ContainsKey(tickID))
         {
             data.Add(tickID, new SyncTickData[SyncTickData.clientCount]);
@@ -43,7 +42,6 @@ public class LocalDB
             log("player state : " + GetStringFor(tickID, playerID));
             data[tickID][playerID] = sd;
         }
-
     }
 
     static int minPlayerTick = 99999;

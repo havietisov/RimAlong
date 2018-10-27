@@ -33,17 +33,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Lib.Harmony.1.2.0.1\lib\net35\0Harmony.dll</HintPath>
+      <HintPath>..\packages\UnlimitedHugs.Rimworld.HugsLib.6.0.1\lib\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp, Version=1.0.6864.30166, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="CookComputing.XmlRpcV2, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d6e17aa302004d, processorArchitecture=MSIL">
       <HintPath>..\packages\xmlrpcnet.3.0.0.266\lib\net20\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
     <Reference Include="HugsLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnlimitedHugs.Rimworld.HugsLib.5.0.2\lib\net35\HugsLib.dll</HintPath>
+      <HintPath>..\packages\UnlimitedHugs.Rimworld.HugsLib.6.0.1\lib\net35\HugsLib.dll</HintPath>
     </Reference>
     <Reference Include="LiteDB, Version=4.1.4.0, Culture=neutral, PublicKeyToken=4ee40123013c9f27, processorArchitecture=MSIL">
       <HintPath>..\packages\LiteDB.4.1.4\lib\net35\LiteDB.dll</HintPath>
@@ -66,6 +66,7 @@
     <Compile Include="CooperateRimming.cs" />
     <Compile Include="DesignationManagerPatch.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
+    <Compile Include="ExpressionHelper.cs" />
     <Compile Include="GenConstructPatch.cs" />
     <Compile Include="GenericDesignatorPatch.cs" />
     <Compile Include="GenericGizmoPatch.cs" />
@@ -75,11 +76,13 @@
     <Compile Include="MoveToStandablePatch.cs" />
     <Compile Include="netDemo.cs" />
     <Compile Include="NetworkGame.cs" />
+    <Compile Include="ParrotWrapper.cs" />
     <Compile Include="PawnAttackMeleeGizmoUtilityPatch.cs" />
     <Compile Include="Pawn_WorkSettings_patch.cs" />
     <Compile Include="PirateRPC.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandPatch.cs" />
+    <Compile Include="ReverseBillTable.cs" />
     <Compile Include="StoreUtility.cs" />
     <Compile Include="SyncTickData.cs" />
     <Compile Include="SyncTickManager.cs" />
@@ -96,9 +99,12 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\CooperateRim.dll" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
-copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\CooperateRim.pdb" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
-copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\NetDemoLib.dll" "D:/SteamLibrary\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
+    <PostBuildEvent>copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\CooperateRim.dll" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
+
+copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\CooperateRim.pdb" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
+
+copy "D:/Projects/CooperateRim/CooperateRim\bin\Debug\NetDemoLib.dll" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\CooperateRim\Assemblies" /y
+
 del D:\CoopReplays\*.* /s /q</PostBuildEvent>
   </PropertyGroup>
 </Project>
