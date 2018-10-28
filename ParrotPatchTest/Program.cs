@@ -23,6 +23,7 @@ namespace ParrotPatchTest
         {
             SerializationService.Initialize();
             ParrotWrapper.Initialize();
+            
             MemberTracker<bool>.TrackPublicField<Func<bool>>(() => static_flag, u => static_flag = u);
             static_flag = true;
             //MemberTracker<bool>.ApplyChange(true, 0);
@@ -42,8 +43,9 @@ namespace ParrotPatchTest
                 }
             }
 
+            
+            //CooperateRim.ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, Bill>>((__instance, bill) => __instance.AddBill(bill));
             /*
-            CooperateRim.ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, Bill>>((__instance, bill) => __instance.AddBill(bill));
             CooperateRim.ParrotWrapper.ParrotPatchExpressiontarget<Action<tester, string>>((__instance, name_something) => __instance.DoSomething(name_something));
             tester t = new tester();
             t.DoSomething("1");

@@ -35,7 +35,14 @@ namespace CooperateRim
         }
         
         static HarmonyInstance hi = HarmonyInstance.Create("id1");
-        
+
+        public static void SerializeInstance<T>(T arg)
+        {
+            Console.WriteLine("instance of : " + typeof(T) + " | " + arg);
+            SerializationService.SerializeInstance<T>(arg);
+
+        }
+
         public static void SerializeThis<T>(T arg)
         {
             Console.WriteLine("type : " + typeof(T) + " | " + arg);
@@ -55,25 +62,6 @@ namespace CooperateRim
         
         static List<MethodInfo> wrappers = new List<MethodInfo>();
         
-        public static void ParrotPatchExpressionTargetWatchValue<exprT>(Expression<exprT> method, FieldInfo fi)
-        {
-            MethodInfo mi = ExpressionHelper.GetMethodInfo(method);
-            MethodInfo serializerMethod = typeof(ParrotWrapper).GetMethod(nameof(ParrotWrapper.SerializeThis));
-            
-            TypeBuilder ass_patch = dynamicModule.DefineType("<parrot_patch_type>[" + new Random().Next().ToString() + "]");
-            List<FieldInfo> trackerFields = new List<FieldInfo>();
-
-            foreach(var a in method.Parameters)
-            {
-                trackerFields.Add(ass_patch.DefineField("<tracker>[" + a.Name + "::" + new Random().Next() + "]", a.Type, FieldAttributes.Static | FieldAttributes.Public));
-            }
-
-            Type t = ass_patch.CreateType();
-            var _prefix = new HarmonyMethod(t.GetMethod("[prefix]"));
-            var _postfix = new HarmonyMethod(t.GetMethod("[postfix]"));
-            hi.Patch(mi, _prefix, _postfix, null);
-        }
-
         internal static void DebugSaveAssembly()
         {
             dynamicAssembly.Save(@"asm.dll");
@@ -83,11 +71,25 @@ namespace CooperateRim
         {
             MethodInfo mi = ExpressionHelper.GetMethodInfo(expr);
             MethodInfo serializerMethod = typeof(ParrotWrapper).GetMethod(nameof(ParrotWrapper.SerializeThis));
+            MethodInfo serializeInstance = typeof(ParrotWrapper).GetMethod(nameof(ParrotWrapper.SerializeInstance));
             List<Type> @params = new List<Type>();
+            List<Type> partchParams = new List<Type>();
+            List<string> @paramNames = new List<string>();
+            ParameterExpression instanceParameter = null;
 
             foreach(var a in expr.Parameters)
             {
-                @params.Add(a.Type);
+                if (a.Name != "__instance")
+                {
+                    @params.Add(a.Type);
+                    @paramNames.Add(a.Name);
+                }
+                else
+                {
+                    instanceParameter = a;
+                }
+
+                partchParams.Add(a.Type);
 
                 if (!SerializationService.CheckForSurrogate(a.Type))
                 {
@@ -98,37 +100,39 @@ namespace CooperateRim
             int pos = 0;
             
             TypeBuilder ass_patch = dynamicModule.DefineType("<parrot_patch_type>[" + new Random().Next().ToString() + "]");
-            MethodBuilder mbb = ass_patch.DefineMethod("[prefix]", MethodAttributes.Static | MethodAttributes.Public, typeof(bool), @params.ToArray());
+            MethodBuilder mbb = ass_patch.DefineMethod("[prefix]", MethodAttributes.Static | MethodAttributes.Public, typeof(bool), partchParams.ToArray());
             List<Type> originalMethodArgs = new List<Type>();
+            List<Type> wrapperMethodArgs = new List<Type>();
 
-            if (!mi.IsStatic)
+            if (instanceParameter != null)
             {
-                originalMethodArgs.Add(mi.DeclaringType);
+                wrapperMethodArgs.Add(instanceParameter.Type);
             }
 
             foreach (var a in mi.GetParameters())
             {
                 originalMethodArgs.Add(a.ParameterType);
+                wrapperMethodArgs.Add(a.ParameterType);
             }
 
-            MethodBuilder wrapper = ass_patch.DefineMethod("<wrapper_method>[" + wrappers.Count + "]", MethodAttributes.Static | MethodAttributes.Public, typeof(void), originalMethodArgs.ToArray());
+            MethodBuilder wrapper = ass_patch.DefineMethod("<wrapper_method>[" + wrappers.Count + "]", MethodAttributes.Static | MethodAttributes.Public, typeof(void), wrapperMethodArgs.ToArray());
             int ppos = 0;
 
-            foreach (var a in mi.GetParameters())
+            foreach (var a in expr.Parameters)
             {
-                wrapper.DefineParameter(++ppos, a.Attributes, a.Name);
+                wrapper.DefineParameter(++ppos, ParameterAttributes.None, a.Name);
             }
             
             ppos = 0;
             ILGenerator wrapperGenerator = wrapper.GetILGenerator();
             originalMethodArgs.Reverse();
             
-            foreach (var a in originalMethodArgs)
+            foreach (var a in wrapperMethodArgs)
             {
                 wrapperGenerator.Emit(OpCodes.Ldarg, ppos++);
             }
-
-            wrapperGenerator.Emit(OpCodes.Call, mi);
+            
+            wrapperGenerator.Emit(mi.IsVirtual ? OpCodes.Callvirt : OpCodes.Call, mi);
             wrapperGenerator.Emit(OpCodes.Ret);
 
             originalMethodArgs.Reverse();
@@ -147,13 +151,14 @@ namespace CooperateRim
             ilg.MarkLabel(end);
 
             int cc = 0;
+            
             foreach (var a in expr.Parameters)
             {
                 MethodInfo __mi = typeof(ParrotWrapper).GetMethod(nameof(ParrotWrapper.SerializeThis)).MakeGenericMethod(a.Type);
                 ilg.Emit(OpCodes.Ldarg, cc++);
-                ilg.EmitCall(OpCodes.Call, __mi, new Type[] { a.Type });
+                ilg.EmitCall(OpCodes.Call, __mi, null);
             }
-
+            
             ilg.Emit(OpCodes.Ldc_I4, wrappers.Count);
             ilg.EmitCall(OpCodes.Call, typeof(ParrotWrapper).GetMethod(nameof(ParrotWrapper.SetWrapperIndex)), null);
 
