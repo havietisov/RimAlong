@@ -58,6 +58,7 @@ namespace CooperateRim
         {
             public int methodContext = -1;
             public List<object> dataObjects = new List<object>();
+            public object instance;
         }
 
         static List<SerializationData> curData = new List<SerializationData>();
@@ -66,6 +67,17 @@ namespace CooperateRim
         {
             curData[curData.Count-1].methodContext = i;
             curData.Add(new SerializationData());
+        }
+
+        public static void SerializeInstance<T>(T o)
+        {
+            NetDemo.log("curdata len : " + curData.Count);
+            if (curData.Count == 0)
+            {
+                curData.Add(new SerializationData());
+            }
+
+            curData[curData.Count - 1].instance = (o);
         }
 
         public static void SerializeObject<T>(T o)
