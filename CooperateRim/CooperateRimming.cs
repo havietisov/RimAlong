@@ -50,22 +50,51 @@ namespace CooperateRim
 
         static void InitBullshit()
         {
-
-
+            /*
+            SerializationService.Initialize();
+            ParrotWrapper.Initialize();
+            
             CooperateRim.ParrotWrapper.ParrotPatchExpressiontarget<Action<tester, int, string>>((__instance, ___internal_value, name_something) => __instance.DoSomething(name_something));
             tester t = new tester();
             t.DoSomething("1");
             SyncTickData.AvoidLoop = true;
-            t.DoSomething("2");
+            byte[] b;
+            var _dat = SerializationService.DeserializeFrom(b = SerializationService.Flush());
 
+            foreach (var dat in _dat)
+            {
+                if (dat.methodContext > -1)
+                {
+                    ParrotWrapper.IndexedCall(dat.methodContext, dat.dataObjects.ToArray());
+                }
+            }*/
+
+            SerializationService.Initialize();
+            ParrotWrapper.Initialize();
+
+            MainTabWindow_Work_patch.useWorkPriorities_index = 
+            MemberTracker<bool>.TrackPublicField<Func<bool>>(() => Current.Game.playSettings.useWorkPriorities, 
+            u => 
+            {
+                Current.Game.playSettings.useWorkPriorities = u;
+                CooperateRimming.Log("hey, it works?");
+                
+                foreach (Pawn pawn in PawnsFinder.AllMapsWorldAndTemporary_Alive)
+                {
+                    if (pawn.Faction == Faction.OfPlayer && pawn.workSettings != null)
+                    {
+                        pawn.workSettings.Notify_UseWorkPrioritiesChanged();
+                    }
+                }
+            });
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<bool, int>>((bool newVal, int index) => MemberTracker<bool>.ApplyChange(newVal, index));
+            MemberTracker<bool>.ApplyChange(true, 0);
         }
 
         public override void Initialize()
         {
             inst = this;
-            //NetDemo.log = CooperateRimming.Log;
             NetDemo.setupCallbacks();
-            //Verse.DirectXmlSaver.XElementFromObject
             (typeof(Rand).GetField("random", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as RandomNumberGenerator).seed = 0;
 
             HarmonyInstance harmony = HarmonyInst;

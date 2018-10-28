@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BillStack.cs" />
+    <Compile Include="CommonSurrogates.cs" />
     <Compile Include="CooperateRimming.cs" />
     <Compile Include="DesignationManagerPatch.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="HighResolutionTimer.cs" />
     <Compile Include="JobTrackerPatch.cs" />
     <Compile Include="LocalDB.cs" />
+    <Compile Include="MainTabWindow_Work_patch.cs" />
     <Compile Include="MoveToStandablePatch.cs" />
     <Compile Include="netDemo.cs" />
     <Compile Include="NetworkGame.cs" />
@@ -83,7 +85,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandPatch.cs" />
     <Compile Include="ReverseBillTable.cs" />
+    <Compile Include="MemberTracker.cs" />
     <Compile Include="StoreUtility.cs" />
+    <Compile Include="SerializationService.cs" />
     <Compile Include="SyncTickData.cs" />
     <Compile Include="SyncTickManager.cs" />
     <Compile Include="ThingFilter_patch.cs" />

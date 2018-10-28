@@ -405,6 +405,7 @@ namespace CooperateRim
         List<IndexedBillConfigRestrictionOptionCall> indexedBillConfigRestrictionOptionCalls = new List<IndexedBillConfigRestrictionOptionCall>();
         List<ThingFilterDelta> thingFiltersData = new List<ThingFilterDelta>();
         List<ThingFilterDeltaSpecial> thingFiltersDataSpecial = new List<ThingFilterDeltaSpecial>();
+        byte[] serializationServiceData = new byte[0];
 
         class DirtyThingFilter
         {
@@ -542,6 +543,7 @@ namespace CooperateRim
 
                     if (cliendID > -1)
                     {
+                        singleton.serializationServiceData = SerializationService.Flush();
                         BinaryFormatter ser = new BinaryFormatter();
                         SyncTickData buffered = singleton;
                         MemoryStream fs = new MemoryStream();
@@ -581,6 +583,11 @@ namespace CooperateRim
             tVar = (List<T2>)(info.GetValue(name, typeof(List<T2>)));
         }
 
+        static void GetVal<T2>(ref T2[] tVar, SerializationInfo info, string name)
+        {
+            tVar = (T2[])(info.GetValue(name, typeof(T2[])));
+        }
+
         public SyncTickData(SerializationInfo info, StreamingContext ctx)
         {
             GetVal(ref designations, info, nameof(designations));
@@ -606,6 +613,7 @@ namespace CooperateRim
             GetVal(ref indexedBillConfigRestrictionOptionCalls, info, nameof(indexedBillConfigRestrictionOptionCalls));
             GetVal(ref thingFiltersData, info, nameof(thingFiltersData));
             GetVal(ref thingFiltersDataSpecial, info, nameof(thingFiltersDataSpecial));
+            GetVal(ref serializationServiceData, info, nameof(serializationServiceData));
         }
 
         public void AcceptResult()
@@ -1195,6 +1203,30 @@ namespace CooperateRim
                 }
 
                 lockD = 21;
+
+
+                if (serializationServiceData.Length > 0)
+                {
+                    
+                    foreach (var sd in SerializationService.DeserializeFrom(serializationServiceData))
+                    {
+                        if (sd.methodContext > -1)
+                        {
+                            AvoidLoop = true;
+                            try
+                            {
+                                ParrotWrapper.IndexedCall(sd.methodContext, sd.dataObjects.ToArray());
+                            }
+                            catch (Exception ee)
+                            {
+                                CooperateRimming.Log("Indexed call exception for " + sd.methodContext + "\r\n" + ee.ToString());
+                            }
+                            AvoidLoop = false;
+                        }
+                    }
+                }
+
+                lockD = 22;
             }
             catch (Exception ee)
             {
@@ -1395,6 +1427,11 @@ namespace CooperateRim
             //special thingfilters to sync
             {
                 info.AddValue(nameof(thingFiltersDataSpecial), thingFiltersDataSpecial);
+            }
+
+            //serialization data
+            {
+                info.AddValue(nameof(serializationServiceData), serializationServiceData);
             }
         }
 
