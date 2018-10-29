@@ -7,6 +7,7 @@ using System.Text;
 
 namespace CooperateRim
 {
+    /*
     [HarmonyPatch(typeof(BillStack))]
     [HarmonyPatch("AddBill")]
     public class BillStackPatch
@@ -57,7 +58,7 @@ namespace CooperateRim
         {
             ReverseBillTable.Associate(bill, __instance);
         }
-    }
+    }*/
 
     /*
     [HarmonyPatch(typeof(RimWorld.BillStack))]

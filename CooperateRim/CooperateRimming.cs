@@ -72,6 +72,11 @@ namespace CooperateRim
             SerializationService.Initialize();
             ParrotWrapper.Initialize();
 
+            SerializationService.AppendSurrogate(typeof(IntVec3), new IntVec3Surrogate());
+            SerializationService.AppendSurrogate(typeof(BillStack), new BillStackSurrogate());
+            SerializationService.AppendSurrogate(typeof(Bill), new BillSurrogate());
+            SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
+
             MainTabWindow_Work_patch.useWorkPriorities_index = 
             MemberTracker<bool>.TrackPublicField<Func<bool>>(() => Current.Game.playSettings.useWorkPriorities, 
             u => 
@@ -88,7 +93,8 @@ namespace CooperateRim
                 }
             });
             ParrotWrapper.ParrotPatchExpressiontarget<Action<bool, int>>((bool newVal, int index) => MemberTracker<bool>.ApplyChange(newVal, index));
-            MemberTracker<bool>.ApplyChange(true, 0);
+            //MemberTracker<bool>.ApplyChange(true, 0);
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, Bill>>((BillStack __instance, Bill bill) => __instance.AddBill(bill));
         }
 
         public override void Initialize()
