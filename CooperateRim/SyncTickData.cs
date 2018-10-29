@@ -1220,6 +1220,12 @@ namespace CooperateRim
                             catch (Exception ee)
                             {
                                 CooperateRimming.Log("Indexed call exception for " + sd.methodContext + "\r\n" + ee.ToString());
+
+                                int i = 0;
+                                foreach (object o in sd.dataObjects)
+                                {
+                                    CooperateRimming.Log((i++) + " :." + o + ".:");
+                                }
                             }
                             AvoidLoop = false;
                         }
