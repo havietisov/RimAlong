@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using Harmony;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,13 +45,13 @@ namespace CooperateRim
         }
     }
     
-
     public class BillProductionSurrogate : ISerializationSurrogate
     {
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
             Bill_Production bp = (Bill_Production)obj;
             info.AddValue("recipedef", bp.recipe.defName);
+            info.AddValue("loadID", bp.GetUniqueLoadID());
         }
 
         public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
@@ -61,13 +62,23 @@ namespace CooperateRim
             Bill b = (Bill)billmaker.SetObjectData(obj, info, context, _selector);
             return (Bill_Production)b;*/
             string recipeDefName = info.GetString("recipedef");
+            string loadID = info.GetString("loadID");
+
+            foreach (var b in BillUtility.GlobalBills())
+            {
+                if (b.GetUniqueLoadID() == loadID)
+                {
+                    return b;
+                }
+            }
 
             foreach (var rec in DefDatabase<RecipeDef>.AllDefsListForReading)
             {
                 if (rec.defName == recipeDefName)
                 {
                     CooperateRimming.Log("bill production restored via recipedef!");
-                    return BillUtility.MakeNewBill(rec);
+                    Bill b = BillUtility.MakeNewBill(rec);
+                    return b;
                 }
             }
             

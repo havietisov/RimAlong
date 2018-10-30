@@ -95,6 +95,8 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<bool, int>>((bool newVal, int index) => MemberTracker<bool>.ApplyChange(newVal, index));
             //MemberTracker<bool>.ApplyChange(true, 0);
             ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, Bill>>((BillStack __instance, Bill bill) => __instance.AddBill(bill));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int>>((BillStack stack, int index) => bill_delete_patch.RemoveAt(stack, index));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int, int>>((BillStack stack, int index, int offset) => bill_reorder_patch.ReorderAt(stack, index, offset));
         }
 
         public override void Initialize()
