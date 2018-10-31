@@ -97,6 +97,9 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, Bill>>((BillStack __instance, Bill bill) => __instance.AddBill(bill));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int>>((BillStack stack, int index) => bill_delete_patch.RemoveAt(stack, index));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int, int>>((BillStack stack, int index, int offset) => bill_reorder_patch.ReorderAt(stack, index, offset));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallow_wrap(thingDefName, allow, thingIDNumber, isSpecial));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int zoneID, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallowzone_wrap(thingDefName, allow, zoneID, isSpecial));
+
         }
 
         public override void Initialize()
@@ -115,6 +118,7 @@ namespace CooperateRim
 
             //thingfilter patch
             {
+                /*
                 MethodInfo[] targetmethod = typeof(Verse.ThingFilter).GetMethods();
 
                 foreach (var m in targetmethod)
@@ -128,7 +132,7 @@ namespace CooperateRim
                     {
                         Log("+++" + m);
                     }
-                }
+                }*/
             }
 
             /*

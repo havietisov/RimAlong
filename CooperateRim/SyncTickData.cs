@@ -422,7 +422,7 @@ namespace CooperateRim
 
         List<string> researches = new List<string>();
 
-        public static int clientCount = 2;
+        public static int clientCount = 1;
         public static int cliendID = -1;
 
         public static void SetClientID(int id)
