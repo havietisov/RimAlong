@@ -91,6 +91,11 @@ namespace PirateRPC
             ms2.Flush();
             byte[] buff = ms2.GetBuffer();
 
+            if (buff.Length > 48000)
+            {
+                var ffs = 0;
+                ffs = 2;
+            }
 
             //NetDemo.log("Serialization took " + (DateTime.Now - dt12).TotalMilliseconds);
 

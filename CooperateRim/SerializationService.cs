@@ -43,6 +43,11 @@ namespace CooperateRim
             sc = new StreamingContext();
             curData = new List<SerializationData>();
             byte[] result = ms.GetBuffer();
+            if (result.Length > 32000)
+            {
+                var a = 15000;
+                a = 2;
+            }
             ms = new MemoryStream();
             return result;
         }
