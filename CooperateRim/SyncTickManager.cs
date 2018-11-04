@@ -26,7 +26,7 @@ namespace CooperateRim
         public static int nextCommunicationTick = 0;
         public static int clientsInSync = 0;
         public static bool imInSync;
-        public static int syncRoundLength = 18;
+        public static int syncRoundLength = 20;
         public static int syncTickRoundOffset = 4;
         public static bool IsSyncTick;
         static Stopwatch sw;
@@ -43,6 +43,9 @@ namespace CooperateRim
         {
             cachedData = __cd;
         }
+
+        public static int expectedSRoundRealtimeLenMiliseconds = 200;
+        public static int ticksPerSecond = 250;
 
         [HarmonyPrefix]
         public static bool Prefix(ref int ___ticksGameInt, ref TickManager __instance)
@@ -62,7 +65,7 @@ namespace CooperateRim
                 NetDemo.Receive();
             }
 
-            if (sw.ElapsedMilliseconds > 10 && !__instance.Paused)
+            if (sw.ElapsedMilliseconds > (1000 / ticksPerSecond) && !__instance.Paused)
             {
                 sw.Reset();
                 sw.Start();

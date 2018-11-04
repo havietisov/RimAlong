@@ -32,15 +32,18 @@ public class LocalDB
     
     public static void PushData(int tickID, int playerID, SyncTickData sd)
     {
-        if (!data.ContainsKey(tickID))
+        lock (data)
         {
-            data.Add(tickID, new SyncTickData[SyncTickData.clientCount]);
-        }
+            if (!data.ContainsKey(tickID))
+            {
+                data.Add(tickID, new SyncTickData[SyncTickData.clientCount]);
+            }
 
-        if (data[tickID][playerID] == null)
-        {
-            log("player state : " + GetStringFor(tickID, playerID));
-            data[tickID][playerID] = sd;
+            if (data[tickID][playerID] == null)
+            {
+                log("player state : " + GetStringFor(tickID, playerID));
+                data[tickID][playerID] = sd;
+            }
         }
     }
 
@@ -81,7 +84,7 @@ public class LocalDB
         {
             return false;
         }
-            
+
         return true;
     }
 
