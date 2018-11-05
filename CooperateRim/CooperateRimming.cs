@@ -101,6 +101,7 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int zoneID, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallowzone_wrap(thingDefName, allow, zoneID, isSpecial));
             //ThingFilter_setallow_bill_with_billgiver(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex)
             ParrotWrapper.ParrotPatchExpressiontarget<thing_filter_wrapper_1>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex) => ThingFilter_wrapper.ThingFilter_setallow_bill_with_billgiver(thingDefName, allow, thingIDNumber, isSpecial, billIndex));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<int, bool>>((int thingIDNumber, bool actuallyDisallow) => ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone(thingIDNumber, actuallyDisallow));
         }
 
         public delegate void  thing_filter_wrapper_1(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex);

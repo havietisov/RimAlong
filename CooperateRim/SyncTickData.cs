@@ -793,6 +793,7 @@ namespace CooperateRim
                 }
 
                 lockD = 7;
+                /*
                 foreach (var comm in bill_repeat_commands)
                 {
                     var _bill = comm.owner;
@@ -816,7 +817,7 @@ namespace CooperateRim
                             break;
                         }
                     }
-                }
+                }*/
 
                 lockD = 8;
                 foreach (var a in thingFilterSetAllowCalls)
