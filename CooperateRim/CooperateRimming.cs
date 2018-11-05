@@ -382,7 +382,7 @@ namespace CooperateRim
                     Current.Game.InitData = new GameInitData();
                     Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
                     Find.Scenario.PreConfigure();
-                    string stringseed = GenText.RandomSeedString();
+                    string stringseed = "retarded_seed";// GenText.RandomSeedString();
                     Current.Game.storyteller = new Storyteller(StorytellerDefOf.Cassandra, DifficultyDefOf.Rough);
                     Current.Game.World = WorldGenerator.GenerateWorld(0.05f, stringseed, OverallRainfall.Normal, OverallTemperature.Normal);
                     for (int i = 0; i < 500; i++)

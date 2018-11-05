@@ -80,18 +80,21 @@ public class LocalDB
         
     public static bool HasFullData(int tickID, int clientCount)
     {
-        if (!data.ContainsKey(tickID) || data[tickID].Any(u => u == null))
+        lock (data)
         {
-            return false;
-        }
+            if (!data.ContainsKey(tickID) || data[tickID].Any(u => u == null))
+            {
+                return false;
+            }
 
-        return true;
+            return true;
+        }
     }
 
     public static Action<Stream> GetCallback(SyncTickData[] ds)
     {
         DateTime dt = DateTime.UtcNow;
-        return u => { TickManagerPatch.SetCachedData(ds); CooperateRimming.Log("Message delivery took " + (DateTime.UtcNow - dt).TotalMilliseconds.ToString()); };
+        return u => { TickManagerPatch.SetCachedData(ds); /*CooperateRimming.Log("Message delivery took " + (DateTime.UtcNow - dt).TotalMilliseconds.ToString());*/ };
     }
 
     public static void TryDistributeData(int tickID)
@@ -117,7 +120,7 @@ public class LocalDB
                 NetDemo.log("invocation took " + (DateTime.Now - dt).TotalMilliseconds);
             }
 
-            data.Remove(tickID);
+            //data.Remove(tickID);
         }
 
     }
