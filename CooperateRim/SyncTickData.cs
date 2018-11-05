@@ -407,6 +407,8 @@ namespace CooperateRim
         List<ThingFilterDelta> thingFiltersData = new List<ThingFilterDelta>();
         List<ThingFilterDeltaSpecial> thingFiltersDataSpecial = new List<ThingFilterDeltaSpecial>();
         byte[] serializationServiceData = new byte[0];
+        public int[] randomToVerify;
+        public List<string> colonistJobsToVerify;
 
         class DirtyThingFilter
         {
@@ -544,6 +546,9 @@ namespace CooperateRim
 
                     if (cliendID > -1)
                     {
+                        singleton.randomToVerify = new int[] { Verse.Rand.Int };
+                        var colonists = Find.ColonistBar.GetColonistsInOrder();
+                        singleton.colonistJobsToVerify = colonists == null ? new List<string> { } : colonists.ConvertAll<string>(u=> u == null || u.CurJobDef == null ? "<null>" : u.CurJobDef.defName);
                         singleton.serializationServiceData = SerializationService.Flush();
                         BinaryFormatter ser = new BinaryFormatter();
                         SyncTickData buffered = singleton;
@@ -615,6 +620,8 @@ namespace CooperateRim
             GetVal(ref thingFiltersData, info, nameof(thingFiltersData));
             GetVal(ref thingFiltersDataSpecial, info, nameof(thingFiltersDataSpecial));
             GetVal(ref serializationServiceData, info, nameof(serializationServiceData));
+            GetVal(ref randomToVerify, info, nameof(randomToVerify));
+            GetVal(ref colonistJobsToVerify, info, nameof(colonistJobsToVerify));
         }
 
         public void AcceptResult()
@@ -1440,6 +1447,14 @@ namespace CooperateRim
             //serialization data
             {
                 info.AddValue(nameof(serializationServiceData), serializationServiceData);
+            }
+
+            {
+                info.AddValue(nameof(randomToVerify), randomToVerify);
+            }
+
+            {
+                info.AddValue(nameof(colonistJobsToVerify), colonistJobsToVerify);
             }
         }
 

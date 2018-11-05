@@ -181,7 +181,7 @@ namespace RemoteDirectoryServer
             {
                 for (int l = 0; l < CooperateRim.SyncTickData.clientCount; l++)
                 {
-                    LocalDB.PushData(CooperateRim.TickManagerPatch.syncRoundLength * i, l, new CooperateRim.SyncTickData());
+                    LocalDB.PushData(CooperateRim.TickManagerPatch.syncRoundLength * i, l, new CooperateRim.SyncTickData() { randomToVerify = new int[] { -1 }, colonistJobsToVerify = new List<string>() { } });
                 }
             }
 
