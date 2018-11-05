@@ -148,7 +148,7 @@ public class LocalDB
                         }
                         else
                         {
-                            if (jobsToVerify.Count != a.colonistJobsToVerify.Count || !jobsToVerify.SequenceEqual(a.colonistJobsToVerify))
+                            if (jobsToVerify.Count != a.colonistJobsToVerify.Count || !jobsToVerify.All(__data => a.colonistJobsToVerify.Contains(__data)))
                             {
                                 foreach (string s in jobsToVerify)
                                 {

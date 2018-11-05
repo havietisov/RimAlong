@@ -548,7 +548,7 @@ namespace CooperateRim
                     {
                         singleton.randomToVerify = new int[] { Verse.Rand.Int };
                         var colonists = Find.ColonistBar.GetColonistsInOrder();
-                        singleton.colonistJobsToVerify = colonists == null ? new List<string> { } : colonists.ConvertAll<string>(u=> u == null || u.CurJobDef == null ? "<null>" : u.CurJobDef.defName);
+                        singleton.colonistJobsToVerify = colonists == null ? new List<string> { } : colonists.ConvertAll<string>(u=> u.CurJobDef == null ? u.ThingID + "::" + "<null>" : u.ThingID + "::" + u.CurJobDef.defName);
                         singleton.serializationServiceData = SerializationService.Flush();
                         BinaryFormatter ser = new BinaryFormatter();
                         SyncTickData buffered = singleton;
