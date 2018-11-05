@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using CooperateRim;
 using System.Net.Sockets;
+using Verse;
 
 public class LocalDB
 {
@@ -97,6 +98,13 @@ public class LocalDB
         return u => { TickManagerPatch.SetCachedData(ds); /*CooperateRimming.Log("Message delivery took " + (DateTime.UtcNow - dt).TotalMilliseconds.ToString());*/ };
     }
 
+    enum desyncReason
+    {
+        Rng,
+        Jobs,
+        None
+    }
+
     public static void TryDistributeData(int tickID)
     {
         List<SyncTickData> sdl = new List<SyncTickData>();
@@ -108,15 +116,71 @@ public class LocalDB
 
             sdl = new List<SyncTickData>(data[tickID]);
 
+            int? randomV = null;
+            List<string> jobsToVerify = null;
+            desyncReason desyncReason = desyncReason.None;
+            
+
             foreach (var __ns in NetDemo.allClients)
             {
+                
+
                 foreach (var a in sdl)
                 {
+                    {
+                        if (!randomV.HasValue)
+                        {
+                            randomV = a.randomToVerify[0];
+                        }
+                        else
+                        {
+                            NetDemo.log(randomV.Value + " == " + a.randomToVerify[0]);
+
+                            if (randomV.Value != a.randomToVerify[0])
+                            {
+                                desyncReason = desyncReason.Rng;
+                            }
+                        }
+
+                        if (jobsToVerify == null)
+                        {
+                            jobsToVerify = a.colonistJobsToVerify;
+                        }
+                        else
+                        {
+                            if (jobsToVerify.Count != a.colonistJobsToVerify.Count || !jobsToVerify.SequenceEqual(a.colonistJobsToVerify))
+                            {
+                                foreach (string s in jobsToVerify)
+                                {
+                                    NetDemo.log("DESYNC DATA 1: " + s);
+                                }
+
+                                foreach (string s in a.colonistJobsToVerify)
+                                {
+                                    NetDemo.log("DESYNC DATA 2: " + s);
+                                }
+
+                                desyncReason = desyncReason.Jobs;
+                                //throw new Exception("Session jobs desynced!");
+                            }
+                        }
+                    }
                     a.DebugLog();
                 }
 
                 DateTime _dt = DateTime.Now;
-                PirateRPC.PirateRPC.SendInvocation(__ns, GetCallback(sdl.ToArray()));
+                switch (desyncReason)
+                {
+                    case desyncReason.None:
+                        PirateRPC.PirateRPC.SendInvocation(__ns, GetCallback(sdl.ToArray()));
+                        break;
+                    case desyncReason.Jobs:
+                        PirateRPC.PirateRPC.SendInvocation(__ns, uuu => { Messages.Message("Session desynchronized! Reason : different colonist jobs", RimWorld.MessageTypeDefOf.ThreatBig, true); });
+                        break;
+                    case desyncReason.Rng:
+                        PirateRPC.PirateRPC.SendInvocation(__ns, uuu => { Messages.Message("Session desynchronized! Reason : different control random numbers", RimWorld.MessageTypeDefOf.ThreatBig, true); });
+                        break;
+                }
                 NetDemo.log("invocation took " + (DateTime.Now - dt).TotalMilliseconds);
             }
 
