@@ -35,6 +35,18 @@ namespace CooperateRim
         }
     }*/
 
+    [HarmonyPatch(typeof(KeyBindingDef))]
+    [HarmonyPatch("get_IsDownEvent")]
+    class KeyBindingDefPatch
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(bool __result)
+        {
+            __result = false;
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
     [HarmonyPatch("TryTakeOrderedJob")]
     class JobTrackerPatch_

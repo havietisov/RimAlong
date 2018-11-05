@@ -148,16 +148,22 @@ public class LocalDB
                         }
                         else
                         {
-                            if (jobsToVerify.Count != a.colonistJobsToVerify.Count || !jobsToVerify.All(__data => a.colonistJobsToVerify.Contains(__data)))
+                            if (jobsToVerify.Count != a.colonistJobsToVerify.Count || !jobsToVerify.All(__data => a.colonistJobsToVerify.Any( uu => uu.SequenceEqual(__data))))
                             {
-                                foreach (string s in jobsToVerify)
+                                if (jobsToVerify.Count != a.colonistJobsToVerify.Count)
                                 {
-                                    NetDemo.log("DESYNC DATA 1: " + s);
+                                    NetDemo.log("JOBS COUNT IS DIFFERENT!" + jobsToVerify.Count + " != " + a.colonistJobsToVerify.Count);
                                 }
-
-                                foreach (string s in a.colonistJobsToVerify)
+                                else
                                 {
-                                    NetDemo.log("DESYNC DATA 2: " + s);
+                                    string ds = "";
+
+                                    for (int i =0; i < jobsToVerify.Count; i++)
+                                    {
+                                        ds += ("JOBSDUMP : " + jobsToVerify[i] + " != " + a.colonistJobsToVerify[i]) + "\r\n";
+                                    }
+                                    
+                                    NetDemo.log(ds);
                                 }
 
                                 desyncReason = desyncReason.Jobs;
