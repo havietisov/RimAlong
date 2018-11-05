@@ -194,6 +194,7 @@ namespace CooperateRim
             public HaulMode haulMode;
             public S_Pawn pawn;
             public string jobDef;
+            public int count;
             public S_LocalTargetInfo jobTargetA;
             public S_LocalTargetInfo jobTargetB;
             public S_LocalTargetInfo jobTargetC;
@@ -548,7 +549,7 @@ namespace CooperateRim
                         SyncTickData buffered = singleton;
                         MemoryStream fs = new MemoryStream();
                         singleton = new SyncTickData();
-                        CooperateRimming.Log("sending data for tick " + tickNum);
+                        //CooperateRimming.Log("sending data for tick " + tickNum);
                         NetDemo.PushStateToDirectory(cliendID, tickNum, buffered, 0);
                         fs.Close();
                         return true;
@@ -866,6 +867,7 @@ namespace CooperateRim
                     CooperateRimming.Log("pawn :" + pawn + "]");
 
                     Job job = new Job(workTypeDef);
+                    job.count = _job.count;
 
                     try
                     {
@@ -1253,7 +1255,7 @@ namespace CooperateRim
             CooperateRimming.Log(s);
             //CooperateRimming.Log(job.ToString() + " |1| " + job.playerForced + " |2| " + job.forceSleep + " |3| " + job.restUntilHealed + " |4| " + job.haulDroppedApparel + " |5| " + job.ignoreDesignations + " |6| " + job.ignoreJoyTimeAssignment + " |7| " + job.ignoreForbidden + " |8| " + job.locomotionUrgency + " |9| " + job.haulMode + " |10| " + cell + " |11| " + job.def.defName + " |12| " + pawn + " |13| " + job.targetA + " |14| " + job.targetB + " |15| " + job.targetC);
             {
-                singleton.jobsToSerialize.Add(new FinalJobData() { playerForced = job.playerForced, forceSleep = job.forceSleep, restUntilHealed = job.restUntilHealed, haulDroppedApparel = job.haulDroppedApparel, ignoreDesignations = job.ignoreDesignations, ignoreAssignment = job.ignoreJoyTimeAssignment, ignoreForbidden = job.ignoreForbidden, locomotionUrgency = job.locomotionUrgency, haulMode = job.haulMode, cell = cell, jobDef = job.def.defName, pawn = pawn, jobTargetA = job.targetA, jobTargetB = job.targetB, jobTargetC = job.targetC });
+                singleton.jobsToSerialize.Add(new FinalJobData() { count = job.count, playerForced = job.playerForced, forceSleep = job.forceSleep, restUntilHealed = job.restUntilHealed, haulDroppedApparel = job.haulDroppedApparel, ignoreDesignations = job.ignoreDesignations, ignoreAssignment = job.ignoreJoyTimeAssignment, ignoreForbidden = job.ignoreForbidden, locomotionUrgency = job.locomotionUrgency, haulMode = job.haulMode, cell = cell, jobDef = job.def.defName, pawn = pawn, jobTargetA = job.targetA, jobTargetB = job.targetB, jobTargetC = job.targetC });
             }
         }
 

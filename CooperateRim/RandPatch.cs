@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Verse;
+using Verse.AI;
 using Verse.Sound;
 
 namespace CooperateRim
@@ -52,9 +53,15 @@ namespace CooperateRim
     public class SoundStarterPatchPlayOneShotOnCamera
     {
         [HarmonyPrefix]
-        public static bool PlayOneShotOnCamera()
+        public static void Prefix()
         {
-            return false;
+            getValuePatch.GuardedPush();
+        }
+
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            getValuePatch.GuardedPop();
         }
     }
 
@@ -62,9 +69,48 @@ namespace CooperateRim
     public class SoundStarterPatchPlayOneShot
     {
         [HarmonyPrefix]
-        public static bool PlayOneShot()
+        public static void Prefix()
         {
-            return false;
+            getValuePatch.GuardedPush();
+        }
+
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            getValuePatch.GuardedPop();
+        }
+    }
+
+    [HarmonyPatch(typeof(SustainerManager))]
+    [HarmonyPatch("SustainerManagerUpdate")]
+    public class SustainerManagerUpdate_patch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            getValuePatch.GuardedPush();
+        }
+
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            getValuePatch.GuardedPop();
+        }
+    }
+
+    [HarmonyPatch(typeof(Mote), MethodType.Constructor, new Type[] {})]
+    public class Mote_patch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            getValuePatch.GuardedPush();
+        }
+
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            getValuePatch.GuardedPop();
         }
     }
 
@@ -72,31 +118,15 @@ namespace CooperateRim
     public class Sample_patch
     {
         [HarmonyPrefix]
-        public static bool Prefix(SubSoundDef def, Sample __instance,  ref Dictionary<SoundParamTarget, float> ___volumeInMappings)
+        public static void Prefix()
         {
-            __instance.subDef = def;
-            __instance.resolvedVolume = def.volumeRange.max;
-            __instance.resolvedPitch = def.pitchRange.max;// UnityEngine.Random.Range(def.pitchRange.min, def.pitchRange.max);
-            __instance.startRealTime = UnityEngine.Time.realtimeSinceStartup;
-            if (Current.ProgramState == ProgramState.Playing)
-            {
-                __instance.startTick = Find.TickManager.TicksGame;
-            }
-            else
-            {
-                __instance.startTick = 0;
-            }
+            getValuePatch.GuardedPush();
+        }
 
-            if (___volumeInMappings == null)
-            {
-                ___volumeInMappings = new Dictionary<SoundParamTarget, float>();
-            }
-
-            foreach (SoundParamTarget_Volume item in (from m in __instance.subDef.paramMappings select m.outParam).OfType<SoundParamTarget_Volume>())
-            {
-                ___volumeInMappings.Add(item, 0f);
-            }
-            return false;
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            getValuePatch.GuardedPop();
         }
     }
 
@@ -104,10 +134,15 @@ namespace CooperateRim
     public class SubSoundVolume
     {
         [HarmonyPrefix]
-        public static bool Prefix(ref float __result, SubSoundDef __instance )
+        public static void Prefix()
         {
-            __result = UnityEngine.Random.Range(__instance.volumeRange.min, __instance.volumeRange.max) / 100f;
-            return false;
+            getValuePatch.GuardedPush();
+        }
+
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            getValuePatch.GuardedPop();
         }
     }
 
@@ -117,18 +152,13 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static void Prefix()
         {
-            CooperateRimming.dumpRand = false;
-            Rand.PushState(System.DateTime.Now.GetHashCode());
+            getValuePatch.GuardedPush();
         }
 
         [HarmonyPostfix]
-        public static void Postfix()
+        public static void postfix()
         {
-            Rand.PopState();
-            if (Current.Game != null)
-            {
-                CooperateRimming.dumpRand = false;
-            }
+            getValuePatch.GuardedPop();
         }
     }
 
@@ -136,10 +166,15 @@ namespace CooperateRim
     public class soundRootPatch
     {
         [HarmonyPrefix]
-        public static bool Update()
+        public static void Prefix()
         {
+            getValuePatch.GuardedPush();
+        }
 
-            return false;
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            getValuePatch.GuardedPop();
         }
     }
 
@@ -147,15 +182,90 @@ namespace CooperateRim
     public class music__MusicUpdate
     {
         [HarmonyPrefix]
-        /*
-            Verse.GenCollection::RandomElementByWeight
-            RimWorld.MusicManagerPlay::ChooseNextSong
-            RimWorld.MusicManagerPlay::StartNewSong
-            RimWorld.MusicManagerPlay::MusicUpdate
-        */
-        public static bool MusicUpdate()
+        public static void Prefix()
         {
-            return false;
+            getValuePatch.GuardedPush();
+        }
+
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            getValuePatch.GuardedPop();
+        }
+    }
+
+    [HarmonyPatch(typeof(Pawn_MeleeVerbs))]
+    [HarmonyPatch("ChooseMeleeVerb")]
+    public class Pawn_MeleeVerbs_patch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            getValuePatch.GuardedPush();
+        }
+
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            getValuePatch.GuardedPop();
+        }
+    }
+
+    [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
+    public class getValuePatch
+    {
+        public static int rand_guard = 0;
+
+        public static void GuardedPush()
+        {
+            getValuePatch.rand_guard++;
+            Verse.Rand.PushState();
+        }
+
+        public static void GuardedPop()
+        {
+            Verse.Rand.PopState();
+            getValuePatch.rand_guard--;
+        }
+
+
+        [HarmonyPostfix]
+        public static void get_Value(ref uint ___iterations, ref float __result)
+        {
+            if (rand_guard == 0)
+            {
+                System.Diagnostics.StackTrace st = new StackTrace();
+
+                foreach (var a in st.GetFrames())
+                {
+                    if (a.GetMethod().DeclaringType == typeof(TickManagerPatch))
+                    {
+                        return;
+                    }
+
+                    if (a.GetMethod().DeclaringType == typeof(Verse.Map) && a.GetMethod().Name == "MapUpdate")
+                    {
+                        return;
+                    }
+                }
+
+                CooperateRimming.Log(">>>>>>>>>>>>>>> FOUL RAND CALL");
+            }
+            //if (CooperateRimming.dumpRand)
+            {
+                /*
+                int tick = Current.Game == null ? -1 : Find.TickManager.TicksGame;
+                StackTrace tr = new StackTrace();
+                streamholder.WriteLine("====STACK====", "state");
+
+                foreach (var frame in tr.GetFrames())
+                {
+                    streamholder.WriteLine(frame.GetMethod().ReflectedType + "::" + frame.GetMethod().Name, "state");
+                }
+
+                streamholder.WriteLine("====END====", "state");
+                streamholder.WriteLine(__result + " at  iter  " + ___iterations + " at tick " + tick, "state");*/
+            }
         }
     }
 
