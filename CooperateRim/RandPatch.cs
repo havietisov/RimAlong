@@ -210,8 +210,8 @@ namespace CooperateRim
             getValuePatch.GuardedPop();
         }
     }
-
-    [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
+    
+    //[HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
     public class getValuePatch
     {
         public static int rand_guard = 0;
@@ -228,7 +228,7 @@ namespace CooperateRim
             getValuePatch.rand_guard--;
         }
 
-
+        
         [HarmonyPostfix]
         public static void get_Value(ref uint ___iterations, ref float __result)
         {
