@@ -383,7 +383,7 @@ namespace CooperateRim
                     Current.Game.InitData = new GameInitData();
                     Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
                     Find.Scenario.PreConfigure();
-                    string stringseed = "horrific_bullshit";// GenText.RandomSeedString();
+                    string stringseed = GenText.RandomSeedString();
                     Current.Game.storyteller = new Storyteller(StorytellerDefOf.Cassandra, DifficultyDefOf.Rough);
                     Current.Game.World = WorldGenerator.GenerateWorld(0.05f, stringseed, OverallRainfall.Normal, OverallTemperature.Normal);
                     for (int i = 0; i < 500; i++)
