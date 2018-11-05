@@ -69,7 +69,141 @@ namespace CooperateRim
         }
     }
 
-    
+    [HarmonyPatch(typeof(ThingFilter), "SetAllowAll", new System.Type[] { typeof(ThingFilter) })]
+    public class ThingFilter_setallowall_wrapper
+    {
+        internal static bool avoid_internal_loop = false;
+
+        public static void ThingFilter_setallowall_zone(int thingIDNumber, bool actuallyDisallow)
+        {
+            avoid_internal_loop = true;
+            try
+            {
+                IStoreSettingsParent storeSettings = null;
+                Zone z = Find.CurrentMap.zoneManager.AllZones.First(u => u.ID == thingIDNumber);
+
+                if (z as IStoreSettingsParent != null)
+                {
+                    storeSettings = z as IStoreSettingsParent;
+                }
+
+                if (storeSettings != null)
+                {
+                    if (!actuallyDisallow)
+                    {
+                        storeSettings.GetStoreSettings().filter.SetAllowAll(null);
+                    }
+                    else
+                    {
+                        storeSettings.GetStoreSettings().filter.SetDisallowAll();
+                    }
+                }
+            }
+            finally
+            {
+                avoid_internal_loop = false;
+            }
+        }
+
+        public static void ThingFilter_setallowall_thing(int thingIDNumber, bool actuallyDisallow)
+        {
+
+        }
+
+        public static void ThingFilter_setallowall_bill(int thingIDNumber, int billNumber, bool actuallyDisallow)
+        {
+
+        }
+
+        [HarmonyPrefix]
+        public static bool Prefix(ThingFilter __instance)
+        {
+            if (!avoid_internal_loop)
+            {
+                if (Find.CurrentMap != null)
+                {
+                    if (ThingFilterPatch.thingFilterCallerStack.Count > 0)
+                    {
+                        object o = ThingFilterPatch.thingFilterCallerStack.Peek();
+                        CooperateRimming.Log("SetAllow :::::::::: " + o);
+
+                        if (o is Zone)
+                        {
+                            ThingFilter_setallowall_zone((o as Zone).ID, false);
+                        }
+
+                        if (o is Thing)
+                        {
+                            ThingFilter_setallowall_thing((o as Thing).thingIDNumber, false);
+                        }
+
+                        if (o is Bill)
+                        {
+                            Bill b = o as Bill;
+                            BillStack bs = b.billStack;
+                            Thing t = bs.billGiver as Thing;
+                            int index = bs.Bills.IndexOf(b);
+                            ThingFilter_setallowall_bill(t.thingIDNumber, index, false);
+                            CooperateRimming.Log("this actions is yet invalid for bills! giver is " + t);
+                        }
+                    }
+                    //SyncTickData.AppendSyncTickDataDeltaFilter(thingDef, Find.Selector.SingleSelectedThing, Find.Selector.SelectedZone, allow);
+                }
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(ThingFilter), "SetDisallowAll")]
+    public class ThingFilter_setdisallowall_wrapper
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(ThingFilter __instance)
+        {
+            if (!ThingFilter_setallowall_wrapper.avoid_internal_loop)
+            {
+                if (Find.CurrentMap != null)
+                {
+                    if (ThingFilterPatch.thingFilterCallerStack.Count > 0)
+                    {
+                        object o = ThingFilterPatch.thingFilterCallerStack.Peek();
+                        CooperateRimming.Log("SetAllow :::::::::: " + o);
+
+                        if (o is Zone)
+                        {
+                            ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone((o as Zone).ID, true);
+                        }
+
+                        if (o is Thing)
+                        {
+                            ThingFilter_setallowall_wrapper.ThingFilter_setallowall_thing((o as Thing).thingIDNumber, true);
+                        }
+
+                        if (o is Bill)
+                        {
+                            Bill b = o as Bill;
+                            BillStack bs = b.billStack;
+                            Thing t = bs.billGiver as Thing;
+                            int index = bs.Bills.IndexOf(b);
+                            ThingFilter_setallowall_wrapper.ThingFilter_setallowall_bill(t.thingIDNumber, index, true);
+                            CooperateRimming.Log("this actions is yet invalid for bills! giver is " + t);
+                        }
+                    }
+                    //SyncTickData.AppendSyncTickDataDeltaFilter(thingDef, Find.Selector.SingleSelectedThing, Find.Selector.SelectedZone, allow);
+                }
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(ThingFilter), "SetAllow", new System.Type[] { typeof(ThingDef), typeof(bool) })]
     public class ThingFilter_wrapper
     {

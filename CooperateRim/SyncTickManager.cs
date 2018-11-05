@@ -26,7 +26,7 @@ namespace CooperateRim
         public static int nextCommunicationTick = 0;
         public static int clientsInSync = 0;
         public static bool imInSync;
-        public static int syncRoundLength = 20;
+        public static int syncRoundLength = 50;
         public static int syncTickRoundOffset = 4;
         public static bool IsSyncTick;
         static Stopwatch sw;
