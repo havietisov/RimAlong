@@ -53,11 +53,12 @@ namespace CooperateRim
     public class SoundStarterPatchPlayOneShotOnCamera
     {
         [HarmonyPrefix]
-        public static void Prefix()
+        public static bool Prefix()
         {
             getValuePatch.GuardedPush();
+            return false;
         }
-
+        
         [HarmonyPostfix]
         public static void postfix()
         {
@@ -69,9 +70,10 @@ namespace CooperateRim
     public class SoundStarterPatchPlayOneShot
     {
         [HarmonyPrefix]
-        public static void Prefix()
+        public static bool Prefix()
         {
             getValuePatch.GuardedPush();
+            return false;
         }
 
         [HarmonyPostfix]
@@ -86,15 +88,33 @@ namespace CooperateRim
     public class SustainerManagerUpdate_patch
     {
         [HarmonyPrefix]
-        public static void Prefix()
+        public static bool Prefix()
         {
             getValuePatch.GuardedPush();
+            return false;
         }
 
         [HarmonyPostfix]
         public static void postfix()
         {
             getValuePatch.GuardedPop();
+        }
+    }
+
+    [HarmonyPatch(typeof(Selector), "Select")]
+    public class Selector__patch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(ref bool playSound)
+        {
+            //playSound = false;
+            //getValuePatch.GuardedPush();
+        }
+
+        [HarmonyPostfix]
+        public static void postfix()
+        {
+            //getValuePatch.GuardedPop();
         }
     }
 
@@ -193,7 +213,7 @@ namespace CooperateRim
             getValuePatch.GuardedPop();
         }
     }
-
+    
     [HarmonyPatch(typeof(Pawn_MeleeVerbs))]
     [HarmonyPatch("ChooseMeleeVerb")]
     public class Pawn_MeleeVerbs_patch
@@ -210,11 +230,24 @@ namespace CooperateRim
             getValuePatch.GuardedPop();
         }
     }
-    
-    //[HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
+
+    [HarmonyPatch(typeof(Designator_ZoneAdd), "SelectedUpdate")]
+    public class zone_add_p
+    {
+        [HarmonyPrefix]
+        public static bool prefix()
+        {
+            CooperateRimming.Log(">>>>>>>>>>>>>>>>>>>>>>> selected update bullshit");
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
     public class getValuePatch
     {
         public static int rand_guard = 0;
+
+        public static List<string> diagData = new List<string>();
 
         public static void GuardedPush()
         {
@@ -228,28 +261,55 @@ namespace CooperateRim
             getValuePatch.rand_guard--;
         }
 
-        
+        public static void SendDiagDataToServer()
+        {
+            string s = "";
+            int cid = SyncTickData.cliendID;
+
+            foreach (var a in diagData)
+            {
+                s += a;
+            }
+
+            if (s.Length > 0)
+            {
+                //System.IO.File.WriteAllText("G:\\CoopReplays\\" + (cid + "_tick_" + Find.TickManager.TicksGame) + ".txt", s);
+            }
+        }
+
+        static int clid = 0;
+
+        public static int getclid()
+        {
+            return clid++;
+        }
+
         [HarmonyPostfix]
         public static void get_Value(ref uint ___iterations, ref float __result)
         {
-            if (rand_guard == 0)
+            if (Current.Game != null && Find.TickManager.TicksGame > 0)
             {
-                System.Diagnostics.StackTrace st = new StackTrace();
 
-                foreach (var a in st.GetFrames())
+                //int tick = Current.Game == null ? -1 : Find.TickManager.TicksGame;
+                //StackTrace tr = new StackTrace();
+                //string s = "";
+
+                bool bb = false;
+                
+                
                 {
-                    if (a.GetMethod().DeclaringType == typeof(TickManagerPatch))
+                    //foreach (var b in tr.GetFrames())
                     {
-                        return;
-                    }
-
-                    if (a.GetMethod().DeclaringType == typeof(Verse.Map) && a.GetMethod().Name == "MapUpdate")
-                    {
-                        return;
+                        //System.IO.File.AppendAllText("G:\\CoopReplays\\" + (SyncTickData.cliendID + "_tick_" + Find.TickManager.TicksGame) + ".txt", b.GetMethod().Name + "::" + b.GetMethod().ReflectedType + " || " + "\r\n");
                     }
                 }
-
-                CooperateRimming.Log(">>>>>>>>>>>>>>> FOUL RAND CALL");
+                /*
+                foreach (var frame in tr.GetFrames())
+                {
+                    streamholder.WriteLine(frame.GetMethod().ReflectedType + "::" + frame.GetMethod().Name, "state");
+                }*/
+                
+                //CooperateRimming.Log(">>>>>>>>>>>>>>> FOUL RAND CALL");
             }
             //if (CooperateRimming.dumpRand)
             {

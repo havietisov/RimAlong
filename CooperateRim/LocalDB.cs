@@ -113,18 +113,13 @@ public class LocalDB
         if (HasFullData(tickID, SyncTickData.clientCount)/* && playerStateTable[clientID] < tickID*/)
         {
             NetDemo.log("dictionary lookup took " + (DateTime.Now - dt).TotalMilliseconds);
-
             sdl = new List<SyncTickData>(data[tickID]);
-
             int? randomV = null;
             List<string> jobsToVerify = null;
             desyncReason desyncReason = desyncReason.None;
             
-
             foreach (var __ns in NetDemo.allClients)
             {
-                
-
                 foreach (var a in sdl)
                 {
                     {
@@ -184,7 +179,8 @@ public class LocalDB
                         PirateRPC.PirateRPC.SendInvocation(__ns, uuu => { Messages.Message("Session desynchronized! Reason : different colonist jobs", RimWorld.MessageTypeDefOf.ThreatBig, true); });
                         break;
                     case desyncReason.Rng:
-                        PirateRPC.PirateRPC.SendInvocation(__ns, uuu => { Messages.Message("Session desynchronized! Reason : different control random numbers", RimWorld.MessageTypeDefOf.ThreatBig, true); });
+                        NetDemo.log("Session desynchronized! Reason : different control random numbers");
+                        PirateRPC.PirateRPC.SendInvocation(__ns, uuu => { Messages.Message("Session desynchronized! Reason : different control random numbers", RimWorld.MessageTypeDefOf.ThreatBig, true);  });
                         break;
                 }
                 NetDemo.log("invocation took " + (DateTime.Now - dt).TotalMilliseconds);
