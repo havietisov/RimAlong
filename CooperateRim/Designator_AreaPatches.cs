@@ -3,6 +3,7 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Verse;
 
@@ -41,8 +42,7 @@ namespace CooperateRim
             }*/
         }
     }
-
-
+    
     [HarmonyPatch(typeof(Designator_ZoneDelete))]
     [HarmonyPatch("DesignateSingleCell")]
     class Designator_patch__
@@ -95,6 +95,106 @@ namespace CooperateRim
                 return true;
             }
         }
+        /*
+        public static void DesignateMultiCell_fix(Designator_ZoneAdd __instance, IEnumerable<IntVec3> cells, Type zoneTypeToPlace)
+        {
+            List<IntVec3> list = cells.ToList<IntVec3>();
+            Zone SelectedZone = null;
+            MethodInfo mi = __instance.GetType().GetMethod("MakeNewZone", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+            if (list.Count == 1)
+            {
+                Zone zone = __instance.Map.zoneManager.ZoneAt(list[0]);
+                if (zone != null)
+                {
+                    if (zone.GetType() == zoneTypeToPlace)
+                    {
+                        //__instance.SelectedZone = zone;
+                    }
+                    return;
+                }
+            }
+            if (SelectedZone == null)
+            {
+                Zone zone2 = null;
+                foreach (IntVec3 c3 in cells)
+                {
+                    Zone zone3 = __instance.Map.zoneManager.ZoneAt(c3);
+                    if (zone3 != null && zone3.GetType() == zoneTypeToPlace)
+                    {
+                        if (zone2 == null)
+                        {
+                            zone2 = zone3;
+                        }
+                        else if (zone3 != zone2)
+                        {
+                            zone2 = null;
+                            break;
+                        }
+                    }
+                }
+                SelectedZone = zone2;
+            }
+            list.RemoveAll((IntVec3 c) => __instance.Map.zoneManager.ZoneAt(c) != null);
+            if (list.Count == 0)
+            {
+                return;
+            }
+            if (TutorSystem.TutorialMode && !TutorSystem.AllowAction(new EventPack(__instance.TutorTagDesignate, list)))
+            {
+                return;
+            }
+            if (SelectedZone == null)
+            {
+                SelectedZone = (Zone)mi.Invoke(__instance, new object[] { });
+                SelectedZone.Map.zoneManager.RegisterZone(SelectedZone);
+                SelectedZone.AddCell(list[0]);
+                list.RemoveAt(0);
+            }
+            bool somethingSucceeded;
+            for (; ; )
+            {
+                somethingSucceeded = true;
+                int count = list.Count;
+                for (int i = list.Count - 1; i >= 0; i--)
+                {
+                    bool flag = false;
+                    for (int j = 0; j < 4; j++)
+                    {
+                        IntVec3 c2 = list[i] + GenAdj.CardinalDirections[j];
+                        if (c2.InBounds(__instance.Map))
+                        {
+                            if (__instance.Map.zoneManager.ZoneAt(c2) == SelectedZone)
+                            {
+                                flag = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (flag)
+                    {
+                        SelectedZone.AddCell(list[i]);
+                        list.RemoveAt(i);
+                    }
+                }
+                if (list.Count == 0)
+                {
+                    break;
+                }
+                if (list.Count == count)
+                {
+                    SelectedZone = (Zone)mi.Invoke(__instance, new object[] { });
+                    __instance.Map.zoneManager.RegisterZone(SelectedZone);
+                    SelectedZone.AddCell(list[0]);
+                    list.RemoveAt(0);
+                }
+            }
+            SelectedZone.CheckContiguous();
+            __instance.Finalize(somethingSucceeded);
+            TutorSystem.Notify_Event(new EventPack(__instance.TutorTagDesignate, list));
+            List<IntVec3> cellList = SelectedZone.Cells;
+            cellList.GetEnumerator();
+        }*/
 
         public static bool DesignateMultiCell(ref Designator __instance, IEnumerable<IntVec3> cells)
         {
@@ -113,6 +213,22 @@ namespace CooperateRim
                 return true;
             }
         }
+        
+        /*
+        public static bool DesignateMultiCell_for_zone_add(ref Designator_ZoneAdd __instance, IEnumerable<IntVec3> cells, Type ___zoneTypeToPlace)
+        {
+            CooperateRimming.Log("DesignateMultiCell_1");
+            if (!SyncTickData.AvoidLoop)
+            {
+                SyncTickData.AppendSyncTickData(__instance, cells);
+                return false;
+            }
+            else
+            {
+                DesignateMultiCell_fix(__instance, cells, ___zoneTypeToPlace);
+                return false;
+            }
+        }*/
 
         public static bool FinalizeDesignationSucceeded(ref Designator __instance)
         {

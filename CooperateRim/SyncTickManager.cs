@@ -50,6 +50,8 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref int ___ticksGameInt, ref TickManager __instance)
         {
+            getValuePatch.SendDiagDataToServer();
+            getValuePatch.diagData.Clear();
             CooperateRimming.dumpRand = true;
             if (sw == null)
             {
@@ -156,6 +158,7 @@ namespace CooperateRim
                             //SyncTickData.Apply(___ticksGameInt);
                             //__instance.DoSingleTick();
                             Rand.PopState();
+
                             imInSync = false;
                         }
                     }

@@ -630,7 +630,7 @@ namespace CooperateRim
 
             try
             {
-
+                Zone oldZone = Find.Selector.SelectedZone;
                 //CooperateRimming.Log("deserialized designations : " + designations.Count);
                 lockD = 1;
                 foreach (var des in designations)
@@ -969,6 +969,21 @@ namespace CooperateRim
                     //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
                     AvoidLoop = false;
                 }
+                /*
+                Rand.PushState();
+                if (oldZone != Find.Selector.SelectedZone)
+                {
+                    if (oldZone == null)
+                    {
+                        Find.Selector.Deselect(Find.Selector.SelectedZone);
+                    }
+                    else
+                    {
+                        Find.Selector.Deselect(Find.Selector.SelectedZone);
+                        Find.Selector.Select(oldZone);
+                    }
+                }
+                Rand.PopState();*/
 
                 lockD = 13;
                 foreach (COMMAND_TOGGLE_INDEXED_CALLS call in toggleCommandIndexedCalls)
@@ -1243,12 +1258,24 @@ namespace CooperateRim
                 }
 
                 lockD = 22;
+
+
+
+                Zone zz = Find.Selector.SelectedZone;
+
+                if (zz != null)
+                {
+                    zz.Cells.GetEnumerator();//failsafe for release mode
+                    if (oldZone != zz)
+                    {
+                        Find.Selector.SelectedZone = oldZone;
+                    }
+                }
             }
             catch (Exception ee)
             {
                 CooperateRimming.Log("sync tick data exception at stage " + lockD + "\r\n" + ee.ToString());
             }
-
             AvoidLoop = false;
         }
 

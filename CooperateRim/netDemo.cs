@@ -13,7 +13,7 @@ public class NetDemo
     public static Action<string> log = u => { new Action(Console.WriteLine).BeginInvoke(k => { Console.WriteLine(u); }, u); };
     public static int dispatchedActionCounter;
     static TcpClient tc;
-    static NetworkStream ns;
+    public static NetworkStream ns;
     public static LinkedList<NetworkStream> allClients = new LinkedList<NetworkStream>();
     static int streamLocker;
 
