@@ -1258,8 +1258,7 @@ namespace CooperateRim
                 }
 
                 lockD = 22;
-
-
+                Find.CurrentMap.zoneManager.AllZones.ForEach(u => { u.Cells.GetEnumerator(); });
 
                 Zone zz = Find.Selector.SelectedZone;
 

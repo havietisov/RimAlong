@@ -59,6 +59,20 @@ namespace CooperateRim
                 ACKSW = new Stopwatch();
                 sw.Start();
                 ACKSW.Start();
+
+
+                if (!imInSync)
+                {
+                    if (nextCommunicationTick == Verse.Find.TickManager.TicksGame)
+                    {
+                        imInSync = SyncTickData.FlushSyncTickData(nextProcessionTick + syncRoundLength * syncTickRoundOffset);
+                    }
+                }
+
+                for (; cachedData == null;)
+                {
+
+                }
             }
             shouldReallyTick = false;
             
