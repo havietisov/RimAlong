@@ -13,6 +13,7 @@ using Verse.AI;
 
 namespace CooperateRim
 {
+
     public class CooperateRimming : ModBase
     {
         public override string ModIdentifier => "CooperateRim.CooperateRimming";
@@ -69,6 +70,8 @@ namespace CooperateRim
                 }
             }*/
 
+            Prefs.PauseOnLoad = false;
+            Prefs.RunInBackground = true;
             SerializationService.Initialize();
             ParrotWrapper.Initialize();
 
@@ -379,6 +382,14 @@ namespace CooperateRim
                 {
                     NetDemo.WaitForConnection(hostName);
                     Rand.PushState(0);
+
+                    ThinkTreeKeyAssigner.Reset();
+
+                    foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
+                    {
+                        ThinkTreeKeyAssigner.AssignKeys(def.thinkRoot, 0);
+                    }
+
                     Current.Game = new Game();
                     Current.Game.InitData = new GameInitData();
                     Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
