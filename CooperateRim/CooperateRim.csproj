@@ -64,7 +64,9 @@
     <Compile Include="BillPatches.cs" />
     <Compile Include="BillStack.cs" />
     <Compile Include="CommonSurrogates.cs" />
+    <Compile Include="ContextualizedRand.cs" />
     <Compile Include="CooperateRimming.cs" />
+    <Compile Include="CRandStuff.cs" />
     <Compile Include="DesignationManagerPatch.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
     <Compile Include="ExpressionHelper.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="RandPatch.cs" />
     <Compile Include="ReverseBillTable.cs" />
     <Compile Include="MemberTracker.cs" />
+    <Compile Include="root_play_fields.cs" />
     <Compile Include="StoreUtility.cs" />
     <Compile Include="SerializationService.cs" />
     <Compile Include="SyncTickData.cs" />
