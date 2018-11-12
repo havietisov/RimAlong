@@ -95,7 +95,7 @@ public class LocalDB
     public static Action<Stream> GetCallback(SyncTickData[] ds)
     {
         DateTime dt = DateTime.UtcNow;
-        return u => { TickManagerPatch.SetCachedData(ds); /*CooperateRimming.Log("Message delivery took " + (DateTime.UtcNow - dt).TotalMilliseconds.ToString());*/ };
+        return u => { TickManagerPatch.SetCachedData(ds); /*RimLog.Message("Message delivery took " + (DateTime.UtcNow - dt).TotalMilliseconds.ToString());*/ };
     }
 
     enum desyncReason

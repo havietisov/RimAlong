@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteDirectoryServer", "Re
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParrotPatchTest", "ParrotPatchTest\ParrotPatchTest.csproj", "{785A782F-8B0E-44C2-8BA8-679295FDA744}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CooperateRimTests", "CooperateRimTests\CooperateRimTests.csproj", "{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{785A782F-8B0E-44C2-8BA8-679295FDA744}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{785A782F-8B0E-44C2-8BA8-679295FDA744}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{785A782F-8B0E-44C2-8BA8-679295FDA744}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

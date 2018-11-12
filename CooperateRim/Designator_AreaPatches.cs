@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using CooperateRim.Utilities;
+using Harmony;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref Designator __instance, ref IntVec3 c, ref BuildableDef ___entDef, ref Rot4 ___placingRot, ref ThingDef ___stuffDef)
         {
-            CooperateRimming.Log("Designator_Build designate single cell " + (___stuffDef == null ? "null" : ___stuffDef.ToString()) + " || " + (___stuffDef == null ? "null" : ___stuffDef.defName));
+            RimLog.Message("Designator_Build designate single cell " + (___stuffDef == null ? "null" : ___stuffDef.ToString()) + " || " + (___stuffDef == null ? "null" : ___stuffDef.defName));
             ThingDef td = ___stuffDef;
 
             if (!SyncTickData.AvoidLoop)
@@ -30,7 +31,7 @@ namespace CooperateRim
                 return true;
             }
             /*
-            CooperateRimming.Log("DesignateMultiCell_1");
+            RimLog.Message("DesignateMultiCell_1");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, cells);
@@ -50,7 +51,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool DesignateSingleCell_1(ref Designator __instance, ref IntVec3 c)
         {
-            CooperateRimming.Log("DELETE : " + __instance.GetType().AssemblyQualifiedName + ".DesignateSingleCell");
+            RimLog.Message("DELETE : " + __instance.GetType().AssemblyQualifiedName + ".DesignateSingleCell");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, c);
@@ -70,7 +71,7 @@ namespace CooperateRim
         //[HarmonyPrefix]
         public static bool DesignateSingleCell_1(ref Designator __instance, ref IntVec3 c)
         {
-            CooperateRimming.Log(__instance.GetType().AssemblyQualifiedName + ".DesignateSingleCell");
+            RimLog.Message(__instance.GetType().AssemblyQualifiedName + ".DesignateSingleCell");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, c);
@@ -84,7 +85,7 @@ namespace CooperateRim
 
         public static bool DesignateSingleCell_2(ref Designator __instance, ref IntVec3 loc)
         {
-            CooperateRimming.Log(__instance.GetType().AssemblyQualifiedName + ".DesignateSingleCell");
+            RimLog.Message(__instance.GetType().AssemblyQualifiedName + ".DesignateSingleCell");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, loc);
@@ -202,7 +203,7 @@ namespace CooperateRim
             {
                 return true;
             }
-            CooperateRimming.Log("DesignateMultiCell_1");
+            RimLog.Message("DesignateMultiCell_1");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, cells);
@@ -217,7 +218,7 @@ namespace CooperateRim
         /*
         public static bool DesignateMultiCell_for_zone_add(ref Designator_ZoneAdd __instance, IEnumerable<IntVec3> cells, Type ___zoneTypeToPlace)
         {
-            CooperateRimming.Log("DesignateMultiCell_1");
+            RimLog.Message("DesignateMultiCell_1");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, cells);
@@ -232,7 +233,7 @@ namespace CooperateRim
 
         public static bool FinalizeDesignationSucceeded(ref Designator __instance)
         {
-            CooperateRimming.Log("FinalizeDesignationSucceeded");
+            RimLog.Message("FinalizeDesignationSucceeded");
             return true;
             /*
             if (!SyncTickData.AvoidLoop)
@@ -248,7 +249,7 @@ namespace CooperateRim
 
         public static bool DesignateThing(Designator __instance, Thing t)
         {
-            CooperateRimming.Log(__instance.GetType().AssemblyQualifiedName + ".DesignateThing");
+            RimLog.Message(__instance.GetType().AssemblyQualifiedName + ".DesignateThing");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickDesignatorApplyToThing(__instance, t, t.Position);

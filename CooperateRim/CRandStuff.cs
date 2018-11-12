@@ -117,7 +117,7 @@ public class upd_r
 //                }
 //                catch (Exception arg)
 //                {
-//                    Log.Error("Error in MemoryTracker: " + arg, false);
+//                    RimLog.Message.Error("Error in MemoryTracker: " + arg, false);
 //                }
 //                try
 //                {
@@ -125,13 +125,13 @@ public class upd_r
 //                }
 //                catch (Exception arg2)
 //                {
-//                    Log.Error("Error in MapLeakTracker: " + arg2, false);
+//                    RimLog.Message.Error("Error in MapLeakTracker: " + arg2, false);
 //                }
 //            }
 //        }
 //        catch (Exception arg3)
 //        {
-//            Log.Error("Root level exception in Update(): " + arg3, false);
+//            RimLog.Message.Error("Root level exception in Update(): " + arg3, false);
 //        }
 
 //        return false;

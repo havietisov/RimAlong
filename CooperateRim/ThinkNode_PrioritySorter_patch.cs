@@ -45,7 +45,7 @@ namespace CooperateRim
                 streamholder.WriteLine(pawn + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextProcessionTick + "]", "thinktree_");
                 streamholder.WriteLine("//===FRM===", "thinktree_");
             }
-            //CooperateRimming.Log(pawn  + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextSyncTickValue + "]");
+            //CooperateRimming.RimLog.Message(pawn  + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextSyncTickValue + "]");
         }
     }
 
@@ -175,7 +175,7 @@ namespace CooperateRim
                 streamholder.WriteLine(pawn + " ::: " + __instance.GetType().ToString() +  "::TryGiveJob :: " + "[" + TickManagerPatch.nextProcessionTick + "]", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
                 streamholder.WriteLine("//===JOB===", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
             }
-            //CooperateRimming.Log(pawn  + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextSyncTickValue + "]");
+            //CooperateRimming.RimLog.Message(pawn  + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextSyncTickValue + "]");
         }
     }
 
@@ -187,7 +187,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool TryIssueJobPackage(ref List<ThinkNode> ___subNodes, Pawn pawn, ref JobIssueParams jobParams, ref ThinkResult __result)
         {
-            CooperateRimming.Log("ThinkNode_PrioritySorter::TryIssueJobPackage :: " + pawn + "[" + TickManagerPatch.nextSyncTickValue + "]");
+            CooperateRimming.RimLog.Message("ThinkNode_PrioritySorter::TryIssueJobPackage :: " + pawn + "[" + TickManagerPatch.nextSyncTickValue + "]");
             List<ThinkNode> tn = new List<ThinkNode>(___subNodes);
             //tn.Sort((u1, u2) => (int)(10000 * (u1.GetPriority(pawn) - u2.GetPriority(pawn))));
 
@@ -212,7 +212,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool TryIssueJobPackage(ref List<ThinkNode> ___subNodes, Pawn pawn, ref JobIssueParams jobParams, ref ThinkResult __result)
         {
-            CooperateRimming.Log("ThinkNode_Random::TryIssueJobPackage :: " + pawn + "[" + TickManagerPatch.nextSyncTickValue + "]");
+            CooperateRimming.RimLog.Message("ThinkNode_Random::TryIssueJobPackage :: " + pawn + "[" + TickManagerPatch.nextSyncTickValue + "]");
             List<ThinkNode> tn = new List<ThinkNode>(___subNodes);
 
             __result = ThinkResult.NoJob;

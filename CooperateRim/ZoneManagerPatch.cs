@@ -17,7 +17,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref Designator __instance, IEnumerable<IntVec3> cells)
         {
-            CooperateRimming.Log("DesignateMultiCell_1");
+            CooperateRimming.RimLog.Message("DesignateMultiCell_1");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, cells);
@@ -134,7 +134,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref Designator __instance, ref IntVec3 c, ref BuildableDef ___entDef, ref Rot4 ___placingRot, ref ThingDef ___stuffDef)
         {
-            CooperateRimming.Log("Designator_Build designate single cell " + (___stuffDef == null ? "null" : ___stuffDef.ToString()) + " || " + (___stuffDef == null ? "null" : ___stuffDef.defName) );
+            CooperateRimming.RimLog.Message("Designator_Build designate single cell " + (___stuffDef == null ? "null" : ___stuffDef.ToString()) + " || " + (___stuffDef == null ? "null" : ___stuffDef.defName) );
             ThingDef td = ___stuffDef;
            
             if (!SyncTickData.AvoidLoop)
@@ -156,7 +156,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref Designator __instance, ref IntVec3 loc)
         {
-            CooperateRimming.Log("Designator_mine designate single cell");
+            CooperateRimming.RimLog.Message("Designator_mine designate single cell");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, loc);
@@ -176,7 +176,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(Designator __instance, Thing t)
         {
-            CooperateRimming.Log("Designator_hunt designate single cell");
+            CooperateRimming.RimLog.Message("Designator_hunt designate single cell");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickDesignatorApplyToThing(__instance, t, t.Position);
@@ -196,7 +196,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref Designator __instance, ref IntVec3 c)
         {
-            CooperateRimming.Log("Designator_SmoothSurface designate single cell");
+            CooperateRimming.RimLog.Message("Designator_SmoothSurface designate single cell");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, c);
@@ -216,7 +216,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref Designator __instance, ref IntVec3 c)
         {
-            CooperateRimming.Log("Designator_cancel designate single cell");
+            CooperateRimming.RimLog.Message("Designator_cancel designate single cell");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickData(__instance, c);
@@ -236,7 +236,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref Designator __instance, ref Thing t)
         {
-            CooperateRimming.Log("Designator_cancel designate single cell");
+            CooperateRimming.RimLog.Message("Designator_cancel designate single cell");
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AppendSyncTickDesignatorApplyToThing(__instance, t, t.Position);

@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using CooperateRim.Utilities;
+using Harmony;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -125,7 +126,7 @@ namespace CooperateRim
                     if (ThingFilterPatch.thingFilterCallerStack.Count > 0)
                     {
                         object o = ThingFilterPatch.thingFilterCallerStack.Peek();
-                        CooperateRimming.Log("SetAllow :::::::::: " + o);
+                        RimLog.Message("SetAllow :::::::::: " + o);
 
                         if (o is Zone)
                         {
@@ -144,7 +145,7 @@ namespace CooperateRim
                             Thing t = bs.billGiver as Thing;
                             int index = bs.Bills.IndexOf(b);
                             ThingFilter_setallowall_bill(t.thingIDNumber, index, false);
-                            CooperateRimming.Log("this actions is yet invalid for bills! giver is " + t);
+                            RimLog.Message("this actions is yet invalid for bills! giver is " + t);
                         }
                     }
                     //SyncTickData.AppendSyncTickDataDeltaFilter(thingDef, Find.Selector.SingleSelectedThing, Find.Selector.SelectedZone, allow);
@@ -171,7 +172,7 @@ namespace CooperateRim
                     if (ThingFilterPatch.thingFilterCallerStack.Count > 0)
                     {
                         object o = ThingFilterPatch.thingFilterCallerStack.Peek();
-                        CooperateRimming.Log("SetAllow :::::::::: " + o);
+                        RimLog.Message("SetAllow :::::::::: " + o);
 
                         if (o is Zone)
                         {
@@ -190,7 +191,7 @@ namespace CooperateRim
                             Thing t = bs.billGiver as Thing;
                             int index = bs.Bills.IndexOf(b);
                             ThingFilter_setallowall_wrapper.ThingFilter_setallowall_bill(t.thingIDNumber, index, true);
-                            CooperateRimming.Log("this actions is yet invalid for bills! giver is " + t);
+                            RimLog.Message("this actions is yet invalid for bills! giver is " + t);
                         }
                     }
                     //SyncTickData.AppendSyncTickDataDeltaFilter(thingDef, Find.Selector.SingleSelectedThing, Find.Selector.SelectedZone, allow);
@@ -216,10 +217,10 @@ namespace CooperateRim
             {
                 IBillGiver billgiver = null;
                 List<Thing>[] things = (List<Thing>[])Find.CurrentMap.thingGrid.GetType().GetField("thingGrid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Find.CurrentMap.thingGrid);
-                CooperateRimming.Log("ThingFilter_setallow_bill_with_billgiver");
+                RimLog.Message("ThingFilter_setallow_bill_with_billgiver");
                 {
                     Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.thingIDNumber == thingIDNumber)).First(u => u.thingIDNumber == thingIDNumber);
-                    CooperateRimming.Log(">>>>>>>>>>> issuer :  " + issuer + " :: " + (issuer as IBillGiver));
+                    RimLog.Message(">>>>>>>>>>> issuer :  " + issuer + " :: " + (issuer as IBillGiver));
                     billgiver = issuer as IBillGiver;
                 }
 
@@ -227,18 +228,18 @@ namespace CooperateRim
                 {
                     if (!isSpecial)
                     {
-                        CooperateRimming.Log(">>>>>>>>>>> billgiver.BillStack.Bills[billIndex].ingredientFilter.SetAllow " + billIndex + " |" + thingDefName + "| " + billgiver.BillStack.Bills[billIndex]);
+                        RimLog.Message(">>>>>>>>>>> billgiver.BillStack.Bills[billIndex].ingredientFilter.SetAllow " + billIndex + " |" + thingDefName + "| " + billgiver.BillStack.Bills[billIndex]);
                         billgiver.BillStack.Bills[billIndex].ingredientFilter.SetAllow(DefDatabase<ThingDef>.GetNamed(thingDefName, true), allow);
                     }
                     else
                     {
-                        CooperateRimming.Log(">>>>>>>>>>> billgiver.BillStack.Bills[billIndex].ingredientFilter.SetAllow " + billIndex + " |" + thingDefName + "| " + billgiver.BillStack.Bills[billIndex]);
+                        RimLog.Message(">>>>>>>>>>> billgiver.BillStack.Bills[billIndex].ingredientFilter.SetAllow " + billIndex + " |" + thingDefName + "| " + billgiver.BillStack.Bills[billIndex]);
                         billgiver.BillStack.Bills[billIndex].ingredientFilter.SetAllow(DefDatabase<SpecialThingFilterDef>.GetNamed(thingDefName, true), allow);
                     }
                 }
                 else
                 {
-                    CooperateRimming.Log("missing bill giver!");
+                    RimLog.Message("missing bill giver!");
                 }
             }
             finally
@@ -299,7 +300,7 @@ namespace CooperateRim
                     }
                     else
                     {
-                        CooperateRimming.Log(">>>>>>>>>> SPECIAL : " + thingDefName + " :: " + DefDatabase<SpecialThingFilterDef>.GetNamed(thingDefName, true) + " :: ");
+                        RimLog.Message(">>>>>>>>>> SPECIAL : " + thingDefName + " :: " + DefDatabase<SpecialThingFilterDef>.GetNamed(thingDefName, true) + " :: ");
                         storeSettings.GetStoreSettings().filter.SetAllow(DefDatabase<SpecialThingFilterDef>.GetNamed(thingDefName, true), allow);
                     }
                 }
@@ -320,7 +321,7 @@ namespace CooperateRim
                     if (ThingFilterPatch.thingFilterCallerStack.Count > 0)
                     {
                         object o = ThingFilterPatch.thingFilterCallerStack.Peek();
-                        CooperateRimming.Log("SetAllow :::::::::: " + o);
+                        RimLog.Message("SetAllow :::::::::: " + o);
 
                         if (o is Zone)
                         {
@@ -339,7 +340,7 @@ namespace CooperateRim
                             Thing t = bs.billGiver as Thing;
                             int index = bs.Bills.IndexOf(b);
                             ThingFilter_setallow_bill_with_billgiver(thingDef.defName, allow, t.thingIDNumber, false, index);
-                            CooperateRimming.Log("this actions is yet invalid for bills! giver is " + t);
+                            RimLog.Message("this actions is yet invalid for bills! giver is " + t);
                         }
                     }
                     //SyncTickData.AppendSyncTickDataDeltaFilter(thingDef, Find.Selector.SingleSelectedThing, Find.Selector.SelectedZone, allow);
@@ -366,7 +367,7 @@ namespace CooperateRim
                     if (ThingFilterPatch.thingFilterCallerStack.Count > 0)
                     {
                         object o = ThingFilterPatch.thingFilterCallerStack.Peek();
-                        CooperateRimming.Log("SetAllow :::::::::: " + o);
+                        RimLog.Message("SetAllow :::::::::: " + o);
 
                         if (o is Zone)
                         {
@@ -385,7 +386,7 @@ namespace CooperateRim
                             Thing t = bs.billGiver as Thing;
                             int index = bs.Bills.IndexOf(b);
                             ThingFilter_wrapper.ThingFilter_setallow_bill_with_billgiver(sfDef.defName, allow, t.thingIDNumber, true, index);
-                            CooperateRimming.Log("this actions is yet invalid for bills! giver is " + t);
+                            RimLog.Message("this actions is yet invalid for bills! giver is " + t);
                         }
                     }
                     //SyncTickData.AppendSyncTickDataDeltaFilter(thingDef, Find.Selector.SingleSelectedThing, Find.Selector.SelectedZone, allow);
