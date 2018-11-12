@@ -38,6 +38,6 @@ public class CRand
 
     public static void set_state(ulong state)
     {
-        //set_comp_state.Invoke(null, new object[] { state });
+        set_comp_state.Invoke(null, new object[] { state });
     }
 }

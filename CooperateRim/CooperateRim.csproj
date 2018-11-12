@@ -87,6 +87,7 @@
     <Compile Include="PirateRPC.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandPatch.cs" />
+    <Compile Include="RandRootContext.cs" />
     <Compile Include="ReverseBillTable.cs" />
     <Compile Include="MemberTracker.cs" />
     <Compile Include="root_play_fields.cs" />

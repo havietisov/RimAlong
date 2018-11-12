@@ -48,7 +48,7 @@ namespace CooperateRim
 > Verse.Game::UpdatePlay
 > Verse.Root_Play::Update
          */
-
+         /*
     [HarmonyPatch(typeof(SoundStarter), "PlayOneShotOnCamera")]
     public class SoundStarterPatchPlayOneShotOnCamera
     {
@@ -64,8 +64,9 @@ namespace CooperateRim
         {
             getValuePatch.GuardedPop();
         }
-    }
+    }*/
 
+    /*
     [HarmonyPatch(typeof(SoundStarter), "PlayOneShot")]
     public class SoundStarterPatchPlayOneShot
     {
@@ -81,8 +82,9 @@ namespace CooperateRim
         {
             getValuePatch.GuardedPop();
         }
-    }
+    }*/
 
+    /*
     [HarmonyPatch(typeof(SustainerManager))]
     [HarmonyPatch("SustainerManagerUpdate")]
     public class SustainerManagerUpdate_patch
@@ -99,7 +101,7 @@ namespace CooperateRim
         {
             getValuePatch.GuardedPop();
         }
-    }
+    }*/
 
     [HarmonyPatch(typeof(Selector), "Select")]
     public class Selector__patch
@@ -258,6 +260,28 @@ namespace CooperateRim
         }
     }
 
+    [HarmonyPatch(typeof(RandomNumberGenerator_BasicHash), "GetInt")]
+    public class basic_hash_tracker
+    {
+        [HarmonyPostfix]
+        public static void Postfix(uint iterations, ref int __result, uint ___seed)
+        {
+            if (SyncTickData.cliendID >= 0 && Find.CurrentMap != null && Find.TickManager.TicksGame > 0)
+            {
+                StackTrace st = new StackTrace();
+                string s = "=======BEGIN========\r\n";
+                foreach (var f in st.GetFrames())
+                {
+                    s += f.GetMethod().ReflectedType + " (" + f.GetMethod().DeclaringType + ")::" + f.GetMethod().Name + "\r\n";
+                }
+
+                s += "=======END========";
+
+                //System.IO.File.AppendAllText("Z:/CoopReplays/" + SyncTickData.cliendID + "/" +"tick_" + Find.TickManager.TicksGame + "_seed_" + ___seed + "_iter_" + iterations + "_res_" + __result + ".txt", s);
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
     public class getValuePatch
     {
@@ -299,7 +323,7 @@ namespace CooperateRim
         {
             return clid++;
         }
-
+        
         [HarmonyPostfix]
         public static void get_Value(ref uint ___iterations, ref float __result)
         {
