@@ -92,9 +92,7 @@ namespace CooperateRim
                 if (canNormallyTick)
                 {
                     //CooperateRimming.Log("normal tick at " + Verse.Find.TickManager.TicksGame + " nsync " + nextSyncTickValue);
-                    Rand.PushState(Verse.Find.TickManager.TicksGame);
                     __instance.DoSingleTick();
-                    Rand.PopState();
                 }
 
                 if (SyncTickData.cliendID > -1 && ACKSW.ElapsedMilliseconds > 50)
@@ -138,7 +136,6 @@ namespace CooperateRim
                             //JobTrackerPatch.FlushCData();
                             shouldReallyTick = true;
                             streamholder.WriteLine("pre-deserialize tick at " + Verse.Find.TickManager.TicksGame, "tickstate");
-                            Rand.PushState(Verse.Find.TickManager.TicksGame);
                             streamholder.WriteLine("data applied at " + Verse.Find.TickManager.TicksGame, "tickstate");
 
                             //lock (LocalDB.OnApply)
@@ -171,7 +168,6 @@ namespace CooperateRim
                             }
                             //SyncTickData.Apply(___ticksGameInt);
                             //__instance.DoSingleTick();
-                            Rand.PopState();
 
                             imInSync = false;
                         }

@@ -10,6 +10,7 @@ using HugsLib;
 using System.Runtime.InteropServices;
 using RimWorld.Planet;
 using Verse.AI;
+using Verse.Sound;
 
 namespace CooperateRim
 {
@@ -105,7 +106,25 @@ namespace CooperateRim
             //ThingFilter_setallow_bill_with_billgiver(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex)
             ParrotWrapper.ParrotPatchExpressiontarget<thing_filter_wrapper_1>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex) => ThingFilter_wrapper.ThingFilter_setallow_bill_with_billgiver(thingDefName, allow, thingIDNumber, isSpecial, billIndex));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<int, bool>>((int thingIDNumber, bool actuallyDisallow) => ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone(thingIDNumber, actuallyDisallow));
+            RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
+            RandRootContext<Game>.ApplyPatch("UpdatePlay");
+            RandRootContext<UIRoot_Play>.ApplyPatch("UIRootOnGUI");
+            //RandRootContext<LetterStack>.ApplyPatch("LetterStackUpdate");
+            //RandRootContext<World>.ApplyPatch("WorldUpdate");
+            //RandRootContext<Map>.ApplyPatch("MapUpdate");
+            //RandRootContext<GameInfo>.ApplyPatch("GameInfoUpdate");
+            //RandRootContext<Game>.ApplyPatch("LoadGame");
+            RandRootContext<SustainerManager>.ApplyPatch("SustainerManagerUpdate");
+            RandRootContext<SoundStarterPlaceholder>.ApplyPatch("PlayOneShot", typeof(SoundStarter));
+            RandRootContext<SoundStarterPlaceholder2>.ApplyPatch("PlayOneShotOnCamera", typeof(SoundStarter));
+            //RandRootContext<WorldPawns>.ApplyPatch("WorldPawnsTick");
+            //RandRootContext<GamePlaceholder_1>.ApplyPatch("InitNewGame", typeof(Game));
+            //RandRootContext<ThingOwner>.ApplyPatch("ThingOwnerTick");
         }
+
+        class GamePlaceholder_1 { }
+        class SoundStarterPlaceholder { };
+        class SoundStarterPlaceholder2 { };
 
         public delegate void  thing_filter_wrapper_1(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex);
 
@@ -381,7 +400,7 @@ namespace CooperateRim
                 if (Widgets.ButtonText(r, "Connect to "))
                 {
                     NetDemo.WaitForConnection(hostName);
-                    Rand.PushState(0);
+                    Rand.PushState(8000);
 
                     ThinkTreeKeyAssigner.Reset();
 
