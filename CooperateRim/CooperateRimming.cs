@@ -1,16 +1,15 @@
 ﻿using Harmony;
 using RimWorld;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Verse;
 using System;
 using UnityEngine;
 using HugsLib;
-using System.Runtime.InteropServices;
 using RimWorld.Planet;
 using Verse.AI;
 using Verse.Sound;
+using CooperateRim.Utilities;
 
 namespace CooperateRim
 {
@@ -22,31 +21,16 @@ namespace CooperateRim
         public static bool dumpRand = false;
         public static CooperateRimming inst;
 
-        static string cachedStuff = "";
+        public CooperateRimming ()
+        {
+            RimLog.Init(this.Logger);
+        }
 
         public HarmonyInstance harmonyInst
         {
             get
             {
                 return base.HarmonyInst;
-            }
-        }
-
-        public static void Log(string val)
-        {
-            if (inst != null && inst.Logger != null)
-            {
-                if (cachedStuff.Length != 0)
-                {
-                    inst.Logger.Message(cachedStuff);
-                    cachedStuff = "";
-                }
-
-                inst?.Logger?.Message(val);
-            }
-            else
-            {
-                cachedStuff += val + "\n";
             }
         }
 
@@ -86,7 +70,7 @@ namespace CooperateRim
             u => 
             {
                 Current.Game.playSettings.useWorkPriorities = u;
-                CooperateRimming.Log("hey, it works?");
+                RimLog.Message("hey, it works?");
                 
                 foreach (Pawn pawn in PawnsFinder.AllMapsWorldAndTemporary_Alive)
                 {
@@ -135,7 +119,7 @@ namespace CooperateRim
             (typeof(Rand).GetField("random", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as RandomNumberGenerator).seed = 0;
 
             HarmonyInstance harmony = HarmonyInst;
-            Log(System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
+            RimLog.Message(System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
             List<Type> typesToPatch = new List<Type>();
             List<Type> designatorInheritees = new List<Type>();
             List<Type> leftOverTypes = new List<Type>();
@@ -249,7 +233,7 @@ namespace CooperateRim
                         MethodInfo targetmethod = AccessTools.Method(t, "DesignateMultiCell");
                         HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateMultiCell"));
                         harmony.Patch(targetmethod, prefix, null, null);
-                        Log("designator multicell patch " + t.FullName);
+                        RimLog.Message("designator multicell patch " + t.FullName);
                     }
                 }
             }
@@ -346,7 +330,7 @@ namespace CooperateRim
             public static bool Prepare()
             {
                 UnityEngine.Debug.Log("Command line args : " + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
-                Log("" + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch"));
+                RimLog.Message("" + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch"));
                 return !System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch");
             }
 
@@ -421,14 +405,14 @@ namespace CooperateRim
                         if (TileFinder.IsValidTileForNewSettlement(i))
                         {
                             Current.Game.InitData.startingTile = i;
-                            Log("Choosen tile : " + i);
+                            RimLog.Message("Choosen tile : " + i);
                             break;
                         }
                     }
 
                     foreach (Pawn p in Current.Game.InitData.startingAndOptionalPawns)
                     {
-                        Log("++++++++++++" + p.ToString());
+                        RimLog.Message("++++++++++++" + p.ToString());
                     }
                     
                     TickManagerPatch.nextFrameTime = DateTime.Now;
@@ -441,7 +425,7 @@ namespace CooperateRim
                     }
                     PageUtility.InitGameStart();
                     Rand.PopState();
-                    Log("Startseed : " + stringseed);
+                    RimLog.Message("Startseed : " + stringseed);
                 }
                 r.y += size;
                 Widgets.ButtonText(r, "MEANINGLESS BUTTON"); r.y += size;
@@ -451,7 +435,7 @@ namespace CooperateRim
 
             static void ErrorHandler(System.Exception ex)
             {
-                Log(ex.ToString());
+                RimLog.Message(ex.ToString());
             }
 
             static void GenerateMap()
@@ -461,7 +445,7 @@ namespace CooperateRim
                     //Find.Root.Start();
                 }
                 else {
-                    Log("Null root");
+                    RimLog.Message("Null root");
                 }
             }
         }

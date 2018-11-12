@@ -85,7 +85,7 @@ namespace CooperateRim
         {
             if (!SyncTickData.AvoidLoop)
             {
-                CooperateRimming.Log(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
+                CooperateRimming.RimLog.Message(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
                 SyncTickData.AppendSyncTickData(bill, __instance.billGiver);
                 return false;
             }
@@ -111,7 +111,7 @@ namespace CooperateRim
         {
             if (!SyncTickData.AvoidLoop)
             {
-                CooperateRimming.Log(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
+                CooperateRimming.RimLog.Message(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
                 SyncTickData.AppendSyncTickData(bill, __instance.billGiver);
                 return false;
             }
@@ -138,7 +138,7 @@ namespace CooperateRim
         {
             if (!SyncTickData.AvoidLoop)
             {
-                CooperateRimming.Log(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
+                CooperateRimming.RimLog.Message(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
                 SyncTickData.AppendSyncTickData(bill, __instance.billGiver);
                 return false;
             }
@@ -184,7 +184,7 @@ namespace CooperateRim
             {
                 if (kkk[__instance] != null)
                 {
-                   // CooperateRimming.Log("DoConfInterface " + kkk[__instance].defName + " || " + __instance.repeatMode.defName);
+                   // CooperateRimming.RimLog.Message("DoConfInterface " + kkk[__instance].defName + " || " + __instance.repeatMode.defName);
                 }
                     
                 if (null == (kkk[__instance]))

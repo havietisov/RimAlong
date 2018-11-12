@@ -14,6 +14,7 @@ using System.Linq;
 using System.Reflection;
 using System.IO;
 using System.Xml.Linq;
+using CooperateRim.Utilities;
 
 namespace CooperateRim
 {
@@ -420,7 +421,7 @@ namespace CooperateRim
         public void DebugLog()
         {
             NetDemo.log(nameof(toggleCommandIndexedCalls) + "::" + toggleCommandIndexedCalls.Count);
-            //CooperateRimming.Log();
+            //RimLog.Message();
         }
 
         List<string> researches = new List<string>();
@@ -430,7 +431,7 @@ namespace CooperateRim
 
         public static void SetClientID(int id)
         {
-            CooperateRimming.Log("RECEIVED CLIENT ID = " + id);
+            RimLog.Message("RECEIVED CLIENT ID = " + id);
             cliendID = id;
         }
 
@@ -451,7 +452,7 @@ namespace CooperateRim
 
         public static void AppendSyncTickDesignatePrey(Designator_Hunt d, Thing t, IntVec3 pos)
         {
-            CooperateRimming.Log(t.PositionHeld + " |||" + pos);
+            RimLog.Message(t.PositionHeld + " |||" + pos);
             //singleton.designatorHuntThingCalls.Add(new DesignatorHuntThing() { designatorType = d.GetType().AssemblyQualifiedName, thing = t, pos = pos });
         }
 
@@ -483,7 +484,7 @@ namespace CooperateRim
 
         public static void AppendSyncTickData(Designation des, System.Type designator)
         {
-            CooperateRimming.Log("XXXXXXXXXXXXXx ++ " + des.def.defName);
+            RimLog.Message("XXXXXXXXXXXXXx ++ " + des.def.defName);
             singleton.designations.Add(new S_Designation(des, designator));
         }
 
@@ -497,12 +498,12 @@ namespace CooperateRim
         {
             if (j.__result != null)
             {
-                //CooperateRimming.Log("new sync tick temporaty job defname : " + j.__result.def.defName);
+                //RimLog.Message("new sync tick temporaty job defname : " + j.__result.def.defName);
                 singleton.jobData.Add(j);
             }
             else
             {
-                //CooperateRimming.Log("temp job data is null");
+                //RimLog.Message("temp job data is null");
             }
         }
 
@@ -533,7 +534,7 @@ namespace CooperateRim
 #if FILE_TRANSFER
                     string s = @"D:\CoopReplays\_" + tickNum + "client_" + cliendID + ".xml";
                     
-                    //CooperateRimming.Log("Written : " + s);
+                    //RimLog.Message("Written : " + s);
                     BinaryFormatter ser = new BinaryFormatter();
                     var fs = System.IO.File.OpenWrite(s);
                     SyncTickData buffered = singleton;
@@ -554,7 +555,7 @@ namespace CooperateRim
                         SyncTickData buffered = singleton;
                         MemoryStream fs = new MemoryStream();
                         singleton = new SyncTickData();
-                        //CooperateRimming.Log("sending data for tick " + tickNum);
+                        //RimLog.Message("sending data for tick " + tickNum);
                         NetDemo.PushStateToDirectory(cliendID, tickNum, buffered, 0);
                         fs.Close();
                         return true;
@@ -564,7 +565,7 @@ namespace CooperateRim
                 }
                 catch (Exception ee)
                 {
-                    CooperateRimming.Log(ee.ToString());
+                    RimLog.Message(ee.ToString());
                     return false;
                 }
             }
@@ -580,7 +581,7 @@ namespace CooperateRim
                 }
             }
 
-            CooperateRimming.Log("could not locate designation def : " + name);
+            RimLog.Message("could not locate designation def : " + name);
             return null;
         }
 
@@ -631,7 +632,7 @@ namespace CooperateRim
             try
             {
                 Zone oldZone = Find.Selector.SelectedZone;
-                //CooperateRimming.Log("deserialized designations : " + designations.Count);
+                //RimLog.Message("deserialized designations : " + designations.Count);
                 lockD = 1;
                 foreach (var des in designations)
                 {
@@ -645,12 +646,12 @@ namespace CooperateRim
                             {
                                 var ddee = ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(des.typeName)).Invoke(null, null)));
 
-                                CooperateRimming.Log("dess : " + ddee);
+                                RimLog.Message("dess : " + ddee);
                                 var ddes = Find.CurrentMap.designationManager.DesignationAt(des.target.cell, DefFromString(des.designationDef));
 
                                 foreach (var v in Find.CurrentMap.designationManager.AllDesignationsAt(des.target.cell))
                                 {
-                                    CooperateRimming.Log(v.ToString());
+                                    RimLog.Message(v.ToString());
                                 }
                                 //this should be replaced with DesignateSingleCell for mining case!
                                 Find.CurrentMap.designationManager.AddDesignation(new Designation((IntVec3)des.target.cell, DefFromString(des.designationDef)));
@@ -673,7 +674,7 @@ namespace CooperateRim
                     }
 
                     AvoidLoop = false;
-                    CooperateRimming.Log(des.designationDef);
+                    RimLog.Message(des.designationDef);
                 }
 
                 lockD = 2;
@@ -711,25 +712,25 @@ namespace CooperateRim
                         }
                     }
 
-                    //CooperateRimming.Log("Find.GameInitData : " + Find.GameInitData);
-                    //CooperateRimming.Log("pawn priority : " + pawn);
+                    //RimLog.Message("Find.GameInitData : " + Find.GameInitData);
+                    //RimLog.Message("pawn priority : " + pawn);
                     AvoidLoop = true;
                     pawn.workSettings.SetPriority(_wtd, prior.priority);
                     AvoidLoop = false;
                 }
 
-                //CooperateRimming.Log("Deserialized jobs :  " + jobsToSerialize.Count);
+                //RimLog.Message("Deserialized jobs :  " + jobsToSerialize.Count);
 
                 List<Thing>[] things = (List<Thing>[])Find.CurrentMap.thingGrid.GetType().GetField("thingGrid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Find.CurrentMap.thingGrid);
 
-                //CooperateRimming.Log("thinglist : " + things);
+                //RimLog.Message("thinglist : " + things);
 
                 /*
                 foreach (var trapI in trapAutoRearms)
                 {
                     Thing trap = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == trapI.trap.ThingID)).First(u => u.ThingID == trapI.trap.ThingID);
 
-                    CooperateRimming.Log("Trap ID : " + trap);
+                    RimLog.Message("Trap ID : " + trap);
 
                     if (trap != null && trap is Building_Trap)
                     {
@@ -778,7 +779,7 @@ namespace CooperateRim
                 {
                     Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
 
-                    CooperateRimming.Log("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
+                    RimLog.Message("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
 
                     foreach (var rec in issuer.def.AllRecipes)
                     {
@@ -799,7 +800,7 @@ namespace CooperateRim
                     var _bill = comm.owner;
                     Thing issuer = things.Where(u => u.Count != 0).First(u => u.Any(uu => uu.ThingID == _bill.targetThing.ThingID)).First(u => u.ThingID == _bill.targetThing.ThingID);
 
-                    CooperateRimming.Log("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
+                    RimLog.Message("job issuer : " + (issuer == null ? "null" : issuer.ToString()));
 
                     foreach (var rec in issuer.def.AllRecipes)
                     {
@@ -824,7 +825,7 @@ namespace CooperateRim
                 {
                     var _bill = a.bill;
                     Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(a.giverPos).First(u => u.ThingID == _bill.targetThing.ThingID);
-                    CooperateRimming.Log("thing filter issuer : " + (issuer == null ? "null" : issuer.ToString()));
+                    RimLog.Message("thing filter issuer : " + (issuer == null ? "null" : issuer.ToString()));
 
                     foreach (var rec in issuer.def.AllRecipes)
                     {
@@ -861,7 +862,7 @@ namespace CooperateRim
 
                     foreach (var __workTypeDef in typeof(JobDefOf).GetFields())
                     {
-                        CooperateRimming.Log("[" + (__workTypeDef.GetValue(null) as JobDef).defName + " : " + _job.jobDef + "]");
+                        RimLog.Message("[" + (__workTypeDef.GetValue(null) as JobDef).defName + " : " + _job.jobDef + "]");
 
                         if ((__workTypeDef.GetValue(null) as JobDef).defName == _job.jobDef)
                         {
@@ -870,9 +871,9 @@ namespace CooperateRim
                         }
                     }
 
-                    CooperateRimming.Log(">>>>>>>>>>>>>");
-                    CooperateRimming.Log("workTypeDef " + (workTypeDef == null ? "null" : workTypeDef.ToString()));
-                    CooperateRimming.Log("pawn :" + pawn + "]");
+                    RimLog.Message(">>>>>>>>>>>>>");
+                    RimLog.Message("workTypeDef " + (workTypeDef == null ? "null" : workTypeDef.ToString()));
+                    RimLog.Message("pawn :" + pawn + "]");
 
                     Job job = new Job(workTypeDef);
                     job.count = _job.count;
@@ -943,9 +944,9 @@ namespace CooperateRim
                 foreach (var s in designatorCellCalls)
                 {
                     AvoidLoop = true;
-                    CooperateRimming.Log(s.designatorType);
+                    RimLog.Message(s.designatorType);
                     ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateSingleCell(s.cell);
-                    //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
+                    //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { RimLog.Message(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
                     //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
                     AvoidLoop = false;
                 }
@@ -955,7 +956,7 @@ namespace CooperateRim
                 {
                     AvoidLoop = true;
                     ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
-                    //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
+                    //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { RimLog.Message(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
                     //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
                     AvoidLoop = false;
                 }
@@ -965,7 +966,7 @@ namespace CooperateRim
                 {
                     AvoidLoop = true;
                     ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(s.designatorType)).Invoke(null, null))).DesignateThing(Find.CurrentMap.thingGrid.ThingsAt(s.pos).First(u => u.ThingID == s.thing.ThingID));
-                    //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { CooperateRimming.Log(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
+                    //Find.ReverseDesignatorDatabase.AllDesignators.All( u => { RimLog.Message(u.GetType().AssemblyQualifiedName + " == " + s.designatorType); return true; });
                     //Find.ReverseDesignatorDatabase.AllDesignators.Find(u => u.GetType().AssemblyQualifiedName == s.designatorType).DesignateMultiCell(ConvertAll<SVEC3, IntVec3>(s.cells, u => (IntVec3)u));
                     AvoidLoop = false;
                 }
@@ -994,14 +995,14 @@ namespace CooperateRim
                     //Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(call.location).First(u => u.ThingID == call.thing.ThingID);
 
                     IEnumerator<Gizmo> gizmoI = issuer.GetGizmos().GetEnumerator();
-                    CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::index  = " + call.gizmo_index);
+                    RimLog.Message("COMMAND_TOGGLE_INDEXED_CALLS::index  = " + call.gizmo_index);
 
                     //if (call.location != issuer.Position)
                     {
-                        CooperateRimming.Log("positions for COMMAND_TOGGLE_INDEXED_CALLS location:" + call.location + " |position| " + issuer.Position + " |position held| " + issuer.PositionHeld);
+                        RimLog.Message("positions for COMMAND_TOGGLE_INDEXED_CALLS location:" + call.location + " |position| " + issuer.Position + " |position held| " + issuer.PositionHeld);
                     }
 
-                    //CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::Position " + );
+                    //RimLog.Message("COMMAND_TOGGLE_INDEXED_CALLS::Position " + );
                     for (int i = 0; i <= call.gizmo_index; i++)
                     {
                         if (!gizmoI.MoveNext())
@@ -1010,7 +1011,7 @@ namespace CooperateRim
                         }
                         else
                         {
-                            CooperateRimming.Log("COMMAND_TOGGLE_INDEXED_CALLS::cycle  = " + i);
+                            RimLog.Message("COMMAND_TOGGLE_INDEXED_CALLS::cycle  = " + i);
                             if (i == call.gizmo_index)
                             {
                                 if (gizmoI.Current is Command_Toggle)
@@ -1070,7 +1071,7 @@ namespace CooperateRim
 
                     foreach (var z in Find.CurrentMap.zoneManager.AllZones)
                     {
-                        CooperateRimming.Log(z.ID + " ++ " + s.zoneData.zoneID);
+                        RimLog.Message(z.ID + " ++ " + s.zoneData.zoneID);
 
                         if (z.ID == s.zoneData.zoneID)
                         {
@@ -1082,11 +1083,11 @@ namespace CooperateRim
                             {
                                 if (z == null)
                                 {
-                                    CooperateRimming.Log("fukken zero!");
+                                    RimLog.Message("fukken zero!");
                                 }
                                 else
                                 {
-                                    CooperateRimming.Log("z is not growing");
+                                    RimLog.Message("z is not growing");
                                 }
                             }
                         }
@@ -1130,37 +1131,37 @@ namespace CooperateRim
                         AvoidLoop = true;
                         Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(call.giverPos).First(u => u.ThingID == call.bill.targetThing.ThingID);
 
-                        CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::index " + call.restrictOptionIndex);
+                        RimLog.Message("IndexedBillConfigRestrictionOptionCall::index " + call.restrictOptionIndex);
 
                         foreach (var rec in issuer.def.AllRecipes)
                         {
-                            CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::recipe " + rec.defName + " == " + call.bill.recipeDefName);
+                            RimLog.Message("IndexedBillConfigRestrictionOptionCall::recipe " + rec.defName + " == " + call.bill.recipeDefName);
 
                             if (rec.defName == call.bill.recipeDefName)
                             {
                                 AvoidLoop = true;
                                 foreach (var ___bill in (issuer as IBillGiver).BillStack.Bills)
                                 {
-                                    CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::bill " + ___bill.recipe.defName);
+                                    RimLog.Message("IndexedBillConfigRestrictionOptionCall::bill " + ___bill.recipe.defName);
 
                                     if (___bill is Bill_Production && ___bill.recipe.defName == call.bill.recipeDefName)
                                     {
                                         Dialog_BillConfig dialog = new Dialog_BillConfig(___bill as Bill_Production, call.giverPos);
-                                        CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::option <-1>");
+                                        RimLog.Message("IndexedBillConfigRestrictionOptionCall::option <-1>");
                                         int index = 0;
                                         foreach (var element in (IEnumerable < Widgets.DropdownMenuElement<Pawn>>)dialog.GetType().GetMethod("GeneratePawnRestrictionOptions", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(dialog, new object[] { }))
                                         {
-                                            CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::option " + index);
+                                            RimLog.Message("IndexedBillConfigRestrictionOptionCall::option " + index);
 
                                             if (index == call.restrictOptionIndex)
                                             {
                                                 ___bill.pawnRestriction = element.payload;
-                                                CooperateRimming.Log(">>>>>>>>>>>>> element called!");
+                                                RimLog.Message(">>>>>>>>>>>>> element called!");
                                             }
 
                                             index++;
                                         }
-                                        CooperateRimming.Log("IndexedBillConfigRestrictionOptionCall::option <~~~>");
+                                        RimLog.Message("IndexedBillConfigRestrictionOptionCall::option <~~~>");
                                     }
                                 }
                             }
@@ -1244,12 +1245,12 @@ namespace CooperateRim
                             }
                             catch (Exception ee)
                             {
-                                CooperateRimming.Log("Indexed call exception for " + sd.methodContext + "\r\n" + ee.ToString());
+                                RimLog.Message("Indexed call exception for " + sd.methodContext + "\r\n" + ee.ToString());
 
                                 int i = 0;
                                 foreach (object o in sd.dataObjects)
                                 {
-                                    CooperateRimming.Log((i++) + " :." + o + ".:");
+                                    RimLog.Message((i++) + " :." + o + ".:");
                                 }
                             }
                             AvoidLoop = false;
@@ -1273,7 +1274,7 @@ namespace CooperateRim
             }
             catch (Exception ee)
             {
-                CooperateRimming.Log("sync tick data exception at stage " + lockD + "\r\n" + ee.ToString());
+                RimLog.Message("sync tick data exception at stage " + lockD + "\r\n" + ee.ToString());
             }
             AvoidLoop = false;
         }
@@ -1286,8 +1287,8 @@ namespace CooperateRim
             {
                 s += "[" + ss.Name + " :: " + ss.GetValue(job) + "]\r\n";
             }
-            CooperateRimming.Log(s);
-            //CooperateRimming.Log(job.ToString() + " |1| " + job.playerForced + " |2| " + job.forceSleep + " |3| " + job.restUntilHealed + " |4| " + job.haulDroppedApparel + " |5| " + job.ignoreDesignations + " |6| " + job.ignoreJoyTimeAssignment + " |7| " + job.ignoreForbidden + " |8| " + job.locomotionUrgency + " |9| " + job.haulMode + " |10| " + cell + " |11| " + job.def.defName + " |12| " + pawn + " |13| " + job.targetA + " |14| " + job.targetB + " |15| " + job.targetC);
+            RimLog.Message(s);
+            //RimLog.Message(job.ToString() + " |1| " + job.playerForced + " |2| " + job.forceSleep + " |3| " + job.restUntilHealed + " |4| " + job.haulDroppedApparel + " |5| " + job.ignoreDesignations + " |6| " + job.ignoreJoyTimeAssignment + " |7| " + job.ignoreForbidden + " |8| " + job.locomotionUrgency + " |9| " + job.haulMode + " |10| " + cell + " |11| " + job.def.defName + " |12| " + pawn + " |13| " + job.targetA + " |14| " + job.targetB + " |15| " + job.targetC);
             {
                 singleton.jobsToSerialize.Add(new FinalJobData() { count = job.count, playerForced = job.playerForced, forceSleep = job.forceSleep, restUntilHealed = job.restUntilHealed, haulDroppedApparel = job.haulDroppedApparel, ignoreDesignations = job.ignoreDesignations, ignoreAssignment = job.ignoreJoyTimeAssignment, ignoreForbidden = job.ignoreForbidden, locomotionUrgency = job.locomotionUrgency, haulMode = job.haulMode, cell = cell, jobDef = job.def.defName, pawn = pawn, jobTargetA = job.targetA, jobTargetB = job.targetB, jobTargetC = job.targetC });
             }
@@ -1303,7 +1304,7 @@ namespace CooperateRim
 
         public static void Apply(int tickNum)
         {
-            //CooperateRimming.Log("Applied frame " + tickNum);
+            //RimLog.Message("Applied frame " + tickNum);
 #if FILE_TRANSFER
             foreach (string s in tickFileNames(tickNum))
             {
@@ -1362,7 +1363,7 @@ namespace CooperateRim
             {
                 foreach (var j in jobsToSerialize)
                 {
-                    CooperateRimming.Log("++++ : " + j.jobDef);
+                    RimLog.Message("++++ : " + j.jobDef);
                 }
                 info.AddValue(nameof(jobsToSerialize), jobsToSerialize);
             }
@@ -1487,7 +1488,7 @@ namespace CooperateRim
 
         public static void AppendSyncTickDataCommand_toggle_call_by_index(Thing t, int number)
         {
-            CooperateRimming.Log(t + " || " + number);
+            RimLog.Message(t + " || " + number);
             singleton.toggleCommandIndexedCalls.Add(new COMMAND_TOGGLE_INDEXED_CALLS() { thing = t, location = t.Position, gizmo_index = number });
         }
 
@@ -1543,7 +1544,7 @@ namespace CooperateRim
 
         internal static void AppendSyncTickDataDeleteZone(Zone instance)
         {
-            CooperateRimming.Log(instance.ToString());
+            RimLog.Message(instance.ToString());
             singleton.deleteZones.Add(new SerializableZoneData() { zoneID = instance.ID });
         }
 

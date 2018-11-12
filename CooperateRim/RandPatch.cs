@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using CooperateRim.Utilities;
+using Harmony;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -255,7 +256,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool prefix()
         {
-            CooperateRimming.Log(">>>>>>>>>>>>>>>>>>>>>>> selected update bullshit");
+            RimLog.Message(">>>>>>>>>>>>>>>>>>>>>>> selected update bullshit");
             return false;
         }
     }
@@ -349,7 +350,7 @@ namespace CooperateRim
                     streamholder.WriteLine(frame.GetMethod().ReflectedType + "::" + frame.GetMethod().Name, "state");
                 }*/
                 
-                //CooperateRimming.Log(">>>>>>>>>>>>>>> FOUL RAND CALL");
+                //RimLog.Message(">>>>>>>>>>>>>>> FOUL RAND CALL");
             }
             //if (CooperateRimming.dumpRand)
             {

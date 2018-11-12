@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using CooperateRim.Utilities;
+using Harmony;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace CooperateRim
         public static bool TryTakeOrderedJobPrioritizedWork(Job job, WorkGiver giver, IntVec3 cell)
         {
             //job.def
-            CooperateRimming.Log("TryTakeOrderedJobPrioritizedWork.IsDes : " + SyncTickData.IsDeserializing);
+            RimLog.Message("TryTakeOrderedJobPrioritizedWork.IsDes : " + SyncTickData.IsDeserializing);
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AllowJobAt(job, giver, cell);
@@ -55,7 +56,7 @@ namespace CooperateRim
         public static bool TryTakeOrderedJob(Pawn_JobTracker __instance, Job job, JobTag tag, Pawn ___pawn)
         {
             //job.def
-            CooperateRimming.Log("TryTakeOrderedJobPrioritizedWork.IsDes : " + SyncTickData.IsDeserializing);
+            RimLog.Message("TryTakeOrderedJobPrioritizedWork.IsDes : " + SyncTickData.IsDeserializing);
             if (!SyncTickData.AvoidLoop)
             {
                 SyncTickData.AllowJobAt(job, ___pawn, tag, ___pawn.Position);

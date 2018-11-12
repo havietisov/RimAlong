@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using CooperateRim.Utilities;
+using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,10 +22,10 @@ namespace CooperateRim
                 bool hasDesignator = false;
                 foreach (var frm in st.GetFrames())
                 {
-                    CooperateRimming.Log("designator== is  " + frm.GetMethod().DeclaringType + " | " + frm.GetMethod().DeclaringType.IsSubclassOf(typeof(Designator)));
+                    RimLog.Message("designator== is  " + frm.GetMethod().DeclaringType + " | " + frm.GetMethod().DeclaringType.IsSubclassOf(typeof(Designator)));
                     if (frm.GetMethod().DeclaringType.IsSubclassOf(typeof(Designator)))
                     {
-                        CooperateRimming.Log("designator is  " + frm.GetMethod().DeclaringType);
+                        RimLog.Message("designator is  " + frm.GetMethod().DeclaringType);
                         SyncTickData.AppendSyncTickData(newDes, frm.GetMethod().DeclaringType);
                         hasDesignator = true;
                         break;
@@ -33,7 +34,7 @@ namespace CooperateRim
 
                 if (!hasDesignator)
                 {
-                    CooperateRimming.Log("no proper designator!");
+                    RimLog.Message("no proper designator!");
                 }
                 
                 return false;

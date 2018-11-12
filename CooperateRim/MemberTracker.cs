@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Linq.Expressions;
 using System.Reflection;
+using CooperateRim.Utilities;
 
 namespace CooperateRim
 {
@@ -29,7 +30,7 @@ namespace CooperateRim
         {
             if (memberTable.ElementAt(index).Value.Value == null)
             {
-                CooperateRimming.Log("action is null, wtf");
+                RimLog.Message("action is null, wtf");
             }
             memberTable.ElementAt(index).Value.Value(newVal);
         }
