@@ -36,7 +36,7 @@
       <HintPath>..\packages\UnlimitedHugs.Rimworld.HugsLib.6.0.1\lib\net35\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>E:\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="CookComputing.XmlRpcV2, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d6e17aa302004d, processorArchitecture=MSIL">
       <HintPath>..\packages\xmlrpcnet.3.0.0.266\lib\net20\CookComputing.XmlRpcV2.dll</HintPath>
@@ -57,7 +57,7 @@
       <HintPath>..\packages\Troschuetz.Random.4.3.0\lib\net35\Troschuetz.Random.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>E:\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +91,7 @@
     <Compile Include="ReverseBillTable.cs" />
     <Compile Include="MemberTracker.cs" />
     <Compile Include="root_play_fields.cs" />
+    <Compile Include="Services\LoggingService.cs" />
     <Compile Include="StoreUtility.cs" />
     <Compile Include="SerializationService.cs" />
     <Compile Include="SyncTickData.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="ThingFilterPatch.cs" />
     <Compile Include="ThingFilter_patch.cs" />
     <Compile Include="ThinkNode_PrioritySorter_patch.cs" />
+    <Compile Include="Utilities\RimLog.cs" />
     <Compile Include="UtilTable.cs" />
     <Compile Include="WindowStackPatch.cs" />
     <Compile Include="WorkGiverPatch.cs" />
@@ -106,14 +108,19 @@
     <Compile Include="Zone_patch.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy "G:/Projects/RimAlong/CooperateRim\bin\Debug\CooperateRim.dll" "G:\SteamLibrary\steamapps\common\RimWorld\Mods\RimAlong\Assemblies" /y
-
-
-
-del G:\CoopReplays\*.* /s /q</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="AfterBuild">
+    <XmlPeek XmlInputPath="App.config" Query="//appSettings/add[@key='RimAlongOutputLocation']/@value">
+      <Output TaskParameter="Result" ItemName="Destination" />
+    </XmlPeek>
+    <Message Text="TESTING: @destination" Importance="high" />
+    <PropertyGroup>
+      <Destination>@(destination)</Destination>
+      <SolutionDirectory>$(SolutionDir)</SolutionDirectory>
+    </PropertyGroup>
+    <Copy SourceFiles="$(SolutionDirectory)\CooperateRim\bin\Debug\CooperateRim.dll" DestinationFiles="$(destination)" />
+  </Target>
 </Project>
