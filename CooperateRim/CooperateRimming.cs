@@ -440,7 +440,7 @@ namespace CooperateRim
                 s.Add(node.ToString() + "\r\n");
             }
 
-            System.IO.File.WriteAllLines("G:/CoopReplays/" + SyncTickData.cliendID + "/"+ name + "thinkdump_.txt", s.ToArray());
+            //System.IO.File.WriteAllLines("G:/CoopReplays/" + SyncTickData.cliendID + "/"+ name + "thinkdump_.txt", s.ToArray());
         }
 
         public class Dialog_Coop : Window
