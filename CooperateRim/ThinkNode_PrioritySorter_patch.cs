@@ -158,10 +158,27 @@ namespace CooperateRim
 
     public class JobGiver_patch
     {
-        public static void TryGiveJob(Pawn pawn, ThinkNode __instance)
+        static int callCount;
+
+        public static void TryGiveJob(Pawn pawn, ThinkNode __instance, Job __result)
         {
             //if(pawn.ToString() == "Peters")
+            if(SyncTickData.cliendID >= 0)
             {
+                List<string> sr = new List<string>();
+
+                sr.Add("====STACK====");
+                StackTrace tr = new StackTrace();
+                foreach (var frame in tr.GetFrames())
+                {
+                    sr.Add(frame.GetMethod().ReflectedType + "::" + frame.GetMethod().Name);
+                }
+
+                sr.Add("====END====");
+                sr.Add("result : " + __result);
+                System.IO.File.AppendAllText("G:/CoopReplays/" + SyncTickData.cliendID + "/" + __instance.ToString() + "_" + (callCount++) + "_" + pawn + ".txt", string.Join("\r\n", sr.ToArray()));
+
+                /*
                 streamholder.WriteLine("===JOB===", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
                 StackTrace tr = new StackTrace();
                 streamholder.WriteLine("====STACK====", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
@@ -173,7 +190,7 @@ namespace CooperateRim
 
                 streamholder.WriteLine("====END====", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
                 streamholder.WriteLine(pawn + " ::: " + __instance.GetType().ToString() +  "::TryGiveJob :: " + "[" + TickManagerPatch.nextProcessionTick + "]", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
-                streamholder.WriteLine("//===JOB===", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");
+                streamholder.WriteLine("//===JOB===", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");*/
             }
             //CooperateRimming.Log(pawn  + " ::: " + __instance.GetType() + "::TryIssueJobPackage :: " + "[" + TickManagerPatch.nextSyncTickValue + "]");
         }

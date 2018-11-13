@@ -104,6 +104,7 @@ public class LocalDB
         Jobs,
         None
     }
+    
 
     public static void TryDistributeData(int tickID)
     {
@@ -112,7 +113,7 @@ public class LocalDB
         DateTime dt = DateTime.Now;
         if (HasFullData(tickID, SyncTickData.clientCount)/* && playerStateTable[clientID] < tickID*/)
         {
-            NetDemo.log("dictionary lookup took " + (DateTime.Now - dt).TotalMilliseconds);
+            NetDemo.log("dictionary lookup took " + (DateTime.Now - dt).TotalMilliseconds + ", update at " + DateTime.Now);
             sdl = new List<SyncTickData>(data[tickID]);
             int? randomV = null;
             List<string> jobsToVerify = null;
