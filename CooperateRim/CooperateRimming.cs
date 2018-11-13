@@ -79,7 +79,37 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(IntVec3), new IntVec3Surrogate());
             SerializationService.AppendSurrogate(typeof(BillStack), new BillStackSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill), new BillSurrogate());
+            SerializationService.AppendSurrogate(typeof(Pawn), new IndexedPawnSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
+
+            PirateRPC.PirateRPC.CompilerGeneratedSurrogate sur = new PirateRPC.PirateRPC.CompilerGeneratedSurrogate();
+
+            DateTime dt = new DateTime();
+            int entryCount = 0;
+
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type t in asm.GetTypes())
+                {
+                    if (t.Name.StartsWith("<>c__DisplayClass") || t.Name.Contains("c__AnonStorey"))
+                    {
+                        
+                        object[] objs = t.GetCustomAttributes(false);
+
+                        foreach (object o in objs)
+                        {
+                            if (o is System.Runtime.CompilerServices.CompilerGeneratedAttribute)
+                            {
+                                //CooperateRimming.Log("Surrogate for : " + t.DeclaringType);
+                                SerializationService.AppendSurrogate(t, sur);
+                                entryCount++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            CooperateRimming.Log("Surrogate creation took " + (DateTime.Now - dt) + " for " + entryCount + " entries");
 
             MainTabWindow_Work_patch.useWorkPriorities_index = 
             MemberTracker<bool>.TrackPublicField<Func<bool>>(() => Current.Game.playSettings.useWorkPriorities, 
@@ -106,9 +136,11 @@ namespace CooperateRim
             //ThingFilter_setallow_bill_with_billgiver(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex)
             ParrotWrapper.ParrotPatchExpressiontarget<thing_filter_wrapper_1>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex) => ThingFilter_wrapper.ThingFilter_setallow_bill_with_billgiver(thingDefName, allow, thingIDNumber, isSpecial, billIndex));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<int, bool>>((int thingIDNumber, bool actuallyDisallow) => ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone(thingIDNumber, actuallyDisallow));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Action>>((Action a) => FloatMenuOptionPatch.InvokeAction(a));
             RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
             RandRootContext<Game>.ApplyPatch("UpdatePlay");
             RandRootContext<UIRoot_Play>.ApplyPatch("UIRootOnGUI");
+            //RandRootContext<Hediff>.ApplyPatch("Tick");
             //RandRootContext<LetterStack>.ApplyPatch("LetterStackUpdate");
             //RandRootContext<World>.ApplyPatch("WorldUpdate");
             //RandRootContext<Map>.ApplyPatch("MapUpdate");
@@ -117,10 +149,20 @@ namespace CooperateRim
             RandRootContext<SustainerManager>.ApplyPatch("SustainerManagerUpdate");
             RandRootContext<SoundStarterPlaceholder>.ApplyPatch("PlayOneShot", typeof(SoundStarter));
             RandRootContext<SoundStarterPlaceholder2>.ApplyPatch("PlayOneShotOnCamera", typeof(SoundStarter));
-            //RandRootContext<WorldPawns>.ApplyPatch("WorldPawnsTick");
+            RandRootContext<WorldPawns>.ApplyPatch("WorldPawnsTick");
             //RandRootContext<GamePlaceholder_1>.ApplyPatch("InitNewGame", typeof(Game));
             //RandRootContext<ThingOwner>.ApplyPatch("ThingOwnerTick");
         }
+        /*
+        [HarmonyPatch(typeof(Hediff), "Tick")]
+        class hediff_tick_cancel
+        {
+            [HarmonyPrefix]
+            public static bool prefix()
+            {
+                return false;
+            }
+        }*/
 
         class GamePlaceholder_1 { }
         class SoundStarterPlaceholder { };
@@ -288,7 +330,7 @@ namespace CooperateRim
                     {
                         MethodInfo targetmethod = AccessTools.Method(t, "TryGiveJob");
                         HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.JobGiver_patch).GetMethod("TryGiveJob"));
-                        harmony.Patch(targetmethod, prefix, null, null);
+                        harmony.Patch(targetmethod, null, prefix, null);
                     }
                 }
             }
@@ -389,6 +431,18 @@ namespace CooperateRim
 
         static string hostName = "LENOVO";
 
+        static void IterateOverThinkNodes(IEnumerable<ThinkNode> nodes, string name)
+        {
+            List<string> s = new List<string>();
+
+            foreach (var node in nodes)
+            {
+                s.Add(node.ToString() + "\r\n");
+            }
+
+            System.IO.File.WriteAllLines("G:/CoopReplays/" + SyncTickData.cliendID + "/"+ name + "thinkdump_.txt", s.ToArray());
+        }
+
         public class Dialog_Coop : Window
         {
             public override void DoWindowContents(Rect inRect)
@@ -439,6 +493,12 @@ namespace CooperateRim
                     {
                         initialPawnList.Add(p);
                     }
+
+                    foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
+                    {
+                        IterateOverThinkNodes(def.thinkRoot.ThisAndChildrenRecursive, def.ToString());
+                    }
+
                     PageUtility.InitGameStart();
                     Rand.PopState();
                     Log("Startseed : " + stringseed);

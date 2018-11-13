@@ -68,6 +68,12 @@ namespace CooperateRim
 
         static List<SerializationData> curData = new List<SerializationData>();
 
+        public static ISerializationSurrogate GetSurrogateFor(Type t)
+        {
+            ISurrogateSelector sr;
+            return selector.GetSurrogate(t, sc, out sr);
+        }
+
         public static void SetMethodWrapperIndexAndFinish(int i)
         {
             curData[curData.Count-1].methodContext = i;

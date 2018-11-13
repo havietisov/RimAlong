@@ -46,7 +46,7 @@ namespace CooperateRim
             return false;
         }
     }
-
+    /*
     [HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
     [HarmonyPatch("TryTakeOrderedJob")]
     class JobTrackerPatch_
@@ -66,7 +66,7 @@ namespace CooperateRim
                 return true;
             }
         }
-    }
+    }*/
 
     //[HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
     //[HarmonyPatch("DetermineNextJob")]

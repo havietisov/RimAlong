@@ -70,6 +70,7 @@
     <Compile Include="DesignationManagerPatch.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
     <Compile Include="ExpressionHelper.cs" />
+    <Compile Include="FloatMenuOptionPatch.cs" />
     <Compile Include="FoodRestrictionPatch.cs" />
     <Compile Include="GenConstructPatch.cs" />
     <Compile Include="GenericDesignatorPatch.cs" />

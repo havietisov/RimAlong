@@ -12,6 +12,48 @@ using Verse.Sound;
 
 namespace CooperateRim
 {
+    [HarmonyPatch(typeof(ReservationManager), "Reserve")]
+    public class ReservationManager_patch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(Pawn claimant, LocalTargetInfo target, Job job, bool __result)
+        {
+            if (SyncTickData.cliendID >= 0)
+                System.IO.File.AppendAllText("G:/CoopReplays/" + SyncTickData.cliendID + "/ReservationManager_reserve.txt", claimant.ToString() + " for  " + job + " at " + target + " and result is " + __result + "\r\n");
+        }
+    }
+
+    [HarmonyPatch(typeof(HaulAIUtility), "HaulAsideJobFor")]
+    public class haul_patch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(Pawn p, Thing t, Job __result)
+        {
+            if (SyncTickData.cliendID >= 0)
+                System.IO.File.AppendAllText("G:/CoopReplays/" + SyncTickData.cliendID + "/haul_aside_results.txt", p.ToString() + " for  " + t  + " and result is " + (__result == null ? "<:null:>" : __result.ToString() ) + "\r\n");
+        }
+    }
+
+    [HarmonyPatch(typeof(GenClosest), "ClosestThing_Global_Reachable")]
+    public class closest_tracker
+    {
+        [HarmonyPostfix]
+        public static void Postfix(IntVec3 center, Thing  __result)
+        {
+            if(SyncTickData.cliendID >= 0)
+            System.IO.File.AppendAllText("G:/CoopReplays/" + SyncTickData.cliendID + "/gen_closest.txt", center.ToString() + " :: " + (__result == null ? "<:null:>" : __result.ToString() ) + "\r\n");
+        }
+    }
+
+    [HarmonyPatch(typeof(Storyteller), "StorytellerTick")]
+    public class StorytellerTick_patch
+    {
+        [HarmonyPrefix]
+        public static bool prefix()
+        {
+            return false;//disables storyteller
+        }
+    }
 
     [HarmonyPatch(typeof(IntermittentSteamSprayer), "SteamSprayerTick")]
     public class IntermittentSteamSprayerPatch
