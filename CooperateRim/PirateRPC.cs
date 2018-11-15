@@ -1,120 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Threading;
-using CooperateRim;
 
 namespace PirateRPC
 {
-    public class PirateRPC
+    public partial class PirateRPC
     {
-        public class CompilerGeneratedSurrogate : ISerializationSurrogate
-        {
-            public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
-            {
-                int id = 0;
-                foreach (FieldInfo fi in obj.GetType().GetFields())
-                {
-                    CooperateRimming.Log("-Surrogator : " + fi.Name + "|" + fi.GetValue(obj));
-                    info.AddValue((id++) + "_" + fi.Name, fi.GetValue(obj));
-                }
-                
-                foreach (FieldInfo fi in obj.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
-                {
-                    CooperateRimming.Log("--Surrogator : " + fi.Name + "|" + fi.GetValue(obj));
-                    SerializationService.GetSurrogateFor(fi.FieldType).GetObjectData(fi.GetValue(obj), info, context);
-                    //info.AddValue((id++) + "_" + fi.Name, fi.GetValue(obj), fi.FieldType);
-                }
-            }
-
-            public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
-            {
-                int id = 0;
-                foreach (FieldInfo fi in obj.GetType().GetFields())
-                {
-                    CooperateRimming.Log("+Surrogator : " + fi.Name + "|" + fi.FieldType);
-                    fi.SetValue(obj, info.GetValue((id++) + "_" + fi.Name, fi.FieldType));
-                }
-
-                foreach (FieldInfo fi in obj.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
-                {
-                    CooperateRimming.Log("++Surrogator : " + fi.Name);
-                    object o = SerializationService.GetSurrogateFor(fi.FieldType).SetObjectData(null, info, context, selector);
-                    CooperateRimming.Log("+++Surrogator : " + o);
-                    fi.SetValue(obj, o);
-                }
-
-                return obj;
-            }
-        }
-
-        [Serializable]
-        public class Modification : ISerializable
-        {
-            Action<Stream> action;
-            
-            internal Modification(Action<Stream> action)
-            {
-                this.action = action;
-            }
-
-            internal Modification(SerializationInfo info, StreamingContext context)
-            {
-                // Simply retrieve the action if it is serializable
-                if (info.GetBoolean("isSerializable"))
-                    this.action = (Action<Stream>)info.GetValue("action", typeof(Action<Stream>));
-                // Otherwise, recreate the action based on its serialized components
-                else
-                {
-                    // Retrieve the serialized method reference
-                    MethodInfo method = (MethodInfo)info.GetValue("method", typeof(MethodInfo));
-
-                    // Create an instance of the anonymous delegate class
-                    object target = System.Activator.CreateInstance(method.DeclaringType);// ReflectionUtil.CreateObject(method.DeclaringType, BindingFlags.NonPublic | BindingFlags.Instance);
-
-                    // Initialize the fields of the anonymous instance
-                    foreach (FieldInfo field in method.DeclaringType.GetFields())
-                        field.SetValue(target, info.GetValue(field.Name, field.FieldType));
-
-                    // Recreate the action delegate
-                    action = (Action<Stream>)Delegate.CreateDelegate(typeof(Action<Stream>), target, method.Name);
-                }
-            }
-
-            void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                // Serialize the action delegate directly if the target is serializable
-                if (action.Target == null || action.Target.GetType().GetCustomAttributes(typeof(SerializableAttribute), false).Length > 0)
-                {
-                    info.AddValue("isSerializable", true);
-                    info.AddValue("action", action);
-                }
-                // Otherwise, serialize information necessary to recreate the action delegate
-                else
-                {
-                    info.AddValue("isSerializable", false);
-                    info.AddValue("method", action.Method);
-                    foreach (FieldInfo field in action.Method.DeclaringType.GetFields())
-                        info.AddValue(field.Name, field.GetValue(action.Target));
-                }
-            }
-
-            public void Apply(Stream s)
-            {
-                action(s);
-            }
-        }
-
-        [Serializable]
-        public class Message
-        {
-            public List<SyncTickData> sdl;
-        }
 
         public static void SendInvocation(Stream s, Action<Stream> act)
         {

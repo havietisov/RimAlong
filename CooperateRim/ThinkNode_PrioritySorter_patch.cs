@@ -176,7 +176,7 @@ namespace CooperateRim
 
                 sr.Add("====END====");
                 sr.Add("result : " + __result);
-                //System.IO.File.AppendAllText("G:/CoopReplays/" + SyncTickData.cliendID + "/" + __instance.ToString() + "_" + (callCount++) + "_" + pawn + ".txt", string.Join("\r\n", sr.ToArray()));
+                System.IO.File.AppendAllText("G:/CoopReplays/" + SyncTickData.cliendID + "/" + __instance.ToString() + "_" + (callCount++) + "_" + pawn + ".txt", string.Join("\r\n", sr.ToArray()));
 
                 /*
                 streamholder.WriteLine("===JOB===", "JobGiver__" + TickManagerPatch.nextProcessionTick + "__");

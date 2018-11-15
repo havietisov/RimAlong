@@ -35,6 +35,16 @@ namespace CooperateRim
             return s != null || T.IsSerializable;
         }
 
+        public static Func<object, SerializationInfo, StreamingContext, ISurrogateSelector, T> SetObjectDataOf<T>()
+        {
+            return (object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector) => (T)SerializationService.GetSurrogateFor(typeof(T)).SetObjectData(obj, info, context, selector);
+        }
+
+        public static Action<T, SerializationInfo, StreamingContext> GetObjectDataOf<T>()
+        {
+            return (T obj, SerializationInfo info, StreamingContext context) => SerializationService.GetSurrogateFor(typeof(T)).GetObjectData(obj, info, context);
+        }
+
         public static byte[] Flush()
         {
             BinaryFormatter bf = new BinaryFormatter(selector, sc);
@@ -71,7 +81,12 @@ namespace CooperateRim
         public static ISerializationSurrogate GetSurrogateFor(Type t)
         {
             ISurrogateSelector sr;
-            return selector.GetSurrogate(t, sc, out sr);
+            ISerializationSurrogate res = selector.GetSurrogate(t, sc, out sr);
+            if (res == null)
+            {
+                CooperateRimming.Log("No surrogate for " + t);
+            }
+            return res;
         }
 
         public static void SetMethodWrapperIndexAndFinish(int i)
