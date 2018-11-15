@@ -15,7 +15,7 @@ using Verse.Sound;
 namespace CooperateRim
 {
 
-    public class CooperateRimming : ModBase
+    public partial class CooperateRimming : ModBase
     {
         public override string ModIdentifier => "CooperateRim.CooperateRimming";
         public static List<Pawn> initialPawnList = new List<Pawn>();
@@ -76,11 +76,21 @@ namespace CooperateRim
             SerializationService.Initialize();
             ParrotWrapper.Initialize();
 
+            SerializationService.AppendSurrogate(typeof(Vector3), new Vector3Surrogate());
             SerializationService.AppendSurrogate(typeof(IntVec3), new IntVec3Surrogate());
             SerializationService.AppendSurrogate(typeof(BillStack), new BillStackSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill), new BillSurrogate());
             SerializationService.AppendSurrogate(typeof(Pawn), new IndexedPawnSurrogate());
+            SerializationService.AppendSurrogate(typeof(ThingWithComps), new ThingWithCompsSurrogate());
+            SerializationService.AppendSurrogate(typeof(Blueprint_Build), new BlueprintBuildSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
+            SerializationService.AppendSurrogate(typeof(JobDef), new JobDefSurrogate());
+            SerializationService.AppendSurrogate(typeof(LocalTargetInfo), new LocalTargetInfoSurrogate());
+            SerializationService.AppendSurrogate(typeof(Job), new JobSurrogate());
+            SerializationService.AppendSurrogate(typeof(WorkGiver), new WorkGiverSurrogate());
+            SerializationService.AppendSurrogate(typeof(WorkGiver_Scanner), new WorkGiverSurrogate());
+            SerializationService.AppendSurrogate(typeof(WorkGiverDef), new WorkGiverDefSurrogate());
+            SerializationService.AppendSurrogate(typeof(FloatMenuOption), new FloatMenuOptionSurrogate());
 
             PirateRPC.PirateRPC.CompilerGeneratedSurrogate sur = new PirateRPC.PirateRPC.CompilerGeneratedSurrogate();
 
@@ -136,7 +146,8 @@ namespace CooperateRim
             //ThingFilter_setallow_bill_with_billgiver(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex)
             ParrotWrapper.ParrotPatchExpressiontarget<thing_filter_wrapper_1>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex) => ThingFilter_wrapper.ThingFilter_setallow_bill_with_billgiver(thingDefName, allow, thingIDNumber, isSpecial, billIndex));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<int, bool>>((int thingIDNumber, bool actuallyDisallow) => ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone(thingIDNumber, actuallyDisallow));
-            ParrotWrapper.ParrotPatchExpressiontarget<Action<Action>>((Action a) => FloatMenuOptionPatch.InvokeAction(a));
+            //ParrotWrapper.ParrotPatchExpressiontarget<Action<Action>>((Action a) => FloatMenuOptionPatch.InvokeAction(a));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Vector3, Pawn, int>>((Vector3 clickPos, Pawn pawn, int index)=> floatMenuMakerpatch.UseIndexedFloatMenuEntryAt(clickPos, pawn, index));
             RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
             RandRootContext<Game>.ApplyPatch("UpdatePlay");
             RandRootContext<UIRoot_Play>.ApplyPatch("UIRootOnGUI");
@@ -378,56 +389,6 @@ namespace CooperateRim
             }
 
         }
-        
-        [HarmonyPatch(typeof(MainMenuDrawer))]
-        [HarmonyPatch("DoMainMenuControls")]
-        [HarmonyBefore]
-        [HarmonyPatch(new Type[] { typeof(Rect), typeof(bool) })]
-        class Patch
-        {
-            public static bool Prepare()
-            {
-                UnityEngine.Debug.Log("Command line args : " + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
-                Log("" + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch"));
-                return !System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch");
-            }
-
-            static void Prefix(Rect rect, bool anyMapFiles)
-            {
-                rect.xMin -= 170f;
-                rect.yMin += 52;
-                GUI.BeginGroup(rect);
-                Rect rect2 = new Rect(0f, 0f, 170f, rect.height);
-
-                Rect rect3 = new Rect(rect2.xMax + 17f, 0f, 145f, rect.height);
-                Rect rect4 = new Rect(0, 0, 170f, rect.height);
-
-                Text.Font = GameFont.Small;
-                List<ListableOption> list = new List<ListableOption>();
-                string label = "Cooperative";
-                list.Add(new ListableOption(label, CooperativeButtonPressed));
-                OptionListingUtility.DrawOptionListing(rect2, list);
-            }
-
-            static void CooperativeButtonPressed()
-            {
-                CooperateRimming.inst.Logger.Trace("coop pressed");
-                //CloseMainTab();
-                Find.WindowStack.Add(new Dialog_Coop());
-            }
-        }
-
-        [HarmonyPatch(typeof(MainMenuDrawer))]
-        [HarmonyPatch("DoMainMenuControls")]
-        [HarmonyAfter]
-        [HarmonyPatch(new Type[] { typeof(Rect), typeof(bool) })]
-        class Patch2
-        {
-            static void Prefix(Rect rect, bool anyMapFiles)
-            {
-                GUI.EndGroup();
-            }
-        }
 
         static string hostName = "LENOVO";
 
@@ -441,89 +402,6 @@ namespace CooperateRim
             }
 
             //System.IO.File.WriteAllLines("G:/CoopReplays/" + SyncTickData.cliendID + "/"+ name + "thinkdump_.txt", s.ToArray());
-        }
-
-        public class Dialog_Coop : Window
-        {
-            public override void DoWindowContents(Rect inRect)
-            {
-                int size = 52;
-                Rect r = inRect;
-                r.height = size - 1;
-                r.width = 150;
-                if (Widgets.ButtonText(r, "Connect to "))
-                {
-                    NetDemo.WaitForConnection(hostName);
-                    Rand.PushState(8000);
-
-                    ThinkTreeKeyAssigner.Reset();
-
-                    foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
-                    {
-                        ThinkTreeKeyAssigner.AssignKeys(def.thinkRoot, 0);
-                    }
-
-                    Current.Game = new Game();
-                    Current.Game.InitData = new GameInitData();
-                    Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
-                    Find.Scenario.PreConfigure();
-                    string stringseed = GenText.RandomSeedString();
-                    Current.Game.storyteller = new Storyteller(StorytellerDefOf.Cassandra, DifficultyDefOf.Rough);
-                    Current.Game.World = WorldGenerator.GenerateWorld(0.05f, stringseed, OverallRainfall.Normal, OverallTemperature.Normal);
-                    for (int i = 0; i < 500; i++)
-                    {
-                        if (TileFinder.IsValidTileForNewSettlement(i))
-                        {
-                            Current.Game.InitData.startingTile = i;
-                            Log("Choosen tile : " + i);
-                            break;
-                        }
-                    }
-
-                    foreach (Pawn p in Current.Game.InitData.startingAndOptionalPawns)
-                    {
-                        Log("++++++++++++" + p.ToString());
-                    }
-                    
-                    TickManagerPatch.nextFrameTime = DateTime.Now;
-                    TickManagerPatch.nextProcessionTick = 0;
-                    Page firstConfigPage = Current.Game.Scenario.GetFirstConfigPage();
-
-                    foreach (var p in Find.GameInitData.startingAndOptionalPawns)
-                    {
-                        initialPawnList.Add(p);
-                    }
-
-                    foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
-                    {
-                        IterateOverThinkNodes(def.thinkRoot.ThisAndChildrenRecursive, def.ToString());
-                    }
-
-                    PageUtility.InitGameStart();
-                    Rand.PopState();
-                    Log("Startseed : " + stringseed);
-                }
-                r.y += size;
-                Widgets.ButtonText(r, "MEANINGLESS BUTTON"); r.y += size;
-                hostName = Widgets.TextArea(r, hostName);
-                //Widgets.Label(r, "hey, motherfuckers!");
-            }
-
-            static void ErrorHandler(System.Exception ex)
-            {
-                Log(ex.ToString());
-            }
-
-            static void GenerateMap()
-            {
-                if (Find.Root)
-                {
-                    //Find.Root.Start();
-                }
-                else {
-                    Log("Null root");
-                }
-            }
         }
     }
 }
