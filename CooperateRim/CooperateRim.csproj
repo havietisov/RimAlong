@@ -105,6 +105,7 @@
     <Compile Include="music__MusicUpdate.cs" />
     <Compile Include="netDemo.cs" />
     <Compile Include="NetworkGame.cs" />
+    <Compile Include="OutfitSerializationSurrogate.cs" />
     <Compile Include="ParrotWrapper.cs" />
     <Compile Include="PawnAttackMeleeGizmoUtilityPatch.cs" />
     <Compile Include="Pawn_MeleeVerbs_patch.cs" />
@@ -144,6 +145,7 @@
     <Compile Include="zone_add_p.cs" />
     <Compile Include="Zone_GrowingPatch.cs" />
     <Compile Include="Zone_patch.cs" />
+    <Compile Include="Zone_StockPileSurrogate.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

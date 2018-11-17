@@ -85,12 +85,16 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(Blueprint_Build), new BlueprintBuildSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
             SerializationService.AppendSurrogate(typeof(JobDef), new JobDefSurrogate());
+            SerializationService.AppendSurrogate(typeof(ThingDef), new ThingDefSurrogate());
             SerializationService.AppendSurrogate(typeof(LocalTargetInfo), new LocalTargetInfoSurrogate());
             SerializationService.AppendSurrogate(typeof(Job), new JobSurrogate());
             SerializationService.AppendSurrogate(typeof(WorkGiver), new WorkGiverSurrogate());
             SerializationService.AppendSurrogate(typeof(WorkGiver_Scanner), new WorkGiverSurrogate());
             SerializationService.AppendSurrogate(typeof(WorkGiverDef), new WorkGiverDefSurrogate());
             SerializationService.AppendSurrogate(typeof(FloatMenuOption), new FloatMenuOptionSurrogate());
+            SerializationService.AppendSurrogate(typeof(Zone_Stockpile), new Zone_StockPileSurrogate());
+            SerializationService.AppendSurrogate(typeof(Outfit), new OutfitSerializationSurrogate());
+            SerializationService.AppendSurrogate(typeof(FoodRestriction), new FoodRestrictionSurrogate());
 
             PirateRPC.PirateRPC.CompilerGeneratedSurrogate sur = new PirateRPC.PirateRPC.CompilerGeneratedSurrogate();
 
@@ -137,17 +141,24 @@ namespace CooperateRim
                 }
             });
             ParrotWrapper.ParrotPatchExpressiontarget<Action<bool, int>>((bool newVal, int index) => MemberTracker<bool>.ApplyChange(newVal, index));
+            
             //MemberTracker<bool>.ApplyChange(true, 0);
-            ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, Bill>>((BillStack __instance, Bill bill) => __instance.AddBill(bill));
-            ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int>>((BillStack stack, int index) => bill_delete_patch.RemoveAt(stack, index));
-            ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int, int>>((BillStack stack, int index, int offset) => bill_reorder_patch.ReorderAt(stack, index, offset));
-            ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallow_wrap(thingDefName, allow, thingIDNumber, isSpecial));
-            ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int zoneID, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallowzone_wrap(thingDefName, allow, zoneID, isSpecial));
+            //ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, Bill>>((BillStack __instance, Bill bill) => __instance.AddBill(bill));
+            //ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int>>((BillStack stack, int index) => bill_delete_patch.RemoveAt(stack, index));
+            //ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int, int>>((BillStack stack, int index, int offset) => bill_reorder_patch.ReorderAt(stack, index, offset));
+            //ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallow_wrap(thingDefName, allow, thingIDNumber, isSpecial));
+            //ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int zoneID, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallowzone_wrap(thingDefName, allow, zoneID, isSpecial));
             //ThingFilter_setallow_bill_with_billgiver(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex)
-            ParrotWrapper.ParrotPatchExpressiontarget<thing_filter_wrapper_1>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex) => ThingFilter_wrapper.ThingFilter_setallow_bill_with_billgiver(thingDefName, allow, thingIDNumber, isSpecial, billIndex));
-            ParrotWrapper.ParrotPatchExpressiontarget<Action<int, bool>>((int thingIDNumber, bool actuallyDisallow) => ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone(thingIDNumber, actuallyDisallow));
+
+            //ParrotWrapper.ParrotPatchExpressiontarget<thing_filter_wrapper_1>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex) => ThingFilter_wrapper.ThingFilter_setallow_bill_with_billgiver(thingDefName, allow, thingIDNumber, isSpecial, billIndex));
+            //ParrotWrapper.ParrotPatchExpressiontarget<Action<int, bool>>((int thingIDNumber, bool actuallyDisallow) => ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone(thingIDNumber, actuallyDisallow));
             //ParrotWrapper.ParrotPatchExpressiontarget<Action<Action>>((Action a) => FloatMenuOptionPatch.InvokeAction(a));
+            
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Vector3, Pawn, int>>((Vector3 clickPos, Pawn pawn, int index)=> floatMenuMakerpatch.UseIndexedFloatMenuEntryAt(clickPos, pawn, index));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<object>>((object o) => thingfilter_methods.SetAllowAllFor(o));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<object>>((object o) => thingfilter_methods.SetDisallowAllFor(o));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<object, ThingDef, bool, bool>>((object o, ThingDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
+
             RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
             RandRootContext<Game>.ApplyPatch("UpdatePlay");
             RandRootContext<UIRoot_Play>.ApplyPatch("UIRootOnGUI");
