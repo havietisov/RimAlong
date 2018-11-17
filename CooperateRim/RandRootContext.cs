@@ -35,7 +35,7 @@ namespace CooperateRim
             context = RandContextCounter.counter++;
             MethodInfo targetmethod = AccessTools.Method(typeof(T), methodname);
             HarmonyMethod postfix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
-            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
+            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Prefix"));
             CooperateRimming.inst.harmonyInst.Patch(targetmethod, prefix, postfix, null);
         }
 
@@ -43,7 +43,7 @@ namespace CooperateRim
         {
             MethodInfo targetmethod = AccessTools.Method(tt, methodname);
             HarmonyMethod postfix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
-            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
+            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Prefix"));
             CooperateRimming.inst.harmonyInst.Patch(targetmethod, prefix, postfix, null);
         }
     }
