@@ -64,7 +64,9 @@
     <Compile Include="basic_hash_tracker.cs" />
     <Compile Include="BillPatches.cs" />
     <Compile Include="BillProductionSurrogate.cs" />
+    <Compile Include="BillRepeatModeUtilityPatch.cs" />
     <Compile Include="BillStack.cs" />
+    <Compile Include="BillStackPatch.cs" />
     <Compile Include="BillStackSurrogate.cs" />
     <Compile Include="BillSurrogate.cs" />
     <Compile Include="BlueprintBuildSurrogate.cs" />
