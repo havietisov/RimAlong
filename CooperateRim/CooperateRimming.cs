@@ -97,6 +97,7 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(Outfit), new OutfitSerializationSurrogate());
             SerializationService.AppendSurrogate(typeof(FoodRestriction), new FoodRestrictionSurrogate());
             SerializationService.AppendSurrogate(typeof(RecipeDef), new RecipeDefSurrogate());
+            SerializationService.AppendSurrogate(typeof(BillRepeatModeDef), new BillRepeatModeDefSurrogate());
 
             PirateRPC.PirateRPC.CompilerGeneratedSurrogate sur = new PirateRPC.PirateRPC.CompilerGeneratedSurrogate();
             
@@ -128,6 +129,9 @@ namespace CooperateRim
             //ParrotWrapper.ParrotPatchExpressiontarget<Action<int, bool>>((int thingIDNumber, bool actuallyDisallow) => ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone(thingIDNumber, actuallyDisallow));
             //ParrotWrapper.ParrotPatchExpressiontarget<Action<Action>>((Action a) => FloatMenuOptionPatch.InvokeAction(a));
 
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Bill_Production, int>>((Bill_Production bill, int count) => BillRepeatModeUtilityPatch.SetBillTargetCount(bill, count));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Bill_Production, int>>((Bill_Production bill, int count) => BillRepeatModeUtilityPatch.SetBillRepeatCount(bill, count));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Bill_Production, BillRepeatModeDef>>((Bill_Production bill, BillRepeatModeDef repeatMode) => BillRepeatModeUtilityPatch.SetBillRepeatType(bill, repeatMode));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int>>((BillStack stack, int index) => bill_delete_patch.RemoveAt(stack, index));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int, int>>((BillStack stack, int index, int offset) => bill_reorder_patch.ReorderAt(stack, index, offset));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Vector3, Pawn, int>>((Vector3 clickPos, Pawn pawn, int index)=> floatMenuMakerpatch.UseIndexedFloatMenuEntryAt(clickPos, pawn, index));
