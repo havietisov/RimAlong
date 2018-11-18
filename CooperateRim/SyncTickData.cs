@@ -550,7 +550,7 @@ namespace CooperateRim
                         var colonists = Find.ColonistBar.GetColonistsInOrder();
                         singleton.colonistJobsToVerify = colonists == null ? new List<string> { } : colonists.ConvertAll<string>(u=> u.CurJobDef == null ? u.ThingID + "::" + "<null>" : u.ThingID + "::" + u.CurJobDef.defName);
                         singleton.serializationServiceData = SerializationService.Flush();
-                        BinaryFormatter ser = new BinaryFormatter();
+                        BinaryFormatter ser = new BinaryFormatter() { TypeFormat = System.Runtime.Serialization.Formatters.FormatterTypeStyle.TypesWhenNeeded };
                         SyncTickData buffered = singleton;
                         MemoryStream fs = new MemoryStream();
                         singleton = new SyncTickData();
