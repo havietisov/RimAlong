@@ -69,6 +69,7 @@
     <Compile Include="BillStackPatch.cs" />
     <Compile Include="BillStackSurrogate.cs" />
     <Compile Include="BillSurrogate.cs" />
+    <Compile Include="Bill_ctor_patch.cs" />
     <Compile Include="BlueprintBuildSurrogate.cs" />
     <Compile Include="closest_tracker.cs" />
     <Compile Include="ContextualizedRand.cs" />
@@ -77,11 +78,15 @@
     <Compile Include="def_patch.cs" />
     <Compile Include="DesignationManagerPatch.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
+    <Compile Include="Dialog_billConfigPatch_.cs" />
     <Compile Include="Dialog_Coop.cs" />
     <Compile Include="ExpressionHelper.cs" />
     <Compile Include="floatMenuMakerpatch.cs" />
     <Compile Include="FloatMenuOptionSurrogate.cs" />
+    <Compile Include="FoodRestrictionDatabasePatch.cs" />
+    <Compile Include="FoodRestrictionDatabasePatch_2.cs" />
     <Compile Include="FoodRestrictionPatch.cs" />
+    <Compile Include="FoodRestrictionSurrogate.cs" />
     <Compile Include="GenConstructPatch.cs" />
     <Compile Include="GeneralRandPatch.cs" />
     <Compile Include="GenericDesignatorPatch.cs" />
@@ -89,7 +94,6 @@
     <Compile Include="getValuePatch.cs" />
     <Compile Include="haul_patch.cs" />
     <Compile Include="HighResolutionTimer.cs" />
-    <Compile Include="IndexedPawnSurrogate.cs" />
     <Compile Include="IntermittentSteamSprayerPatch.cs" />
     <Compile Include="IntVec3Surrogate.cs" />
     <Compile Include="JobDefSurrogate.cs" />
@@ -105,6 +109,8 @@
     <Compile Include="music__MusicUpdate.cs" />
     <Compile Include="netDemo.cs" />
     <Compile Include="NetworkGame.cs" />
+    <Compile Include="OutfitDatabasePatch.cs" />
+    <Compile Include="OutfitDatabasePatch_2.cs" />
     <Compile Include="OutfitSerializationSurrogate.cs" />
     <Compile Include="ParrotWrapper.cs" />
     <Compile Include="PawnAttackMeleeGizmoUtilityPatch.cs" />
@@ -116,6 +122,7 @@
     <Compile Include="PirateRPC.Modification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandRootContext.cs" />
+    <Compile Include="RecipeDefSurrogate.cs" />
     <Compile Include="ReservationManager_patch.cs" />
     <Compile Include="ReverseBillTable.cs" />
     <Compile Include="MemberTracker.cs" />
@@ -131,8 +138,13 @@
     <Compile Include="SyncTickData.cs" />
     <Compile Include="SyncTickManager.cs" />
     <Compile Include="TesterSurrogate.cs" />
+    <Compile Include="ThingDefSurrogate.cs" />
     <Compile Include="ThingFilterPatch.cs" />
-    <Compile Include="ThingFilter_patch.cs" />
+    <Compile Include="thingfilter_methods.cs" />
+    <Compile Include="ThingFilter_setallowall_wrapper.cs" />
+    <Compile Include="ThingFilter_setallow_wrapper.cs" />
+    <Compile Include="ThingFilter_setdisallowall_wrapper.cs" />
+    <Compile Include="ThingSurrogate.cs" />
     <Compile Include="ThingWithCompsSurrogate.cs" />
     <Compile Include="ThinkNode_PrioritySorter_patch.cs" />
     <Compile Include="UtilTable.cs" />
@@ -146,6 +158,7 @@
     <Compile Include="Zone_GrowingPatch.cs" />
     <Compile Include="Zone_patch.cs" />
     <Compile Include="Zone_StockPileSurrogate.cs" />
+    <Compile Include="zone_stockpile_ctor_patch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

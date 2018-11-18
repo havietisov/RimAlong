@@ -7,6 +7,7 @@ namespace CooperateRim
 {
     public class ThingFilterPatch
     {
+        public static bool avoidThingFilterUsage;
         public static Stack<object> thingFilterCallerStack = new Stack<object>();
     }
 }

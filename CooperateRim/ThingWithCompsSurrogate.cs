@@ -1,4 +1,4 @@
 ﻿namespace CooperateRim
 {
-    public class ThingWithCompsSurrogate : IndexedPawnSurrogate { };
+    public class ThingWithCompsSurrogate : ThingSurrogate { };
 }

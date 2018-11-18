@@ -4,7 +4,7 @@ using Verse;
 
 namespace CooperateRim
 {
-    public class IndexedPawnSurrogate : ISerializationSurrogate
+    public class ThingSurrogate : ISerializationSurrogate
     {
         public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
