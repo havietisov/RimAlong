@@ -64,6 +64,7 @@
     <Compile Include="basic_hash_tracker.cs" />
     <Compile Include="BillPatches.cs" />
     <Compile Include="BillProductionSurrogate.cs" />
+    <Compile Include="BillRepeatModeDefSurrogate.cs" />
     <Compile Include="BillRepeatModeUtilityPatch.cs" />
     <Compile Include="BillStack.cs" />
     <Compile Include="BillStackPatch.cs" />
@@ -144,6 +145,7 @@
     <Compile Include="ThingFilterPatch.cs" />
     <Compile Include="thingfilter_methods.cs" />
     <Compile Include="ThingFilter_setallowall_wrapper.cs" />
+    <Compile Include="ThingFilter_setallow_special_wrapper.cs" />
     <Compile Include="ThingFilter_setallow_wrapper.cs" />
     <Compile Include="ThingFilter_setdisallowall_wrapper.cs" />
     <Compile Include="ThingSurrogate.cs" />
