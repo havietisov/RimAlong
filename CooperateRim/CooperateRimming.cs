@@ -99,34 +99,7 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(RecipeDef), new RecipeDefSurrogate());
 
             PirateRPC.PirateRPC.CompilerGeneratedSurrogate sur = new PirateRPC.PirateRPC.CompilerGeneratedSurrogate();
-
-            DateTime dt = new DateTime();
-            int entryCount = 0;
-
-            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (Type t in asm.GetTypes())
-                {
-                    if (t.Name.StartsWith("<>c__DisplayClass") || t.Name.Contains("c__AnonStorey"))
-                    {
-                        
-                        object[] objs = t.GetCustomAttributes(false);
-
-                        foreach (object o in objs)
-                        {
-                            if (o is System.Runtime.CompilerServices.CompilerGeneratedAttribute)
-                            {
-                                //CooperateRimming.Log("Surrogate for : " + t.DeclaringType);
-                                SerializationService.AppendSurrogate(t, sur);
-                                entryCount++;
-                            }
-                        }
-                    }
-                }
-            }
-
-            CooperateRimming.Log("Surrogate creation took " + (DateTime.Now - dt) + " for " + entryCount + " entries");
-
+            
             MainTabWindow_Work_patch.useWorkPriorities_index = 
             MemberTracker<bool>.TrackPublicField<Func<bool>>(() => Current.Game.playSettings.useWorkPriorities, 
             u => 
@@ -143,11 +116,10 @@ namespace CooperateRim
                 }
             });
             ParrotWrapper.ParrotPatchExpressiontarget<Action<bool, int>>((bool newVal, int index) => MemberTracker<bool>.ApplyChange(newVal, index));
-            
+
             //MemberTracker<bool>.ApplyChange(true, 0);
             //ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, Bill>>((BillStack __instance, Bill bill) => __instance.AddBill(bill));
-            //ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int>>((BillStack stack, int index) => bill_delete_patch.RemoveAt(stack, index));
-            //ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int, int>>((BillStack stack, int index, int offset) => bill_reorder_patch.ReorderAt(stack, index, offset));
+
             //ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallow_wrap(thingDefName, allow, thingIDNumber, isSpecial));
             //ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int zoneID, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallowzone_wrap(thingDefName, allow, zoneID, isSpecial));
             //ThingFilter_setallow_bill_with_billgiver(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex)
@@ -155,7 +127,9 @@ namespace CooperateRim
             //ParrotWrapper.ParrotPatchExpressiontarget<thing_filter_wrapper_1>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex) => ThingFilter_wrapper.ThingFilter_setallow_bill_with_billgiver(thingDefName, allow, thingIDNumber, isSpecial, billIndex));
             //ParrotWrapper.ParrotPatchExpressiontarget<Action<int, bool>>((int thingIDNumber, bool actuallyDisallow) => ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone(thingIDNumber, actuallyDisallow));
             //ParrotWrapper.ParrotPatchExpressiontarget<Action<Action>>((Action a) => FloatMenuOptionPatch.InvokeAction(a));
-            
+
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int>>((BillStack stack, int index) => bill_delete_patch.RemoveAt(stack, index));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int, int>>((BillStack stack, int index, int offset) => bill_reorder_patch.ReorderAt(stack, index, offset));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Vector3, Pawn, int>>((Vector3 clickPos, Pawn pawn, int index)=> floatMenuMakerpatch.UseIndexedFloatMenuEntryAt(clickPos, pawn, index));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object>>((object o) => thingfilter_methods.SetAllowAllFor(o));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object>>((object o) => thingfilter_methods.SetDisallowAllFor(o));
