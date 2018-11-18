@@ -87,6 +87,7 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
             SerializationService.AppendSurrogate(typeof(JobDef), new JobDefSurrogate());
             SerializationService.AppendSurrogate(typeof(ThingDef), new ThingDefSurrogate());
+            SerializationService.AppendSurrogate(typeof(SpecialThingFilterDef), new SpecialThingFilterDefSurrogate());
             SerializationService.AppendSurrogate(typeof(LocalTargetInfo), new LocalTargetInfoSurrogate());
             SerializationService.AppendSurrogate(typeof(Job), new JobSurrogate());
             SerializationService.AppendSurrogate(typeof(WorkGiver), new WorkGiverSurrogate());
@@ -139,6 +140,8 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object>>((object o) => thingfilter_methods.SetDisallowAllFor(o));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Building_WorkTable, RecipeDef>>((Building_WorkTable table, RecipeDef recipe) => BillStackPatch.MakeNewBillAt(table, recipe));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, ThingDef, bool, bool>>((object o, ThingDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<object, SpecialThingFilterDef, bool, bool>>((object o, SpecialThingFilterDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
+
 
             RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
             RandRootContext<Game>.ApplyPatch("UpdatePlay");
