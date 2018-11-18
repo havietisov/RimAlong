@@ -30,7 +30,7 @@ namespace CooperateRim
         public static bool CheckForSurrogate(Type T)
         {
             ISurrogateSelector sur;
-            BinaryFormatter bf = new BinaryFormatter();
+            BinaryFormatter bf = new BinaryFormatter() { TypeFormat = System.Runtime.Serialization.Formatters.FormatterTypeStyle.TypesWhenNeeded };
             ISerializationSurrogate s = selector.GetSurrogate(T, sc, out sur);
             return s != null || T.IsSerializable;
         }
@@ -47,7 +47,7 @@ namespace CooperateRim
 
         public static byte[] Flush()
         {
-            BinaryFormatter bf = new BinaryFormatter(selector, sc);
+            BinaryFormatter bf = new BinaryFormatter(selector, sc) { TypeFormat = System.Runtime.Serialization.Formatters.FormatterTypeStyle.TypesWhenNeeded };
             bf.Serialize(ms, curData);
             ms.Flush();
             sc = new StreamingContext();
@@ -67,7 +67,7 @@ namespace CooperateRim
 
         public static List<SerializationData> DeserializeFrom(byte[] bytes)
         {
-            BinaryFormatter bf = new BinaryFormatter(selector, sc);
+            BinaryFormatter bf = new BinaryFormatter(selector, sc) { TypeFormat = System.Runtime.Serialization.Formatters.FormatterTypeStyle.TypesWhenNeeded };
             return (List<SerializationData>)bf.Deserialize(new MemoryStream(bytes));
         }
 

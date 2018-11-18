@@ -14,7 +14,7 @@ namespace PirateRPC
         {
             DateTime dt12 = DateTime.Now;
             MemoryStream initialBuffer = new MemoryStream();
-            BinaryFormatter bf = new BinaryFormatter();
+            BinaryFormatter bf = new BinaryFormatter() { TypeFormat = System.Runtime.Serialization.Formatters.FormatterTypeStyle.TypesWhenNeeded };
             bf.Serialize(initialBuffer, new Modification(act));
             initialBuffer.Flush();
             string ss = Convert.ToBase64String(initialBuffer.GetBuffer(), 0, (int)initialBuffer.Length);
@@ -58,7 +58,7 @@ namespace PirateRPC
             byte[] b = Convert.FromBase64String(ss);
             NetDemo.log("RPC size : " + b.Length);
             MemoryStream ms = new MemoryStream(b);
-            BinaryFormatter bf = new BinaryFormatter();
+            BinaryFormatter bf = new BinaryFormatter() { TypeFormat = System.Runtime.Serialization.Formatters.FormatterTypeStyle.TypesWhenNeeded };
             
             {
                 try
