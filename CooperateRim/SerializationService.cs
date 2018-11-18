@@ -53,13 +53,16 @@ namespace CooperateRim
             sc = new StreamingContext();
             curData = new List<SerializationData>();
             byte[] result = ms.GetBuffer();
+            List<byte> __result = new List<byte>(result);
+            CooperateRimming.Log(result.Length + "::::<>::::" + ms.Length);
+            __result.RemoveRange((int)ms.Length, result.Length - (int)ms.Length);
             if (result.Length > 32000)
             {
                 var a = 15000;
                 a = 2;
             }
             ms = new MemoryStream();
-            return result;
+            return __result.ToArray();
         }
 
         public static List<SerializationData> DeserializeFrom(byte[] bytes)
