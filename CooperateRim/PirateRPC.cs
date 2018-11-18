@@ -13,12 +13,11 @@ namespace PirateRPC
         public static void SendInvocation(Stream s, Action<Stream> act)
         {
             DateTime dt12 = DateTime.Now;
-
             MemoryStream initialBuffer = new MemoryStream();
             BinaryFormatter bf = new BinaryFormatter();
             bf.Serialize(initialBuffer, new Modification(act));
             initialBuffer.Flush();
-            string ss = Convert.ToBase64String(initialBuffer.GetBuffer());
+            string ss = Convert.ToBase64String(initialBuffer.GetBuffer(), 0, (int)initialBuffer.Length);
             MemoryStream ms2 = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(ms2);
             bw.Write(ss);
