@@ -1,4 +1,4 @@
 ﻿namespace CooperateRim
 {
-    public class BlueprintBuildSurrogate : IndexedPawnSurrogate { };
+    public class BlueprintBuildSurrogate : ThingSurrogate { };
 }

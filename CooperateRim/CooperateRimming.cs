@@ -80,7 +80,8 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(IntVec3), new IntVec3Surrogate());
             SerializationService.AppendSurrogate(typeof(BillStack), new BillStackSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill), new BillSurrogate());
-            SerializationService.AppendSurrogate(typeof(Pawn), new IndexedPawnSurrogate());
+            SerializationService.AppendSurrogate(typeof(Pawn), new ThingSurrogate());
+            SerializationService.AppendSurrogate(typeof(Building_WorkTable), new ThingSurrogate());
             SerializationService.AppendSurrogate(typeof(ThingWithComps), new ThingWithCompsSurrogate());
             SerializationService.AppendSurrogate(typeof(Blueprint_Build), new BlueprintBuildSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
@@ -95,6 +96,7 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(Zone_Stockpile), new Zone_StockPileSurrogate());
             SerializationService.AppendSurrogate(typeof(Outfit), new OutfitSerializationSurrogate());
             SerializationService.AppendSurrogate(typeof(FoodRestriction), new FoodRestrictionSurrogate());
+            SerializationService.AppendSurrogate(typeof(RecipeDef), new RecipeDefSurrogate());
 
             PirateRPC.PirateRPC.CompilerGeneratedSurrogate sur = new PirateRPC.PirateRPC.CompilerGeneratedSurrogate();
 
@@ -157,6 +159,7 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Vector3, Pawn, int>>((Vector3 clickPos, Pawn pawn, int index)=> floatMenuMakerpatch.UseIndexedFloatMenuEntryAt(clickPos, pawn, index));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object>>((object o) => thingfilter_methods.SetAllowAllFor(o));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object>>((object o) => thingfilter_methods.SetDisallowAllFor(o));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Building_WorkTable, RecipeDef>>((Building_WorkTable table, RecipeDef recipe) => BillStackPatch.MakeNewBillAt(table, recipe));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, ThingDef, bool, bool>>((object o, ThingDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
 
             RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
