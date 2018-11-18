@@ -1,24 +1,20 @@
 ﻿using Harmony;
 using RimWorld;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace CooperateRim
 {
     [HarmonyPatch(typeof(BillStack))]
-    [HarmonyPatch("Delete")]
-    public class bill_delete_patch
+    [HarmonyPatch("Reorder")]
+    public class bill_reorder_patch
     {
         static bool avoid_loop_internal = false;
 
-        public static void RemoveAt(BillStack stack, int index)
+        public static void ReorderAt(BillStack stack, int index, int offset)
         {
             avoid_loop_internal = true;
             try
             {
-                stack.Delete(stack.Bills[index]);
+                stack.Reorder(stack.Bills[index], offset);
             }
             finally
             {
@@ -27,7 +23,7 @@ namespace CooperateRim
         }
 
         [HarmonyPrefix]
-        public static bool Delete(ref Bill bill, BillStack __instance)
+        public static bool Reorder(ref Bill bill, BillStack __instance, int offset)
         {
             if (avoid_loop_internal)
             {
@@ -35,7 +31,7 @@ namespace CooperateRim
             }
             else
             {
-                RemoveAt(__instance, __instance.Bills.IndexOf(bill));
+                ReorderAt(__instance, __instance.Bills.IndexOf(bill), offset);
                 return false;
             }
         }
