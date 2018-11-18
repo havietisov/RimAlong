@@ -4,16 +4,16 @@ using Verse;
 
 namespace CooperateRim
 {
-    [HarmonyPatch(typeof(ThingFilter), "SetAllow", new System.Type[] { typeof(ThingDef), typeof(bool) })]
-    public class ThingFilter_setallow_wrapper
+    [HarmonyPatch(typeof(ThingFilter), "SetAllow", new System.Type[] { typeof(SpecialThingFilterDef), typeof(bool) })]
+    public class ThingFilter_setallow_special_wrapper
     {
         [HarmonyPrefix]
-        public static bool Prefix(ThingFilter __instance, ThingDef thingDef, bool allow)
+        public static bool Prefix(ThingFilter __instance, SpecialThingFilterDef sfDef, bool allow)
         {
-            CooperateRimming.Log("ThingFilterPatch.avoidThingFilterUsage == " + ThingFilterPatch.avoidThingFilterUsage + "|" + thingfilter_methods.avoidInternalLoop);
+            CooperateRimming.Log("ThingFilterPatch.avoidThingFilterUsage == " + ThingFilterPatch.avoidThingFilterUsage);
             if (!thingfilter_methods.avoidInternalLoop && !ThingFilterPatch.avoidThingFilterUsage)
             {
-                thingfilter_methods.SetAllowance(ThingFilterPatch.thingFilterCallerStack.Peek(), def: thingDef, isAllow: allow, isSpecial: false);
+                thingfilter_methods.SetAllowance(ThingFilterPatch.thingFilterCallerStack.Peek(), def: sfDef, isAllow: allow, isSpecial: false);
                 return false;
             }
             else
@@ -22,6 +22,7 @@ namespace CooperateRim
             }
         }
     }
+
     /*
     [HarmonyPatch(typeof(ThingFilter), "SetAllowAll", new System.Type[] { typeof(ThingFilter) })]
     public class ThingFilter_setallowall_wrapper
