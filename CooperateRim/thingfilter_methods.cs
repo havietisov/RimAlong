@@ -66,32 +66,58 @@ namespace CooperateRim
 
         public static void SetAllowance(object o, ThingDef def, bool isSpecial, bool isAllow)
         {
-           
+            avoidInternalLoop = true;
+
+            if (o is Zone_Stockpile)
             {
-                avoidInternalLoop = true;
-
-                if (o is Zone_Stockpile)
-                {
-                    (o as Zone_Stockpile).settings.filter.SetAllow(def, isAllow);
-                }
-
-                if (o is Outfit)
-                {
-                    (o as Outfit).filter.SetAllow(def, isAllow);
-                }
-
-                if (o is FoodRestriction)
-                {
-                    (o as FoodRestriction).filter.SetAllow(def, isAllow);
-                }
-
-                if (o is Bill)
-                {
-                    (o as Bill).ingredientFilter.SetAllow(def, isAllow);
-                }
-
-                CooperateRimming.Log("SetAllowance for " + o + "::" + def + "::" + isAllow);
+                (o as Zone_Stockpile).settings.filter.SetAllow(def, isAllow);
             }
+
+            if (o is Outfit)
+            {
+                (o as Outfit).filter.SetAllow(def, isAllow);
+            }
+
+            if (o is FoodRestriction)
+            {
+                (o as FoodRestriction).filter.SetAllow(def, isAllow);
+            }
+
+            if (o is Bill)
+            {
+                (o as Bill).ingredientFilter.SetAllow(def, isAllow);
+            }
+
+            CooperateRimming.Log("SetAllowance for " + o + "::" + def + "::" + isAllow);
+            avoidInternalLoop = false;
+        }
+
+        public static void SetAllowance(object o, SpecialThingFilterDef def, bool isSpecial, bool isAllow)
+        {
+            avoidInternalLoop = true;
+
+            if (o is Zone_Stockpile)
+            {
+                (o as Zone_Stockpile).settings.filter.SetAllow(def, isAllow);
+            }
+
+            if (o is Outfit)
+            {
+                (o as Outfit).filter.SetAllow(def, isAllow);
+            }
+
+            if (o is FoodRestriction)
+            {
+                (o as FoodRestriction).filter.SetAllow(def, isAllow);
+            }
+
+            if (o is Bill)
+            {
+                (o as Bill).ingredientFilter.SetAllow(def, isAllow);
+            }
+
+            CooperateRimming.Log("SetAllowance for " + o + "::" + def + "::" + isAllow);
+            avoidInternalLoop = false;
         }
     }
 
