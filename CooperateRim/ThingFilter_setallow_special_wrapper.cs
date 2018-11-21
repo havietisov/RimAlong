@@ -10,7 +10,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ThingFilter __instance, SpecialThingFilterDef sfDef, bool allow)
         {
-            CooperateRimming.Log("ThingFilterPatch.avoidThingFilterUsage == " + ThingFilterPatch.avoidThingFilterUsage);
+            //CooperateRimming.Log("ThingFilterPatch.avoidThingFilterUsage == " + ThingFilterPatch.avoidThingFilterUsage);
             if (!thingfilter_methods.avoidInternalLoop && !ThingFilterPatch.avoidThingFilterUsage)
             {
                 thingfilter_methods.SetAllowance(ThingFilterPatch.thingFilterCallerStack.Peek(), def: sfDef, isAllow: allow, isSpecial: false);
