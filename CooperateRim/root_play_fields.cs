@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using CooperateRim;
+using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Linq;

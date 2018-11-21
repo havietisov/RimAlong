@@ -54,7 +54,7 @@ namespace CooperateRim
             curData = new List<SerializationData>();
             byte[] result = ms.GetBuffer();
             List<byte> __result = new List<byte>(result);
-            CooperateRimming.Log(result.Length + "::::<>::::" + ms.Length);
+            //CooperateRimming.Log(result.Length + "::::<>::::" + ms.Length);
             __result.RemoveRange((int)ms.Length, result.Length - (int)ms.Length);
             if (result.Length > 32000)
             {

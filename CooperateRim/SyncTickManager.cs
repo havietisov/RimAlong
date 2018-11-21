@@ -46,13 +46,23 @@ namespace CooperateRim
 
         public static int expectedSRoundRealtimeLenMiliseconds = 200;
         public static int ticksPerSecond = 250;
-
+        static float lastLogTime = -9000;
+        
         [HarmonyPrefix]
         public static bool Prefix(ref int ___ticksGameInt, ref TickManager __instance)
         {
             getValuePatch.SendDiagDataToServer();
             getValuePatch.diagData.Clear();
             CooperateRimming.dumpRand = true;
+
+
+            if (lastLogTime < UnityEngine.Time.time)
+            {
+                lastLogTime = UnityEngine.Time.time + 1;
+                CooperateRimming.Log("comm tick : " + nextCommunicationTick + " of gameticks  " + Verse.Find.TickManager.TicksGame + ". procession at : " + nextProcessionTick);
+                CooperateRimming.Log("is paused : " + __instance.Paused + " syncstatus : " + imInSync);
+            }
+
             if (sw == null)
             {
                 sw = new Stopwatch();
@@ -63,13 +73,21 @@ namespace CooperateRim
 
                 if (!imInSync)
                 {
+
                     if (nextCommunicationTick == Verse.Find.TickManager.TicksGame)
                     {
+                        
                         imInSync = SyncTickData.FlushSyncTickData(nextProcessionTick + syncRoundLength * syncTickRoundOffset);
                     }
+
+
                 }
 
-                for (; cachedData == null;)
+                if (cachedData == null)
+                {
+                    return false;
+                }
+                //for (; cachedData == null;)
                 {
 
                 }

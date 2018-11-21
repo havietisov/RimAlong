@@ -18,9 +18,7 @@ namespace CooperateRim
         {
             public static bool Prepare()
             {
-                UnityEngine.Debug.Log("Command line args : " + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
-                Log("" + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch"));
-                return !System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch");
+                return true;
             }
 
             static void Prefix(Rect rect, bool anyMapFiles)

@@ -32,7 +32,7 @@ namespace CooperateRim
                 (o as Bill).ingredientFilter.SetAllowAll(null);
             }
 
-            CooperateRimming.Log("Setallowall for " + o);
+            //CooperateRimming.Log("Setallowall for " + o);
             avoidInternalLoop = false;
         }
 
@@ -60,7 +60,7 @@ namespace CooperateRim
                 (o as Bill).ingredientFilter.SetDisallowAll();
             }
 
-            CooperateRimming.Log("Setdisallowall for " + o);
+            //CooperateRimming.Log("Setdisallowall for " + o);
             avoidInternalLoop = false;
         }
 
@@ -88,7 +88,7 @@ namespace CooperateRim
                 (o as Bill).ingredientFilter.SetAllow(def, isAllow);
             }
 
-            CooperateRimming.Log("SetAllowance for " + o + "::" + def + "::" + isAllow);
+           // CooperateRimming.Log("SetAllowance for " + o + "::" + def + "::" + isAllow);
             avoidInternalLoop = false;
         }
 
@@ -116,7 +116,7 @@ namespace CooperateRim
                 (o as Bill).ingredientFilter.SetAllow(def, isAllow);
             }
 
-            CooperateRimming.Log("SetAllowance for " + o + "::" + def + "::" + isAllow);
+           // CooperateRimming.Log("SetAllowance for " + o + "::" + def + "::" + isAllow);
             avoidInternalLoop = false;
         }
     }

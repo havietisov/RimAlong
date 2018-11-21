@@ -50,6 +50,54 @@ namespace CooperateRim
             }
         }
 
+        public static void GenerateWorld()
+        {
+            ThinkTreeKeyAssigner.Reset();
+
+            foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
+            {
+                ThinkTreeKeyAssigner.AssignKeys(def.thinkRoot, 0);
+            }
+
+            Current.Game = new Game();
+            Current.Game.InitData = new GameInitData();
+
+
+            Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
+            Find.Scenario.PreConfigure();
+
+
+            string stringseed = GenText.RandomSeedString();
+            Current.Game.storyteller = new Storyteller(StorytellerDefOf.Cassandra, DifficultyDefOf.Rough);
+            Current.Game.World = WorldGenerator.GenerateWorld(0.05f, stringseed, OverallRainfall.Normal, OverallTemperature.Normal);
+            for (int i = 0; i < 500; i++)
+            {
+                if (TileFinder.IsValidTileForNewSettlement(i))
+                {
+                    Current.Game.InitData.startingTile = i;
+                    Log("Choosen tile : " + i);
+                    break;
+                }
+            }
+            TickManagerPatch.nextFrameTime = DateTime.Now;
+            TickManagerPatch.nextProcessionTick = 0;
+
+            foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
+            {
+                IterateOverThinkNodes(def.thinkRoot.ThisAndChildrenRecursive, def.ToString());
+            }
+
+            ThingIDMakerPatch.stopID = true;
+
+            foreach (Pawn p in Current.Game.InitData.startingAndOptionalPawns)
+            {
+                Log("starting pawn : " + p.ToString() + ",  uid : " + p.thingIDNumber);
+            }
+
+            PageUtility.InitGameStart();
+            Log("Startseed : " + stringseed);
+        }
+
         static void InitBullshit()
         {
             /*
@@ -142,7 +190,9 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, ThingDef, bool, bool>>((object o, ThingDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, SpecialThingFilterDef, bool, bool>>((object o, SpecialThingFilterDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
 
-
+            //RandRootContext<Verse.Map>.ApplyPatch("MapPostTick");
+            //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
+            RandRootContext<CooperateRimming>.ApplyPatch("GenerateWorld");
             RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
             RandRootContext<Game>.ApplyPatch("UpdatePlay");
             RandRootContext<UIRoot_Play>.ApplyPatch("UIRootOnGUI");
@@ -297,7 +347,7 @@ namespace CooperateRim
                         MethodInfo targetmethod = AccessTools.Method(t, "DesignateMultiCell");
                         HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateMultiCell"));
                         harmony.Patch(targetmethod, prefix, null, null);
-                        Log("designator multicell patch " + t.FullName);
+                        //Log("designator multicell patch " + t.FullName);
                     }
                 }
             }
@@ -355,11 +405,11 @@ namespace CooperateRim
                     {
                         MethodInfo targetmethod = AccessTools.Method(t, "JobOnThing");
                         HarmonyMethod postfix = new HarmonyMethod(mi);
-                        Logger.Message("Patched type : " + t);
+                        //Logger.Message("Patched type : " + t);
                         harmony.Patch(targetmethod, null, postfix, null);
                         leftOverTypes.Remove(t);
                     }
-                    catch (Exception ee)
+                        catch (Exception ee)
                     {
                         //Logger.Message("Patching exception : " + ee.ToString());
                     }

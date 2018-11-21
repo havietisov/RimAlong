@@ -18,7 +18,7 @@ namespace CooperateRim
 
         public void DoSomething(string name_something)
         {
-            Console.WriteLine("is it delayed? " + name_something);
+            //Console.WriteLine("is it delayed? " + name_something);
         }
 
     }
@@ -38,20 +38,20 @@ namespace CooperateRim
 
         public static void SerializeInstance<T>(T arg)
         {
-            Console.WriteLine("instance of : " + typeof(T) + " | " + arg);
+            //Console.WriteLine("instance of : " + typeof(T) + " | " + arg);
             SerializationService.SerializeInstance<T>(arg);
 
         }
 
         public static void SerializeThis<T>(T arg)
         {
-            Console.WriteLine("type : " + typeof(T) + " | " + arg);
+            //Console.WriteLine("type : " + typeof(T) + " | " + arg);
             SerializationService.SerializeObject<T>(arg);
         }
 
         public static void SetWrapperIndex(int i)
         {
-            Console.WriteLine("wrapper index : " + i);
+            //Console.WriteLine("wrapper index : " + i);
             SerializationService.SetMethodWrapperIndexAndFinish(i);
         }
 
@@ -95,7 +95,7 @@ namespace CooperateRim
 
                 if (!SerializationService.CheckForSurrogate(a.Type))
                 {
-                    Console.WriteLine("missing surrogate for " + a.Type);
+                    //Console.WriteLine("missing surrogate for " + a.Type);
                 }
             }
             

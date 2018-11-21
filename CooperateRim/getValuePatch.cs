@@ -52,7 +52,10 @@ namespace CooperateRim
         {
             if (Current.Game != null && Find.TickManager.TicksGame > 0)
             {
-
+                if (RandContextCounter.context_counter <= 0)
+                {
+                    CooperateRimming.Log("outside of context rand!" + RandContextCounter.context_counter);
+                }
                 //int tick = Current.Game == null ? -1 : Find.TickManager.TicksGame;
                 //StackTrace tr = new StackTrace();
                 //string s = "";
