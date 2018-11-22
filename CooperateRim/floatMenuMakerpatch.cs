@@ -13,13 +13,28 @@ namespace CooperateRim
     [HarmonyPatch(typeof(FloatMenuMakerMap), "ChoicesAtFor")]
     class floatMenuMakerpatch
     {
-        public static void UseIndexedFloatMenuEntryAt(Vector3 clickPos, Pawn pawn, int index)
-        {
-            Action a = FloatMenuMakerMap.ChoicesAtFor(clickPos, pawn)[index].action;
+        public delegate void delUseIndexedFloatMenuEntryAt(Vector3 clickPos, Pawn pawn, int index, int totalCount, string delegateName);
 
-            if (a != null)
+        public static void UseIndexedFloatMenuEntryAt(Vector3 clickPos, Pawn pawn, int index, int totalCount, string delegateName)
+        {
+            var entries = FloatMenuMakerMap.ChoicesAtFor(clickPos, pawn);
+
+            if (totalCount == entries.Count)
             {
-                a();
+                Action a = entries[index].action;
+
+                if (a != null && (a.Method.Name + "::" + a.Method.DeclaringType.Name).SequenceEqual(delegateName))
+                {
+                    a();
+                }
+                else
+                {
+                    CooperateRimming.Log("Warning! Different methods for float menu entry! But this might be fine");
+                }
+            }
+            else
+            {
+                CooperateRimming.Log("Warning! Different method count for float menu entry! But this might be fine");
             }
         }
 
@@ -32,7 +47,9 @@ namespace CooperateRim
                 foreach (FloatMenuOption opt in __result)
                 {
                     int _idx = idx;
-                    opt.action = () => { UseIndexedFloatMenuEntryAt(clickPos, pawn, _idx); };
+                    int totalCount = __result.Count;
+                    string delegateName = __result[idx].action != null ? __result[idx].action.Method.Name + "::" + __result[idx].action.Method.DeclaringType.Name : null;
+                    opt.action = () => { UseIndexedFloatMenuEntryAt(clickPos, pawn, _idx, totalCount, delegateName); };
                     idx++;
                 }
             }

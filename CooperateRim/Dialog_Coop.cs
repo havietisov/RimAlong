@@ -19,7 +19,7 @@ namespace CooperateRim
         [HarmonyPostfix]
         public static void Postfix()
         {
-            getValuePatch.GuardedPush();
+            getValuePatch.GuardedPop();
         }
     }
 
