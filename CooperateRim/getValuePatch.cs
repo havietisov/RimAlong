@@ -1,6 +1,7 @@
 ﻿using Harmony;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Verse;
 
 namespace CooperateRim
@@ -54,7 +55,16 @@ namespace CooperateRim
             {
                 if (RandContextCounter.context_counter <= 0)
                 {
-                    CooperateRimming.Log("outside of context rand!" + RandContextCounter.context_counter);
+                    StackTrace st = new StackTrace();
+
+                    CooperateRimming.Log("=========== outside of context rand!==========" + RandContextCounter.context_counter);
+
+                    foreach (var a in st.GetFrames())
+                    {
+                        CooperateRimming.Log(a.GetMethod().Name + "::" + a.GetMethod().DeclaringType);
+                    }
+
+                    CooperateRimming.Log("===========\\outside of context rand!==========" + RandContextCounter.context_counter);
                 }
                 //int tick = Current.Game == null ? -1 : Find.TickManager.TicksGame;
                 //StackTrace tr = new StackTrace();

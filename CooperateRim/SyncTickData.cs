@@ -682,6 +682,8 @@ namespace CooperateRim
                     WorkTypeDef _wtd = null;
                     Pawn pawn = null;
 
+                    CooperateRimming.Log("job priority for thingID : " + prior.p.ThingID);
+
                     foreach (var __workTypeDef in DefDatabase<WorkTypeDef>.AllDefsListForReading)
                     {
                         if (__workTypeDef.defName == prior.w.defName)

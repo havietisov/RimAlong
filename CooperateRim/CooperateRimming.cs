@@ -183,7 +183,7 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Bill_Production, BillRepeatModeDef>>((Bill_Production bill, BillRepeatModeDef repeatMode) => BillRepeatModeUtilityPatch.SetBillRepeatType(bill, repeatMode));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int>>((BillStack stack, int index) => bill_delete_patch.RemoveAt(stack, index));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, int, int>>((BillStack stack, int index, int offset) => bill_reorder_patch.ReorderAt(stack, index, offset));
-            ParrotWrapper.ParrotPatchExpressiontarget<Action<Vector3, Pawn, int>>((Vector3 clickPos, Pawn pawn, int index)=> floatMenuMakerpatch.UseIndexedFloatMenuEntryAt(clickPos, pawn, index));
+            ParrotWrapper.ParrotPatchExpressiontarget<floatMenuMakerpatch.delUseIndexedFloatMenuEntryAt>((Vector3 clickPos, Pawn pawn, int index, int totalCount, string delegateName)=> floatMenuMakerpatch.UseIndexedFloatMenuEntryAt(clickPos, pawn, index, totalCount, delegateName));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object>>((object o) => thingfilter_methods.SetAllowAllFor(o));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object>>((object o) => thingfilter_methods.SetDisallowAllFor(o));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Building_WorkTable, RecipeDef>>((Building_WorkTable table, RecipeDef recipe) => BillStackPatch.MakeNewBillAt(table, recipe));
@@ -192,6 +192,9 @@ namespace CooperateRim
 
             //RandRootContext<Verse.Map>.ApplyPatch("MapPostTick");
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
+            RandRootContext<UnityEngine.GUI>.ApplyPatch("CallWindowDelegate");
+            RandRootContext<MusicManagerPlay>.ApplyPatch("StartNewSong");
+            RandRootContext<MusicManagerPlay_placeholder1>.ApplyPatch("MusicUpdate", typeof(MusicManagerPlay));
             RandRootContext<CooperateRimming>.ApplyPatch("GenerateWorld");
             RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
             RandRootContext<Game>.ApplyPatch("UpdatePlay");
@@ -220,10 +223,12 @@ namespace CooperateRim
             }
         }*/
 
+        class MusicManagerPlay_placeholder1 { };
         class GamePlaceholder_1 { }
         class SoundStarterPlaceholder { };
         class SoundStarterPlaceholder2 { };
 
+        
         public delegate void  thing_filter_wrapper_1(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex);
 
         public override void Initialize()
