@@ -30,7 +30,7 @@ namespace CooperateRim
                 {
                     int iii = ii;
                     RecipeDef _rdef = rdef[ii];
-                    opt.action = () => { CooperateRimming.Log("recipe option clicked for recipe "  + _rdef); MakeNewBillAt(selThing, _rdef); };
+                    opt.action = () => { Utilities.RimLog.Message("recipe option clicked for recipe "  + _rdef); MakeNewBillAt(selThing, _rdef); };
                     ii++;
                 }
 

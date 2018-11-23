@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CooperateRim.Utilities;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Verse;
 
@@ -29,7 +30,7 @@ namespace CooperateRim
                 }
             }
 
-            CooperateRimming.Log("Could not locate a pawn with thingid " + idNumber);
+            RimLog.Message("Could not locate a pawn with thingid " + idNumber);
             return null;
         }
     }

@@ -34,7 +34,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static void Prefix(Command_Action __instance)
         {
-            CooperateRimming.Log(__instance.action.Method.DeclaringType.Name + "::" +__instance.action.Method.Name.ToString());
+            CooperateRimming.RimLog.Message(__instance.action.Method.DeclaringType.Name + "::" +__instance.action.Method.Name.ToString());
         }
     }*/
 }

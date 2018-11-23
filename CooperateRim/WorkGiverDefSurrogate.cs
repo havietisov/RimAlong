@@ -24,7 +24,7 @@ namespace CooperateRim
                 }
             }
 
-            CooperateRimming.Log("Could not locate defname");
+            Utilities.RimLog.Message("Could not locate defname");
             return null;
         }
     }

@@ -29,12 +29,12 @@ namespace CooperateRim
                 }
                 else
                 {
-                    CooperateRimming.Log("Warning! Different methods for float menu entry! But this might be fine");
+                    Utilities.RimLog.Message("Warning! Different methods for float menu entry! But this might be fine");
                 }
             }
             else
             {
-                CooperateRimming.Log("Warning! Different method count for float menu entry! But this might be fine");
+                Utilities.RimLog.Message("Warning! Different method count for float menu entry! But this might be fine");
             }
         }
 
@@ -64,7 +64,7 @@ namespace CooperateRim
         {
             if (a == null)
             {
-                CooperateRimming.Log(">>>>>>>>>>>> Action is null, wtf!!!!!!!!!!!!!!!!!!");
+                Utilities.RimLog.Message(">>>>>>>>>>>> Action is null, wtf!!!!!!!!!!!!!!!!!!");
             }
             else
             {
@@ -85,7 +85,7 @@ namespace CooperateRim
             Action a = __instance.action;
             __instance.action = () => 
             {
-                CooperateRimming.Log("deltype : " + a.GetType());
+                Utilities.RimLog.Message("deltype : " + a.GetType());
                 InvokeAction(a);
             };
         }

@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using CooperateRim.Utilities;
+using Harmony;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Patch()
         {
-            CooperateRimming.Log("++++++++=PlaceBlueprintForBuild");
+            RimLog.Message("++++++++=PlaceBlueprintForBuild");
             return true;
         }
     }

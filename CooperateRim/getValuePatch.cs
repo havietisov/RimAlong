@@ -57,14 +57,14 @@ namespace CooperateRim
                 {
                     StackTrace st = new StackTrace();
 
-                    CooperateRimming.Log("=========== outside of context rand!==========" + RandContextCounter.context_counter);
+                    Utilities.RimLog.Message("=========== outside of context rand!==========" + RandContextCounter.context_counter);
 
                     foreach (var a in st.GetFrames())
                     {
-                        CooperateRimming.Log(a.GetMethod().Name + "::" + a.GetMethod().DeclaringType);
+                        Utilities.RimLog.Message(a.GetMethod().Name + "::" + a.GetMethod().DeclaringType);
                     }
 
-                    CooperateRimming.Log("===========\\outside of context rand!==========" + RandContextCounter.context_counter);
+                    Utilities.RimLog.Message("===========\\outside of context rand!==========" + RandContextCounter.context_counter);
                 }
                 //int tick = Current.Game == null ? -1 : Find.TickManager.TicksGame;
                 //StackTrace tr = new StackTrace();
@@ -85,7 +85,7 @@ namespace CooperateRim
                     streamholder.WriteLine(frame.GetMethod().ReflectedType + "::" + frame.GetMethod().Name, "state");
                 }*/
                 
-                //CooperateRimming.Log(">>>>>>>>>>>>>>> FOUL RAND CALL");
+                //Utilities.RimLog.Message(">>>>>>>>>>>>>>> FOUL RAND CALL");
             }
             //if (CooperateRimming.dumpRand)
             {

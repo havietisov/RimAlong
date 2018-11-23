@@ -1,16 +1,15 @@
 ﻿using Harmony;
 using RimWorld;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Verse;
 using System;
 using UnityEngine;
 using HugsLib;
-using System.Runtime.InteropServices;
 using RimWorld.Planet;
 using Verse.AI;
 using Verse.Sound;
+using CooperateRim.Utilities;
 
 namespace CooperateRim
 {
@@ -22,7 +21,10 @@ namespace CooperateRim
         public static bool dumpRand = false;
         public static CooperateRimming inst;
 
-        static string cachedStuff = "";
+        public CooperateRimming ()
+        {
+            RimLog.Init(this.Logger);
+        }
 
         public HarmonyInstance harmonyInst
         {
@@ -31,25 +33,7 @@ namespace CooperateRim
                 return base.HarmonyInst;
             }
         }
-
-        public static void Log(string val)
-        {
-            if (inst != null && inst.Logger != null)
-            {
-                if (cachedStuff.Length != 0)
-                {
-                    inst.Logger.Message(cachedStuff);
-                    cachedStuff = "";
-                }
-
-                inst?.Logger?.Message(val);
-            }
-            else
-            {
-                cachedStuff += val + "\n";
-            }
-        }
-
+        
         public static void GenerateWorld()
         {
             ThinkTreeKeyAssigner.Reset();
@@ -75,7 +59,7 @@ namespace CooperateRim
                 if (TileFinder.IsValidTileForNewSettlement(i))
                 {
                     Current.Game.InitData.startingTile = i;
-                    Log("Choosen tile : " + i);
+                    RimLog.Message("Choosen tile : " + i);
                     break;
                 }
             }
@@ -91,13 +75,13 @@ namespace CooperateRim
 
             foreach (Pawn p in Current.Game.InitData.startingAndOptionalPawns)
             {
-                Log("starting pawn : " + p.ToString() + ",  uid : " + p.thingIDNumber);
+                RimLog.Message("starting pawn : " + p.ToString() + ",  uid : " + p.thingIDNumber);
             }
 
             PageUtility.InitGameStart();
-            Log("Startseed : " + stringseed);
+            RimLog.Message("Startseed : " + stringseed);
         }
-
+        
         static void InitBullshit()
         {
             /*
@@ -155,7 +139,7 @@ namespace CooperateRim
             u => 
             {
                 Current.Game.playSettings.useWorkPriorities = u;
-                CooperateRimming.Log("hey, it works?");
+                RimLog.Message("hey, it works?");
                 
                 foreach (Pawn pawn in PawnsFinder.AllMapsWorldAndTemporary_Alive)
                 {
@@ -238,7 +222,7 @@ namespace CooperateRim
             (typeof(Rand).GetField("random", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as RandomNumberGenerator).seed = 0;
 
             HarmonyInstance harmony = HarmonyInst;
-            Log(System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
+            RimLog.Message(System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
             List<Type> typesToPatch = new List<Type>();
             List<Type> designatorInheritees = new List<Type>();
             List<Type> leftOverTypes = new List<Type>();
@@ -352,7 +336,7 @@ namespace CooperateRim
                         MethodInfo targetmethod = AccessTools.Method(t, "DesignateMultiCell");
                         HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateMultiCell"));
                         harmony.Patch(targetmethod, prefix, null, null);
-                        //Log("designator multicell patch " + t.FullName);
+                        RimLog.Message("designator multicell patch " + t.FullName);
                     }
                 }
             }
@@ -439,6 +423,56 @@ namespace CooperateRim
             }
 
         }
+        
+        [HarmonyPatch(typeof(MainMenuDrawer))]
+        [HarmonyPatch("DoMainMenuControls")]
+        [HarmonyBefore]
+        [HarmonyPatch(new Type[] { typeof(Rect), typeof(bool) })]
+        class Patch
+        {
+            public static bool Prepare()
+            {
+                UnityEngine.Debug.Log("Command line args : " + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
+                RimLog.Message("" + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch"));
+                return !System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch");
+            }
+
+            static void Prefix(Rect rect, bool anyMapFiles)
+            {
+                rect.xMin -= 170f;
+                rect.yMin += 52;
+                GUI.BeginGroup(rect);
+                Rect rect2 = new Rect(0f, 0f, 170f, rect.height);
+
+                Rect rect3 = new Rect(rect2.xMax + 17f, 0f, 145f, rect.height);
+                Rect rect4 = new Rect(0, 0, 170f, rect.height);
+
+                Text.Font = GameFont.Small;
+                List<ListableOption> list = new List<ListableOption>();
+                string label = "Cooperative";
+                list.Add(new ListableOption(label, CooperativeButtonPressed));
+                OptionListingUtility.DrawOptionListing(rect2, list);
+            }
+
+            static void CooperativeButtonPressed()
+            {
+                CooperateRimming.inst.Logger.Trace("coop pressed");
+                //CloseMainTab();
+                Find.WindowStack.Add(new Dialog_Coop());
+            }
+        }
+
+        [HarmonyPatch(typeof(MainMenuDrawer))]
+        [HarmonyPatch("DoMainMenuControls")]
+        [HarmonyAfter]
+        [HarmonyPatch(new Type[] { typeof(Rect), typeof(bool) })]
+        class Patch2
+        {
+            static void Prefix(Rect rect, bool anyMapFiles)
+            {
+                GUI.EndGroup();
+            }
+        }
 
         static string hostName = "LENOVO";
 
@@ -450,8 +484,6 @@ namespace CooperateRim
             {
                 s.Add(node.ToString() + "\r\n");
             }
-
-            //System.IO.File.WriteAllLines("G:/CoopReplays/" + SyncTickData.cliendID + "/"+ name + "thinkdump_.txt", s.ToArray());
         }
     }
 }

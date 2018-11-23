@@ -1,4 +1,5 @@
-﻿using Harmony;
+﻿using CooperateRim.Utilities;
+using Harmony;
 using RimWorld;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,7 @@ namespace CooperateRim
             List<FloatMenuOption> list = new List<FloatMenuOption>();
             list.Add(new FloatMenuOption(BillRepeatModeDefOf.RepeatCount.LabelCap, delegate ()
             {
-                CooperateRimming.Log("le fuq is dis 1");
+                RimLog.Message("le fuq is dis 1");
                 SetBillRepeatType(bill, BillRepeatModeDefOf.RepeatCount);
             }, MenuOptionPriority.Default, null, null, 0f, null, null));
             FloatMenuOption item = new FloatMenuOption(BillRepeatModeDefOf.TargetCount.LabelCap, delegate ()
@@ -47,14 +48,14 @@ namespace CooperateRim
                 }
                 else
                 {
-                    CooperateRimming.Log("le fuq is dis 2");
+                    RimLog.Message("le fuq is dis 2");
                     SetBillRepeatType(bill, BillRepeatModeDefOf.TargetCount);
                 }
             }, MenuOptionPriority.Default, null, null, 0f, null, null);
             list.Add(item);
             list.Add(new FloatMenuOption(BillRepeatModeDefOf.Forever.LabelCap, delegate ()
             {
-                CooperateRimming.Log("le fuq is dis 3");
+                RimLog.Message("le fuq is dis 3");
                 SetBillRepeatType(bill, BillRepeatModeDefOf.Forever);
             }, MenuOptionPriority.Default, null, null, 0f, null, null));
             Find.WindowStack.Add(new FloatMenu(list));

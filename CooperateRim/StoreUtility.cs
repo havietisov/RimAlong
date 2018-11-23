@@ -50,7 +50,7 @@ namespace CooperateRim
             bool diry = TickManagerPatch.nextSyncTickValue % 4 == 0 ? true : false;
 
             __result = pawn.Position + new IntVec3(dirx ? (int)radius : -(int)radius, 0, diry ? (int)radius : -(int)radius);
-            CooperateRimming.Log("Wander to : " + pawn + " :: " + __result  + " {" + TickManagerPatch.nextSyncTickValue + "}");
+            CooperateRimming.RimLog.Message("Wander to : " + pawn + " :: " + __result  + " {" + TickManagerPatch.nextSyncTickValue + "}");
             pawn.Map.debugDrawer.FlashCell(__result, 0.4f, "wander");
             return false;
         }
