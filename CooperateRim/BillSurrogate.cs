@@ -22,10 +22,10 @@ namespace CooperateRim
         {
             string recipeDefName = info.GetString("recipedef");
             BillStack st = (BillStack)info.GetValue("bill_stack", typeof(BillStack));
-            CooperateRimming.Log("bill lacks pawn restriction in surrogate!");
-            CooperateRimming.Log("billstack is null ? " + (st == null ? "yes" : "no"));
-            CooperateRimming.Log("bill giver as thing : " + (st.billGiver as Thing));
-            CooperateRimming.Log("bill giver def as thing : " + (st.billGiver as Thing).def);
+            Utilities.RimLog.Message("bill lacks pawn restriction in surrogate!");
+            Utilities.RimLog.Message("billstack is null ? " + (st == null ? "yes" : "no"));
+            Utilities.RimLog.Message("bill giver as thing : " + (st.billGiver as Thing));
+            Utilities.RimLog.Message("bill giver def as thing : " + (st.billGiver as Thing).def);
 
             foreach (var rec in (st.billGiver as Thing).def.recipes)
             {
@@ -35,7 +35,7 @@ namespace CooperateRim
                 }
             }
 
-            CooperateRimming.Log("could not make bill!");
+            Utilities.RimLog.Message("could not make bill!");
             return null;
         }
     }

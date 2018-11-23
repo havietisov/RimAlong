@@ -29,7 +29,7 @@ namespace CooperateRim
                 }
             }
 
-            CooperateRimming.Log("Could not locate workgiver by it's workgiverdef");
+            Utilities.RimLog.Message("Could not locate workgiver by it's workgiverdef");
             return null;
         }
     }

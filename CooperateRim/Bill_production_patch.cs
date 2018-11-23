@@ -13,7 +13,7 @@ namespace CooperateRim
         {
             if (!SyncTickData.AvoidLoop)
             {
-                CooperateRimming.Log(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
+                Utilities.RimLog.Message(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
                 SyncTickData.AppendSyncTickData(bill, __instance.billGiver);
                 return false;
             }
@@ -39,7 +39,7 @@ namespace CooperateRim
         {
             if (!SyncTickData.AvoidLoop)
             {
-                CooperateRimming.Log(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
+                Utilities.RimLog.Message(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
                 SyncTickData.AppendSyncTickData(bill, __instance.billGiver);
                 return false;
             }
@@ -66,7 +66,7 @@ namespace CooperateRim
         {
             if (!SyncTickData.AvoidLoop)
             {
-                CooperateRimming.Log(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
+                Utilities.RimLog.Message(">>>>>>>>>>>>> " + __instance.billGiver.ToString());
                 SyncTickData.AppendSyncTickData(bill, __instance.billGiver);
                 return false;
             }

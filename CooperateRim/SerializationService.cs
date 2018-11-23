@@ -54,7 +54,7 @@ namespace CooperateRim
             curData = new List<SerializationData>();
             byte[] result = ms.GetBuffer();
             List<byte> __result = new List<byte>(result);
-            //CooperateRimming.Log(result.Length + "::::<>::::" + ms.Length);
+            //Utilities.RimLog.Message(result.Length + "::::<>::::" + ms.Length);
             __result.RemoveRange((int)ms.Length, result.Length - (int)ms.Length);
             if (result.Length > 32000)
             {
@@ -87,7 +87,7 @@ namespace CooperateRim
             ISerializationSurrogate res = selector.GetSurrogate(t, sc, out sr);
             if (res == null)
             {
-                CooperateRimming.Log("No surrogate for " + t);
+                Utilities.RimLog.Message("No surrogate for " + t);
             }
             return res;
         }

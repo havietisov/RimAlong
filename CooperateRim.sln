@@ -3,12 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27703.2047
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CooperateRim", "CooperateRim\CooperateRim.csproj", "{59511D22-BD23-4042-802B-0491A6C972FB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A753BE64-866E-4B90-BF0C-A21DDDD96AF9} = {A753BE64-866E-4B90-BF0C-A21DDDD96AF9}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RimLauncher", "RimLauncher\RimLauncher.csproj", "{0C46493E-CC22-4EC6-9E53-FB06608847BF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteDirectoryServer", "RemoteDirectoryServer\RemoteDirectoryServer.csproj", "{E087DBF9-FE1B-4538-BBD9-3583CF0A3AE6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParrotPatchTest", "ParrotPatchTest\ParrotPatchTest.csproj", "{785A782F-8B0E-44C2-8BA8-679295FDA744}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CooperateRimTests", "CooperateRimTests\CooperateRimTests.csproj", "{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildTool", "BuildUtils\BuildTool.csproj", "{A753BE64-866E-4B90-BF0C-A21DDDD96AF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +39,14 @@ Global
 		{785A782F-8B0E-44C2-8BA8-679295FDA744}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{785A782F-8B0E-44C2-8BA8-679295FDA744}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{785A782F-8B0E-44C2-8BA8-679295FDA744}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D9ABB13-4528-45D6-A6D3-AB05F58CC2A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A753BE64-866E-4B90-BF0C-A21DDDD96AF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A753BE64-866E-4B90-BF0C-A21DDDD96AF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A753BE64-866E-4B90-BF0C-A21DDDD96AF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A753BE64-866E-4B90-BF0C-A21DDDD96AF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

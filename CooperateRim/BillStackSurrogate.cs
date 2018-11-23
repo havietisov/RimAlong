@@ -20,8 +20,8 @@ namespace CooperateRim
         {
             string billGiverID = info.GetString("billgiverID");
             IntVec3 pos = (IntVec3)info.GetValue("thingPos", typeof(IntVec3));
-            CooperateRimming.Log("bill stack surrogate obj " + (obj == null ? "null" : "not null"));
-            CooperateRimming.Log("looking for issuer at " + pos);
+            Utilities.RimLog.Message("bill stack surrogate obj " + (obj == null ? "null" : "not null"));
+            Utilities.RimLog.Message("looking for issuer at " + pos);
             List<Thing>[] things = (List<Thing>[])Find.CurrentMap.thingGrid.GetType().GetField("thingGrid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Find.CurrentMap.thingGrid);
 
             foreach(var aa in things)
@@ -30,18 +30,18 @@ namespace CooperateRim
                 {
                     if (issuer.Position == pos)
                     {
-                        CooperateRimming.Log(issuer.ThingID + " :+: " + billGiverID);
+                        Utilities.RimLog.Message(issuer.ThingID + " :+: " + billGiverID);
                     }
                     if (issuer.ThingID == billGiverID)
                     {
-                        CooperateRimming.Log(issuer.ThingID + " :: " + billGiverID);
-                        CooperateRimming.Log("returning billstack ? " + ((issuer as IBillGiver).BillStack == null ? "null" : "not null"));
+                        Utilities.RimLog.Message(issuer.ThingID + " :: " + billGiverID);
+                        Utilities.RimLog.Message("returning billstack ? " + ((issuer as IBillGiver).BillStack == null ? "null" : "not null"));
                         return (issuer as IBillGiver).BillStack;
                     }
                 }
             }
 
-            CooperateRimming.Log("could not locate bill giver");
+            Utilities.RimLog.Message("could not locate bill giver");
             return null;
         }
     }

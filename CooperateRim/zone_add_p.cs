@@ -9,7 +9,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool prefix()
         {
-            CooperateRimming.Log(">>>>>>>>>>>>>>>>>>>>>>> selected update bullshit");
+            Utilities.RimLog.Message(">>>>>>>>>>>>>>>>>>>>>>> selected update bullshit");
             return false;
         }
     }

@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using CooperateRim.Utilities;
+using RimWorld;
 using System.Runtime.Serialization;
 using Verse;
 
@@ -35,13 +36,13 @@ namespace CooperateRim
             {
                 if (rec.defName == recipeDefName)
                 {
-                    CooperateRimming.Log("bill production restored via recipedef!");
+                    RimLog.Message("bill production restored via recipedef!");
                     Bill b = BillUtility.MakeNewBill(rec);
                     return b;
                 }
             }
-            
-            CooperateRimming.Log("could not make bill_production!");
+
+            RimLog.Message("could not make bill_production!");
             return null;
         }
     }

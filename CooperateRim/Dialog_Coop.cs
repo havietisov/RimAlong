@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using RimWorld.Planet;
 using Harmony;
+using CooperateRim.Utilities;
 
 namespace CooperateRim
 {
@@ -45,11 +46,11 @@ namespace CooperateRim
             {
                 if (t is Pawn)
                 {
-                    CooperateRimming.Log("Made id for " + (t as Pawn) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+                    Utilities.RimLog.Message("Made id for " + (t as Pawn) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
                 }
                 else
                 {
-                    CooperateRimming.Log("Made id for " + (t) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+                    Utilities.RimLog.Message("Made id for " + (t) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
                 }
             }
         }
@@ -80,7 +81,7 @@ namespace CooperateRim
 
             static void ErrorHandler(System.Exception ex)
             {
-                Log(ex.ToString());
+                RimLog.Message(ex.ToString());
             }
 
             static void GenerateMap()
@@ -89,8 +90,9 @@ namespace CooperateRim
                 {
                     //Find.Root.Start();
                 }
-                else {
-                    Log("Null root");
+                else
+                {
+                    RimLog.Message("Null root");
                 }
             }
         }

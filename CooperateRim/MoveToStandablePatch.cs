@@ -1,8 +1,5 @@
-﻿using Harmony;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using CooperateRim.Utilities;
+using Harmony;
 using Verse.AI;
 
 namespace CooperateRim
@@ -15,7 +12,11 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool TryGiveJob(ref Job __result, PawnDuty pawn)
         {
-            //CooperateRimming.Log("JobGiver_MoveToStandable ++ " + pawn);
+<<<<<<< HEAD
+            //Utilities.RimLog.Message("JobGiver_MoveToStandable ++ " + pawn);
+=======
+            RimLog.Message("JobGiver_MoveToStandable ++ " + pawn);
+>>>>>>> Project_Cleanup
             __result = null;
             return false;
         }

@@ -21,7 +21,7 @@ namespace CooperateRim
                 v++;
             }
 
-            CooperateRimming.Log("could not serialize jobdef");
+            Utilities.RimLog.Message("could not serialize jobdef");
             info.AddValue("deftable_index", -1);
         }
 
