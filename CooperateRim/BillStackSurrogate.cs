@@ -28,10 +28,6 @@ namespace CooperateRim
             {
                 foreach (var issuer in aa)
                 {
-                    if (issuer.Position == pos)
-                    {
-                        Utilities.RimLog.Message(issuer.ThingID + " :+: " + billGiverID);
-                    }
                     if (issuer.ThingID == billGiverID)
                     {
                         Utilities.RimLog.Message(issuer.ThingID + " :: " + billGiverID);

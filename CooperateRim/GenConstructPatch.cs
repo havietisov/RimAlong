@@ -16,7 +16,6 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Patch()
         {
-            RimLog.Message("++++++++=PlaceBlueprintForBuild");
             return true;
         }
     }

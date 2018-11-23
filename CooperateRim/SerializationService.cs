@@ -100,7 +100,6 @@ namespace CooperateRim
 
         public static void SerializeInstance<T>(T o)
         {
-            NetDemo.log("curdata len : " + curData.Count);
             if (curData.Count == 0)
             {
                 curData.Add(new SerializationData());
@@ -111,7 +110,6 @@ namespace CooperateRim
 
         public static void SerializeObject<T>(T o)
         {
-            NetDemo.log("curdata len : " + curData.Count);
             if (curData.Count == 0)
             {
                 curData.Add(new SerializationData());

@@ -139,7 +139,6 @@ namespace CooperateRim
             u => 
             {
                 Current.Game.playSettings.useWorkPriorities = u;
-                RimLog.Message("hey, it works?");
                 
                 foreach (Pawn pawn in PawnsFinder.AllMapsWorldAndTemporary_Alive)
                 {
@@ -229,37 +228,8 @@ namespace CooperateRim
             List<Type> leftOverTypes = new List<Type>();
 
             InitBullshit();
+            
 
-            //thingfilter patch
-            {
-                /*
-                MethodInfo[] targetmethod = typeof(Verse.ThingFilter).GetMethods();
-
-                foreach (var m in targetmethod)
-                {
-                    if 
-                    (
-                        m.Name == "SetAllow" && m.GetParameters().Length == 2 
-                        && m.GetParameters()[0].ParameterType == typeof(ThingDef) 
-                        && m.GetParameters()[1].ParameterType == typeof(bool)
-                    )
-                    {
-                        Log("+++" + m);
-                    }
-                }*/
-            }
-
-            /*
-            foreach (string methodName in new[] { "get_Int", "Gaussian" })
-            {
-                foreach (var method in typeof(Rand).GetMethods().Where(u => u.Name == methodName))
-                {
-                    HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.GeneralRandPatch).GetMethod("Prefix"));
-                    HarmonyMethod postfix = new HarmonyMethod(typeof(CooperateRim.GeneralRandPatch).GetMethod("Postfix"));
-                    harmony.Patch(method, prefix, postfix, null);
-                    Log()
-                }
-            }*/
 
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
@@ -291,20 +261,7 @@ namespace CooperateRim
                     }
                 }
             }
-            /*
-            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (Type t in a.GetTypes())
-                {
-                    if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)))
-                    {
-                        MethodInfo targetmethod = AccessTools.Method(t, "FinalizeDesignationSucceeded");
-                        HarmonyMethod prefix_1 = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("FinalizeDesignationSucceeded"));
-                        harmony.Patch(targetmethod, prefix_1, null, null);
-                    }
-                }
-            }*/
-            
+
             List<Type> doNotPatchDesignators = new List<Type>(new [] { typeof(Designator_ZoneDelete), typeof(Designator_Build), typeof(Designator) });
 
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
@@ -337,7 +294,6 @@ namespace CooperateRim
                         MethodInfo targetmethod = AccessTools.Method(t, "DesignateMultiCell");
                         HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateMultiCell"));
                         harmony.Patch(targetmethod, prefix, null, null);
-                        RimLog.Message("designator multicell patch " + t.FullName);
                     }
                 }
             }
@@ -354,33 +310,7 @@ namespace CooperateRim
                     }
                 }
             }
-
-            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (Type t in a.GetTypes())
-                {
-                    if (!t.IsAbstract && t.IsSubclassOf(typeof(ThinkNode)))
-                    {
-                        MethodInfo targetmethod = AccessTools.Method(t, "TryIssueJobPackage");
-                        HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.ThinkNode_patch).GetMethod("TryIssueJobPackage"));
-                        harmony.Patch(targetmethod, prefix, null, null);
-                    }
-                }
-            }
-
-            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (Type t in a.GetTypes())
-                {
-                    if (!t.IsAbstract && t.IsSubclassOf(typeof(ThinkNode_JobGiver)))
-                    {
-                        MethodInfo targetmethod = AccessTools.Method(t, "TryGiveJob");
-                        HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.JobGiver_patch).GetMethod("TryGiveJob"));
-                        harmony.Patch(targetmethod, null, prefix, null);
-                    }
-                }
-            }
-
+            
             Logger.Message("Field : " + (typeof(Building_Trap)).GetField("autoRearm", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase));
 
             foreach (MethodInfo mi in new[] 
