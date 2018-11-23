@@ -74,10 +74,10 @@ namespace CooperateRim
     {
         public S_Pawn(Pawn p) 
         {
-            ThingID = p.ThingID;
+            ThingID = p.thingIDNumber;
         }
 
-        public string ThingID;
+        public int ThingID;
 
         public static implicit operator S_Pawn(Pawn @this)
         {
@@ -693,6 +693,9 @@ namespace CooperateRim
                         }
                     }
 
+                    pawn = (Pawn)ThingRegistry.tryGetThing(prior.p.ThingID);
+
+                    /*
                     foreach (var _pawn in Find.CurrentMap.mapPawns.AllPawns)
                     {
                         if (_pawn.ThingID == prior.p.ThingID)
@@ -700,13 +703,13 @@ namespace CooperateRim
                             pawn = _pawn;
                             break;
                         }
-                    }
+                    }*/
 
                     if (pawn == null)
                     {
                         foreach (var _pawn in CooperateRimming.initialPawnList)
                         {
-                            if (_pawn.ThingID == prior.p.ThingID)
+                            if (_pawn.thingIDNumber == prior.p.ThingID)
                             {
                                 pawn = _pawn;
                                 break;
@@ -855,7 +858,7 @@ namespace CooperateRim
 
                     foreach (var _pawn in Find.CurrentMap.mapPawns.AllPawns)
                     {
-                        if (_pawn.ThingID == _job.pawn.ThingID)
+                        if (_pawn.thingIDNumber == _job.pawn.ThingID)
                         {
                             pawn = _pawn;
                             break;
