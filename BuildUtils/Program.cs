@@ -93,12 +93,21 @@ namespace BuildUtils
                             assemblyPath
                             , "../../../dependencies/Assembly-CSharp.dll", true
                         );
+
+                        string assemblyFolderPath = "../../../ModFolder/RimAlong/Assemblies";
+
+                        if (!Directory.Exists(assemblyFolderPath))
+                        {
+                            Console.WriteLine("Creating directory " + assemblyFolderPath);
+                            Directory.CreateDirectory(assemblyFolderPath);
+                        }
                     }
                     break;
 
                 case "--Post-RimAlong":
                     {
                         string modDir = Path.Combine(Path.GetDirectoryName(settings.rimworldExecPath), "Mods", "RimAlong");
+                        
                         string rimalongPath = "../../../ModFolder/RimAlong/Assemblies/CooperateRim.dll";
 
                         if (!Directory.Exists(modDir))
