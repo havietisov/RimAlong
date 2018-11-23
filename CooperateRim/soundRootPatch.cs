@@ -2,6 +2,7 @@
 
 namespace CooperateRim
 {
+    /*
     [HarmonyPatch(typeof(Verse.Sound.SoundRoot), "Update")]
     public class soundRootPatch
     {
@@ -16,5 +17,5 @@ namespace CooperateRim
         {
             getValuePatch.GuardedPop();
         }
-    }
+    }*/
 }

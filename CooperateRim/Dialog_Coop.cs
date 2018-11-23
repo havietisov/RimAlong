@@ -5,6 +5,7 @@ using UnityEngine;
 using RimWorld.Planet;
 using Harmony;
 using CooperateRim.Utilities;
+using System.Collections.Generic;
 
 namespace CooperateRim
 {
@@ -23,7 +24,7 @@ namespace CooperateRim
             getValuePatch.GuardedPop();
         }
     }
-
+    /*
     [HarmonyPatch(typeof(PawnApparelGenerator), "GenerateStartingApparelFor")]
     public class generator_patch
     {
@@ -31,6 +32,42 @@ namespace CooperateRim
         public static bool Prefix()
         {
             return false;
+        }
+    }*/
+
+    public class ThingRegistry
+    {
+        static Dictionary<int, WeakReference<Thing>> registry = new Dictionary<int, WeakReference<Thing>>();
+
+        public static void AddThing(Thing t, int id)
+        {
+            if (id == -1)
+            {
+                RimLog.Message("uhm, -1 id for " + t + ", skipping");
+            }
+            else
+            {
+                if (registry.ContainsKey(id))
+                {
+                    RimLog.Error("attempt to add something with id " + id + " for thing " + t);
+                }
+                else
+                {
+                    registry.Add(id, new WeakReference<Thing>(t));
+                }
+            }
+        }
+
+        public static Thing tryGetThing(int id)
+        {
+            if (registry.ContainsKey(id))
+            {
+                return registry[id].Target;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 
@@ -42,6 +79,8 @@ namespace CooperateRim
         [HarmonyPostfix]
         public static void Postfix(Thing t)
         {
+            ThingRegistry.AddThing(t, t.thingIDNumber);
+
             if (!stopID)
             {
                 if (t is Pawn)

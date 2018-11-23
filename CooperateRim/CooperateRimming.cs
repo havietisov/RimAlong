@@ -176,6 +176,7 @@ namespace CooperateRim
 
             //RandRootContext<Verse.Map>.ApplyPatch("MapPostTick");
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
+            RandRootContext<Verse.Sound.SoundRoot>.ApplyPatch("Update");
             RandRootContext<UnityEngine.GUI>.ApplyPatch("CallWindowDelegate");
             RandRootContext<MusicManagerPlay>.ApplyPatch("StartNewSong");
             RandRootContext<MusicManagerPlay_placeholder1>.ApplyPatch("MusicUpdate", typeof(MusicManagerPlay));
