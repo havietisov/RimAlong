@@ -56,14 +56,6 @@ namespace CooperateRim
             getValuePatch.diagData.Clear();
             CooperateRimming.dumpRand = true;
 
-
-            if (lastLogTime < UnityEngine.Time.time)
-            {
-                lastLogTime = UnityEngine.Time.time + 1;
-                Utilities.RimLog.Message("comm tick : " + nextCommunicationTick + " of gameticks  " + Verse.Find.TickManager.TicksGame + ". procession at : " + nextProcessionTick);
-                Utilities.RimLog.Message("is paused : " + __instance.Paused + " syncstatus : " + imInSync);
-            }
-
             if (sw == null)
             {
                 sw = new Stopwatch();

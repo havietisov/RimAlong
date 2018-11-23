@@ -9,8 +9,7 @@ namespace CooperateRim
     {
         static ulong state_old;
         static ulong state_mine;
-
-
+        
         [HarmonyPrefix]
         public static void Prefix()
         {

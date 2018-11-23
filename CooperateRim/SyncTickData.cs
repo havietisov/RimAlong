@@ -484,7 +484,6 @@ namespace CooperateRim
 
         public static void AppendSyncTickData(Designation des, System.Type designator)
         {
-            RimLog.Message("XXXXXXXXXXXXXx ++ " + des.def.defName);
             singleton.designations.Add(new S_Designation(des, designator));
         }
 
@@ -645,14 +644,9 @@ namespace CooperateRim
                         case TargetType.Cell:
                             {
                                 var ddee = ((Designator)(typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(Type.GetType(des.typeName)).Invoke(null, null)));
-
-                                RimLog.Message("dess : " + ddee);
+                                
                                 var ddes = Find.CurrentMap.designationManager.DesignationAt(des.target.cell, DefFromString(des.designationDef));
-
-                                foreach (var v in Find.CurrentMap.designationManager.AllDesignationsAt(des.target.cell))
-                                {
-                                    RimLog.Message(v.ToString());
-                                }
+                                
                                 //this should be replaced with DesignateSingleCell for mining case!
                                 Find.CurrentMap.designationManager.AddDesignation(new Designation((IntVec3)des.target.cell, DefFromString(des.designationDef)));
                             }
@@ -830,7 +824,6 @@ namespace CooperateRim
                 {
                     var _bill = a.bill;
                     Thing issuer = Find.CurrentMap.thingGrid.ThingsListAt(a.giverPos).First(u => u.ThingID == _bill.targetThing.ThingID);
-                    RimLog.Message("thing filter issuer : " + (issuer == null ? "null" : issuer.ToString()));
 
                     foreach (var rec in issuer.def.AllRecipes)
                     {
@@ -867,18 +860,13 @@ namespace CooperateRim
 
                     foreach (var __workTypeDef in typeof(JobDefOf).GetFields())
                     {
-                        RimLog.Message("[" + (__workTypeDef.GetValue(null) as JobDef).defName + " : " + _job.jobDef + "]");
-
                         if ((__workTypeDef.GetValue(null) as JobDef).defName == _job.jobDef)
                         {
                             workTypeDef = (__workTypeDef.GetValue(null) as JobDef);
                             break;
                         }
                     }
-
-                    RimLog.Message(">>>>>>>>>>>>>");
-                    RimLog.Message("workTypeDef " + (workTypeDef == null ? "null" : workTypeDef.ToString()));
-                    RimLog.Message("pawn :" + pawn + "]");
+                    
 
                     Job job = new Job(workTypeDef);
                     job.count = _job.count;
@@ -1161,7 +1149,6 @@ namespace CooperateRim
                                             if (index == call.restrictOptionIndex)
                                             {
                                                 ___bill.pawnRestriction = element.payload;
-                                                RimLog.Message(">>>>>>>>>>>>> element called!");
                                             }
 
                                             index++;
@@ -1366,10 +1353,6 @@ namespace CooperateRim
 
             //jobs
             {
-                foreach (var j in jobsToSerialize)
-                {
-                    RimLog.Message("++++ : " + j.jobDef);
-                }
                 info.AddValue(nameof(jobsToSerialize), jobsToSerialize);
             }
 
@@ -1493,7 +1476,6 @@ namespace CooperateRim
 
         public static void AppendSyncTickDataCommand_toggle_call_by_index(Thing t, int number)
         {
-            RimLog.Message(t + " || " + number);
             singleton.toggleCommandIndexedCalls.Add(new COMMAND_TOGGLE_INDEXED_CALLS() { thing = t, location = t.Position, gizmo_index = number });
         }
 

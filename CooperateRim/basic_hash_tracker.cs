@@ -4,6 +4,7 @@ using Verse;
 
 namespace CooperateRim
 {
+    /*
     [HarmonyPatch(typeof(RandomNumberGenerator_BasicHash), "GetInt")]
     public class basic_hash_tracker
     {
@@ -24,5 +25,5 @@ namespace CooperateRim
                 //System.IO.File.AppendAllText("Z:/CoopReplays/" + SyncTickData.cliendID + "/" +"tick_" + Find.TickManager.TicksGame + "_seed_" + ___seed + "_iter_" + iterations + "_res_" + __result + ".txt", s);
             }
         }
-    }
+    }*/
 }
