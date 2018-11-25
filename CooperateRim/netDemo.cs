@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
+using Verse;
 
 public class NetDemo
 {
@@ -28,7 +29,6 @@ public class NetDemo
         tc.Client.NoDelay = true;
         tc.Connect(host, 12345);
         ns = tc.GetStream();
-
         
         try
         {
@@ -41,6 +41,7 @@ public class NetDemo
                 PirateRPC.PirateRPC.SendInvocation(u, k =>
                 {
                     SyncTickData.SetClientID(cid);
+                    LongEventHandler.QueueLongEvent(CooperateRimming.GenerateWorld, "Waiting to make a world", true, e => { NetDemo.Log(e.ToString()); });
                 });
             });
         }

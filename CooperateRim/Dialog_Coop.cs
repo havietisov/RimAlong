@@ -43,7 +43,7 @@ namespace CooperateRim
         {
             if (id == -1)
             {
-                RimLog.Message("uhm, -1 id for " + t + ", skipping");
+                //RimLog.Message("uhm, -1 id for " + t + ", skipping");
             }
             else
             {
@@ -110,7 +110,6 @@ namespace CooperateRim
                 if (Widgets.ButtonText(r, "Connect to "))
                 {
                     NetDemo.WaitForConnection(hostName);
-                    GenerateWorld();
                 }
                 r.y += size;
                 Widgets.ButtonText(r, "MEANINGLESS BUTTON"); r.y += size;

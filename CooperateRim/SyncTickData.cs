@@ -547,6 +547,7 @@ namespace CooperateRim
                     if (cliendID > -1)
                     {
                         singleton.randomToVerify = new int[] { Verse.Rand.Int };
+                        RimLog.Message("Rand control context : " + RandContextCounter.currentContextName);
                         var colonists = Find.ColonistBar.GetColonistsInOrder();
                         singleton.colonistJobsToVerify = colonists == null ? new List<string> { } : colonists.ConvertAll<string>(u=> u.CurJobDef == null ? u.ThingID + "::" + "<null>" : u.ThingID + "::" + u.CurJobDef.defName);
                         singleton.serializationServiceData = SerializationService.Flush();
@@ -677,7 +678,7 @@ namespace CooperateRim
                     WorkTypeDef _wtd = null;
                     Pawn pawn = null;
 
-                    Utilities.RimLog.Message("job priority for thingID : " + prior.p.ThingID);
+                    //Utilities.RimLog.Message("job priority for thingID : " + prior.p.ThingID);
 
                     foreach (var __workTypeDef in DefDatabase<WorkTypeDef>.AllDefsListForReading)
                     {
@@ -687,35 +688,24 @@ namespace CooperateRim
                         }
                     }
 
+                    if (_wtd == null)
+                    {
+                        //RimLog.Message("wtd is null ? ");
+                    }
+
                     pawn = (Pawn)ThingRegistry.tryGetThing(prior.p.ThingID);
 
-                    /*
-                    foreach (var _pawn in Find.CurrentMap.mapPawns.AllPawns)
-                    {
-                        if (_pawn.ThingID == prior.p.ThingID)
-                        {
-                            pawn = _pawn;
-                            break;
-                        }
-                    }*/
 
                     if (pawn == null)
                     {
-                        foreach (var _pawn in CooperateRimming.initialPawnList)
-                        {
-                            if (_pawn.thingIDNumber == prior.p.ThingID)
-                            {
-                                pawn = _pawn;
-                                break;
-                            }
-                        }
+                        //RimLog.Message("pawn is null ? ");
                     }
-
-                    //RimLog.Message("Find.GameInitData : " + Find.GameInitData);
-                    //RimLog.Message("pawn priority : " + pawn);
-                    AvoidLoop = true;
-                    pawn.workSettings.SetPriority(_wtd, prior.priority);
-                    AvoidLoop = false;
+                    else
+                    {
+                        AvoidLoop = true;
+                        pawn.workSettings.SetPriority(_wtd, prior.priority);
+                        AvoidLoop = false;
+                    }
                 }
 
                 //RimLog.Message("Deserialized jobs :  " + jobsToSerialize.Count);

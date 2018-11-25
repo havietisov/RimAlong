@@ -95,7 +95,7 @@ public class LocalDB
     public static Action<Stream> GetCallback(SyncTickData[] ds)
     {
         DateTime dt = DateTime.UtcNow;
-        return u => { TickManagerPatch.SetCachedData(ds); /*RimLog.Message("Message delivery took " + (DateTime.UtcNow - dt).TotalMilliseconds.ToString());*/ };
+        return u => { TickManagerPatch.SetCachedData(ds); getValuePatch.ClearFramelistData(); /*RimLog.Message("Message delivery took " + (DateTime.UtcNow - dt).TotalMilliseconds.ToString());*/ };
     }
 
     enum desyncReason
@@ -177,11 +177,11 @@ public class LocalDB
                         PirateRPC.PirateRPC.SendInvocation(__ns, GetCallback(sdl.ToArray()));
                         break;
                     case desyncReason.Jobs:
-                        PirateRPC.PirateRPC.SendInvocation(__ns, uuu => { Messages.Message("Session desynchronized! Reason : different colonist jobs", RimWorld.MessageTypeDefOf.ThreatBig, true); });
+                        PirateRPC.PirateRPC.SendInvocation(__ns, uuu => { Messages.Message("Session desynchronized! Reason : different colonist jobs", RimWorld.MessageTypeDefOf.ThreatBig, true); getValuePatch.DumpFramelistData(uuu); });
                         break;
                     case desyncReason.Rng:
                         NetDemo.log("Session desynchronized! Reason : different control random numbers");
-                        PirateRPC.PirateRPC.SendInvocation(__ns, uuu => { Messages.Message("Session desynchronized! Reason : different control random numbers", RimWorld.MessageTypeDefOf.ThreatBig, true);  });
+                        PirateRPC.PirateRPC.SendInvocation(__ns, uuu => { Messages.Message("Session desynchronized! Reason : different control random numbers", RimWorld.MessageTypeDefOf.ThreatBig, true); getValuePatch.DumpFramelistData(uuu);  });
                         break;
                 }
                 NetDemo.log("invocation took " + (DateTime.Now - dt).TotalMilliseconds);

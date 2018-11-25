@@ -10,6 +10,7 @@ using RimWorld.Planet;
 using Verse.AI;
 using Verse.Sound;
 using CooperateRim.Utilities;
+using System.Diagnostics;
 
 namespace CooperateRim
 {
@@ -44,15 +45,19 @@ namespace CooperateRim
             }
 
             Current.Game = new Game();
+            RimLog.Message("first ever id is "  + Current.Game.uniqueIDsManager.GetNextThingID());
+            
+            Current.Game.uniqueIDsManager.GetType().GetField("nextThingID", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(Current.Game.uniqueIDsManager, 0);
             Current.Game.InitData = new GameInitData();
-
-
+            
             Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
             Find.Scenario.PreConfigure();
 
 
             string stringseed = GenText.RandomSeedString();
             Current.Game.storyteller = new Storyteller(StorytellerDefOf.Cassandra, DifficultyDefOf.Rough);
+
+
             Current.Game.World = WorldGenerator.GenerateWorld(0.05f, stringseed, OverallRainfall.Normal, OverallTemperature.Normal);
             for (int i = 0; i < 500; i++)
             {
@@ -71,8 +76,16 @@ namespace CooperateRim
                 IterateOverThinkNodes(def.thinkRoot.ThisAndChildrenRecursive, def.ToString());
             }
 
-            ThingIDMakerPatch.stopID = true;
+            foreach (var af in new[] { MapGeneratorDefOf.Encounter, MapGeneratorDefOf.Base_Faction, MapGeneratorDefOf.Base_Player, MapGeneratorDefOf.EscapeShip })
+            {
+                foreach (var fp in af.genSteps)
+                {
+                    RimLog.Message("getnstepdef : " + fp);
+                }
+            }
 
+            ThingIDMakerPatch.stopID = true;
+            
             foreach (Pawn p in Current.Game.InitData.startingAndOptionalPawns)
             {
                 RimLog.Message("starting pawn : " + p.ToString() + ",  uid : " + p.thingIDNumber);
@@ -81,7 +94,26 @@ namespace CooperateRim
             PageUtility.InitGameStart();
             RimLog.Message("Startseed : " + stringseed);
         }
-        
+
+        [HarmonyPatch(typeof(WorldPawns), "AddPawn")]
+        public class wpPatch
+        {
+            [HarmonyAfter]
+            public static void postfix(Pawn p)
+            {
+                StackTrace st = new StackTrace();
+
+                RimLog.Message("==========");
+                foreach (var a in st.GetFrames())
+                {
+                    RimLog.Message(a.GetMethod().Name + "::" + a.GetMethod().DeclaringType);
+                }
+
+                RimLog.Message("pawn added to world : " + p);
+                RimLog.Message("///==========");
+            }
+        }
+
         static void InitBullshit()
         {
             /*
@@ -173,16 +205,26 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, ThingDef, bool, bool>>((object o, ThingDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, SpecialThingFilterDef, bool, bool>>((object o, SpecialThingFilterDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
 
-            //RandRootContext<Verse.Map>.ApplyPatch("MapPostTick");
+            RandRootContext<Verse.Map>.ApplyPatch("MapPostTick");
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
             RandRootContext<Verse.Sound.SoundRoot>.ApplyPatch("Update");
             RandRootContext<UnityEngine.GUI>.ApplyPatch("CallWindowDelegate");
             RandRootContext<MusicManagerPlay>.ApplyPatch("StartNewSong");
             RandRootContext<MusicManagerPlay_placeholder1>.ApplyPatch("MusicUpdate", typeof(MusicManagerPlay));
-            RandRootContext<CooperateRimming>.ApplyPatch("GenerateWorld");
+            RandRootContext<WorldGenPlaceholder>.ApplyPatch("GenerateWorld", typeof(CooperateRimming));
             RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
             RandRootContext<Game>.ApplyPatch("UpdatePlay");
             RandRootContext<UIRoot_Play>.ApplyPatch("UIRootOnGUI");
+            RandRootContext<InitNewGamePlaceholder>.ApplyPatch("InitNewGame", typeof(Verse.Game));
+
+            foreach (MethodInfo mi in typeof(MoteMaker).GetMethods())
+            {
+                if (!mi.IsConstructor && !mi.IsAbstract && mi.Name != "GetType")
+                {
+                    RandRootContext<MoteBullshit_placeholder>.ApplyPatch(mi, typeof(MoteMaker));
+                }
+            }
+
             //RandRootContext<Hediff>.ApplyPatch("Tick");
             //RandRootContext<LetterStack>.ApplyPatch("LetterStackUpdate");
             //RandRootContext<World>.ApplyPatch("WorldUpdate");
@@ -207,10 +249,13 @@ namespace CooperateRim
             }
         }*/
 
+        public class MoteBullshit_placeholder { };
         class MusicManagerPlay_placeholder1 { };
         class GamePlaceholder_1 { }
         class SoundStarterPlaceholder { };
         class SoundStarterPlaceholder2 { };
+        class WorldGenPlaceholder { };
+        class InitNewGamePlaceholder { };
 
         
         public delegate void  thing_filter_wrapper_1(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex);
@@ -361,13 +406,6 @@ namespace CooperateRim
         [HarmonyPatch(new Type[] { typeof(Rect), typeof(bool) })]
         class Patch
         {
-            public static bool Prepare()
-            {
-                UnityEngine.Debug.Log("Command line args : " + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
-                RimLog.Message("" + System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch"));
-                return !System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch");
-            }
-
             static void Prefix(Rect rect, bool anyMapFiles)
             {
                 rect.xMin -= 170f;
@@ -405,7 +443,7 @@ namespace CooperateRim
             }
         }
 
-        static string hostName = "LENOVO";
+        static string hostName = "localhost";
 
         static void IterateOverThinkNodes(IEnumerable<ThinkNode> nodes, string name)
         {
