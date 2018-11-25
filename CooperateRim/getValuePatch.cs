@@ -26,7 +26,7 @@ namespace CooperateRim
         [HarmonyPostfix]
         public static void Postfix(float mtb, float mtbUnit, float checkDuration, bool __result)
         {
-            if (Current.Game != null && Find.TickManager.TicksGame > 0)
+            if (Current.Game != null && Find.TickManager.TicksGame > 0 && getValuePatch.diagnostics)
             {
                 mtb_dump.Add(new mtbdata() { checkDuration = checkDuration, mtb = mtb, mtbUnit = mtbUnit, __result = __result, ctx = RandContextCounter.currentContextName, tickID = Find.TickManager.TicksGame, context = new StackTrace().GetFrames() });
             }
@@ -36,7 +36,7 @@ namespace CooperateRim
     [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
     public class getValuePatch
     {
-        public static bool diagnostics = true;
+        public static bool diagnostics = false;
 
         public static int rand_guard = 0;
 
@@ -98,18 +98,20 @@ namespace CooperateRim
 
         public static void DumpFramelistData(System.IO.Stream s)
         {
-            List<diagdata> fdls = framelistForTicks;
-            RimLog.Message("framelistForTicks :: "+ framelistForTicks.Count);
-
-            PirateRPC.PirateRPC.SendInvocation(s, (u) => 
+            if (getValuePatch.diagnostics)
             {
-                Console.WriteLine("dumping data " + fdls.Count);
+                List<diagdata> fdls = framelistForTicks;
+                RimLog.Message("framelistForTicks :: " + framelistForTicks.Count);
 
-                foreach (var kv in fdls)
+                PirateRPC.PirateRPC.SendInvocation(s, (u) =>
                 {
-                    if (!string.IsNullOrEmpty(kv.trace))
+                    Console.WriteLine("dumping data " + fdls.Count);
+
+                    foreach (var kv in fdls)
                     {
-                        string str = kv.trace;
+                        if (!string.IsNullOrEmpty(kv.trace))
+                        {
+                            string str = kv.trace;
 
                         /*
                         foreach (StackFrame sf in kv.trace)
@@ -117,14 +119,13 @@ namespace CooperateRim
                             str += sf.ToString() + "\r\n";
                         }*/
 
-                        System.IO.File.WriteAllText("C:/CoopReplays/" + kv.clientID + "/" + kv.frame + "_" + kv.context + "_" + kv.iteration + ".txt", str);
+                            System.IO.File.WriteAllText("C:/CoopReplays/" + kv.clientID + "/" + kv.frame + "_" + kv.context + "_" + kv.iteration + ".txt", str);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
-
         
-
         [HarmonyPostfix]
         public static void get_Value(ref uint ___iterations, ref float __result, RandomNumberGenerator ___random)
         {

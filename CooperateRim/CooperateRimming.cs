@@ -37,66 +37,7 @@ namespace CooperateRim
         
         public static void GenerateWorld()
         {
-            /*
-            ThinkTreeKeyAssigner.Reset();
-
-            foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
-            {
-                ThinkTreeKeyAssigner.AssignKeys(def.thinkRoot, 0);
-            }*/
-
             ThingIDMakerPatch.stopID = true;
-
-            /*
-            Current.Game = new Game();
-            RimLog.Message("first ever id is "  + Current.Game.uniqueIDsManager.GetNextThingID());
-            
-            Current.Game.uniqueIDsManager.GetType().GetField("nextThingID", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(Current.Game.uniqueIDsManager, 0);
-            Current.Game.InitData = new GameInitData();
-            
-            Current.Game.Scenario = ScenarioDefOf.Crashlanded.scenario;
-            Find.Scenario.PreConfigure();
-
-
-            string stringseed = GenText.RandomSeedString();
-            Current.Game.storyteller = new Storyteller(StorytellerDefOf.Cassandra, DifficultyDefOf.Rough);
-
-
-            Current.Game.World = WorldGenerator.GenerateWorld(0.05f, stringseed, OverallRainfall.Normal, OverallTemperature.Normal);
-            for (int i = 0; i < 500; i++)
-            {
-                if (TileFinder.IsValidTileForNewSettlement(i))
-                {
-                    Current.Game.InitData.startingTile = i;
-                    RimLog.Message("Choosen tile : " + i);
-                    break;
-                }
-            }
-            TickManagerPatch.nextFrameTime = DateTime.Now;
-            TickManagerPatch.nextProcessionTick = 0;
-
-            foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
-            {
-                IterateOverThinkNodes(def.thinkRoot.ThisAndChildrenRecursive, def.ToString());
-            }
-
-            foreach (var af in new[] { MapGeneratorDefOf.Encounter, MapGeneratorDefOf.Base_Faction, MapGeneratorDefOf.Base_Player, MapGeneratorDefOf.EscapeShip })
-            {
-                foreach (var fp in af.genSteps)
-                {
-                    RimLog.Message("getnstepdef : " + fp);
-                }
-            }
-
-            ThingIDMakerPatch.stopID = true;
-            
-            foreach (Pawn p in Current.Game.InitData.startingAndOptionalPawns)
-            {
-                RimLog.Message("starting pawn : " + p.ToString() + ",  uid : " + p.thingIDNumber);
-            }
-
-            PageUtility.InitGameStart();
-            RimLog.Message("Startseed : " + stringseed);*/
 
             if (SyncTickData.cliendID == 0)
             {
@@ -104,11 +45,15 @@ namespace CooperateRim
             }
             else
             {
-                NetDemo.LoadFromRemoteSFD();
-            }
-            //GameDataSaveLoader.CheckVersionAndLoadGame("mp_default");
+                LongEventHandler.QueueLongEvent(() => 
+                {
+                    NetDemo.LoadFromRemoteSFD();
+                    for (; NetDemo.GetSFD() == null ;)
+                    {
 
-            //SavedGameLoaderNow.LoadGameFromSaveFileNow("mp_default");
+                    }
+                }, "Downloading savefile".Translate(), true, e => { RimLog.Error(e.ToString()); });
+            }
         }
 
         [HarmonyPatch(typeof(Dialog_SaveFileList_Load), "DoFileInteraction")]
@@ -128,6 +73,14 @@ namespace CooperateRim
 
                         PirateRPC.PirateRPC.SendInvocation(u, uu => { NetDemo.LoadFromRemoteSFD(); });
                     });
+
+                    LongEventHandler.QueueLongEvent(() =>
+                    {
+                        for (; NetDemo.GetSFD() == null;)
+                        {
+
+                        }
+                    }, "Downloading savefile".Translate(), true, e => { RimLog.Error(e.ToString()); });
                 }
 
                 return false;
