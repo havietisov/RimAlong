@@ -37,13 +37,17 @@ namespace CooperateRim
         
         public static void GenerateWorld()
         {
+            /*
             ThinkTreeKeyAssigner.Reset();
 
             foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
             {
                 ThinkTreeKeyAssigner.AssignKeys(def.thinkRoot, 0);
-            }
+            }*/
 
+            ThingIDMakerPatch.stopID = true;
+
+            /*
             Current.Game = new Game();
             RimLog.Message("first ever id is "  + Current.Game.uniqueIDsManager.GetNextThingID());
             
@@ -92,7 +96,42 @@ namespace CooperateRim
             }
 
             PageUtility.InitGameStart();
-            RimLog.Message("Startseed : " + stringseed);
+            RimLog.Message("Startseed : " + stringseed);*/
+
+            if (SyncTickData.cliendID == 0)
+            {
+                Find.WindowStack.Add(new Dialog_SaveFileList_Load());
+            }
+            else
+            {
+                NetDemo.LoadFromRemoteSFD();
+            }
+            //GameDataSaveLoader.CheckVersionAndLoadGame("mp_default");
+
+            //SavedGameLoaderNow.LoadGameFromSaveFileNow("mp_default");
+        }
+
+        [HarmonyPatch(typeof(Dialog_SaveFileList_Load), "DoFileInteraction")]
+        public class Dialog_SaveFileList_Load_patch//actually, server should do checks about this
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(string saveFileName)
+            {
+                string fileName = saveFileName;
+                string fileContent = System.IO.File.ReadAllText(GenFilePaths.FilePathForSavedGame(saveFileName));
+
+                if (SyncTickData.cliendID == 0)
+                {
+                    PirateRPC.PirateRPC.SendInvocation(NetDemo.ns, u => 
+                    {
+                        NetDemo.SetSFD(new NetDemo.SaveFileData() { tcontext = fileContent, partial_name = fileName + "_received" });
+
+                        PirateRPC.PirateRPC.SendInvocation(u, uu => { NetDemo.LoadFromRemoteSFD(); });
+                    });
+                }
+
+                return false;
+            }
         }
 
         [HarmonyPatch(typeof(WorldPawns), "AddPawn")]
