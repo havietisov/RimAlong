@@ -64,8 +64,8 @@ namespace CooperateRim
                 ACKSW.Start();
 
                 /*fix for newly loaded game*/
-                TickManagerPatch.nextCommunicationTick = ((Verse.Find.TickManager.TicksGame / TickManagerPatch.syncRoundLength) + 1) * TickManagerPatch.syncRoundLength;
-                TickManagerPatch.nextProcessionTick = ((Verse.Find.TickManager.TicksGame / (syncRoundLength * syncTickRoundOffset)) + 1) * (syncRoundLength * syncTickRoundOffset);
+                TickManagerPatch.nextCommunicationTick = Verse.Find.TickManager.TicksGame;
+                TickManagerPatch.nextProcessionTick = Verse.Find.TickManager.TicksGame;
 
                 if (!imInSync)
                 {
@@ -101,7 +101,7 @@ namespace CooperateRim
                 sw.Start();
                 bool canNormallyTick = nextProcessionTick > Verse.Find.TickManager.TicksGame;
 
-                RimLog.Message("Frame " + ___ticksGameInt + " canNormallyTick " + canNormallyTick);
+                RimLog.Message("Tick " + ___ticksGameInt + " canNormallyTick " + canNormallyTick + "| comm " + nextCommunicationTick + " | " + nextProcessionTick);
 
                 if (canNormallyTick)
                 {

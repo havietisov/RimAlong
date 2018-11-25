@@ -1,4 +1,5 @@
 ﻿using CooperateRim;
+using CooperateRim.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -67,28 +68,39 @@ public class NetDemo
     {
         log(s);
     }
-    
+
+    static bool hasClientID;
+
     public static void WaitForConnection(string host)
     {
         tc = new TcpClient();
         tc.Client.NoDelay = true;
         tc.Connect(host, 12345);
         ns = tc.GetStream();
-        
+        hasClientID = false;
         try
         {
-            PirateRPC.PirateRPC.SendInvocation(ns, u =>
+            LongEventHandler.QueueLongEvent(() =>
             {
-                int cid = SyncTickData.cliendID;
-                Interlocked.Increment(ref SyncTickData.cliendID);
-                Log("sending client id " + cid);
-
-                PirateRPC.PirateRPC.SendInvocation(u, k =>
+                PirateRPC.PirateRPC.SendInvocation(ns, u =>
                 {
-                    SyncTickData.SetClientID(cid);
-                    LongEventHandler.QueueLongEvent(CooperateRimming.GenerateWorld, "Waiting to make a world", true, e => { NetDemo.Log(e.ToString()); });
+                    int cid = SyncTickData.cliendID;
+                    Interlocked.Increment(ref SyncTickData.cliendID);
+                    Log("sending client id " + cid);
+
+                    PirateRPC.PirateRPC.SendInvocation(u, k =>
+                    {
+                        SyncTickData.SetClientID(cid);
+                        hasClientID = true;
+                        LongEventHandler.QueueLongEvent(CooperateRimming.GenerateWorld, "Waiting to make a world", true, e => { NetDemo.Log(e.ToString()); });
+                    });
                 });
-            });
+
+                for (; !hasClientID; )
+                {
+
+                }
+            }, "Waiting for server".Translate(), true, e => { RimLog.Error(e.ToString()); });
         }
         catch (Exception ee)
         {
