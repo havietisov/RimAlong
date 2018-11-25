@@ -54,8 +54,10 @@ public class NetDemo
 
     public static void PerformSaveFileLoad()
     {
+        Rand.PushState(0);
         System.IO.File.WriteAllText(GenFilePaths.FilePathForSavedGame(m_sfd.partial_name), m_sfd.tcontext);
         GameDataSaveLoader.LoadGame(m_sfd.partial_name);
+        Rand.PopState();
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

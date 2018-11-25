@@ -105,7 +105,13 @@ namespace CooperateRim
 
                 if (canNormallyTick)
                 {
+
                     //Utilities.RimLog.Message("normal tick at " + Verse.Find.TickManager.TicksGame + " nsync " + nextSyncTickValue);
+                    ulong i = 0;
+                    foreach (var act in RandContextCounter.replacement_seed)
+                    {
+                        act((ulong)___ticksGameInt + (i++));
+                    }
                     __instance.DoSingleTick();
                 }
 
@@ -160,6 +166,12 @@ namespace CooperateRim
 
                                     var cd = cachedData;
                                     cachedData = null;
+
+                                    ulong i = 0;
+                                    foreach (var act in RandContextCounter.replacement_seed)
+                                    {
+                                        act((ulong)___ticksGameInt + (i++));
+                                    }
 
                                     foreach (var a in cd)
                                     {

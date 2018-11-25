@@ -197,17 +197,43 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, ThingDef, bool, bool>>((object o, ThingDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, SpecialThingFilterDef, bool, bool>>((object o, SpecialThingFilterDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
 
-            RandRootContext<Verse.Map>.ApplyPatch("MapPostTick");
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
             RandRootContext<Verse.Sound.SoundRoot>.ApplyPatch("Update");
             RandRootContext<UnityEngine.GUI>.ApplyPatch("CallWindowDelegate");
             RandRootContext<MusicManagerPlay>.ApplyPatch("StartNewSong");
             RandRootContext<MusicManagerPlay_placeholder1>.ApplyPatch("MusicUpdate", typeof(MusicManagerPlay));
-            RandRootContext<WorldGenPlaceholder>.ApplyPatch("GenerateWorld", typeof(CooperateRimming));
-            RandRootContext<Pawn_JobTracker>.ApplyPatch("JobTrackerTick");
-            RandRootContext<Game>.ApplyPatch("UpdatePlay");
-            RandRootContext<UIRoot_Play>.ApplyPatch("UIRootOnGUI");
-            RandRootContext<InitNewGamePlaceholder>.ApplyPatch("InitNewGame", typeof(Verse.Game));
+            RandRootContext<Verse.MapDrawer>.ApplyPatch("MapMeshDrawerUpdate_First");
+            //RandRootContext<Verse.Root>.ApplyPatch("OnGUI");
+
+            //separating UpdatePlay calls from each other
+            RandRootContext<TickManager>.ApplyPatch("DoSingleTick");
+            RandRootContext<LetterStack>.ApplyPatch("LetterStackUpdate");
+            RandRootContext<World>.ApplyPatch("WorldUpdate");
+            RandRootContext<Map>.ApplyPatch("MapUpdate");
+            RandRootContext<GameInfo>.ApplyPatch("GameInfoUpdate");
+            RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
+            RandRootContext<SubEffecter_Sprayer>.ApplyPatch("MakeMote");
+            RandRootContext<SubEffecter_DrifterEmote>.ApplyPatch("MakeMote");
+            RandRootContext<SubEffecter_InteractSymbol>.ApplyPatch("SubEffectTick");
+
+            RandRootContext<SubEffecter_ProgressBar>.ApplyPatch("SubEffectTick");
+            RandRootContext<SubEffecter_SoundIntermittent>.ApplyPatch("SubEffectTick");
+            RandRootContext<SubEffecter_SoundTriggered>.ApplyPatch("SubTrigger");
+            RandRootContext<SubEffecter_Sustainer>.ApplyPatch("SubEffectTick");
+            
+            RandRootContext<SubEffecterDef>.ApplyPatch("Spawn");
+            RandRootContext<effecter_effecttick_placeholder>.ApplyPatch("EffectTick", typeof(Effecter));
+            RandRootContext<effecter_Trigger_placeholder>.ApplyPatch("Trigger", typeof(Effecter));
+            RandRootContext<effecter_Cleanup_placeholder>.ApplyPatch("Cleanup", typeof(Effecter));
+            RandRootContext<Need_Food>.ApplyPatch("get_MalnutritionSeverityPerInterval");
+            RandRootContext<Verse.AI.Pawn_PathFollower>.ApplyPatch("PatherTick");
+
+            RandRootContext<GameComponentUtility_placeholder>.ApplyPatch("GameComponentUpdate", typeof(GameComponentUtility));
+            //finishing separating UpdatePlay calls from each other
+            RandRootContext<RimWorld.WildPlantSpawner>.ApplyPatch("WildPlantSpawnerTickInternal");
+            RandRootContext<TickList>.ApplyPatch("Tick");
+            RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
+            RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
 
             foreach (MethodInfo mi in typeof(MoteMaker).GetMethods())
             {
@@ -241,6 +267,13 @@ namespace CooperateRim
             }
         }*/
 
+        class effecter_effecttick_placeholder { };
+        class effecter_Trigger_placeholder { };
+        class effecter_Cleanup_placeholder { };
+
+        class mapPreTick_placeholder { };
+        class mapPostTick_placeholder { };
+        public class GameComponentUtility_placeholder { };
         public class MoteBullshit_placeholder { };
         class MusicManagerPlay_placeholder1 { };
         class GamePlaceholder_1 { }
