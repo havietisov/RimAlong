@@ -13,6 +13,7 @@ namespace CooperateRim
         public static ulong counter = 9000;
         public static int context_counter;
         public static Type currentContextName;
+        public static List<Action<ulong>> replacement_seed = new List<Action<ulong>>();
     }
 
     public class RandRootContext<T>
@@ -35,12 +36,14 @@ namespace CooperateRim
             context = CRand.get_state();
             CRand.set_state(old_ctx);
             RandContextCounter.currentContextName = oldContext;
+            oldContext = null;
             RandContextCounter.context_counter--;
         }
 
         public static void ApplyPatch(string methodname)
         {
             context = RandContextCounter.counter++;
+            RandContextCounter.replacement_seed.Add(u => { context = u; });
             MethodInfo targetmethod = AccessTools.Method(typeof(T), methodname);
             HarmonyMethod postfix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
             HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Prefix"));

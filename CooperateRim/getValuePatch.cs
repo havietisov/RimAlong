@@ -36,7 +36,7 @@ namespace CooperateRim
     [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
     public class getValuePatch
     {
-        public static bool diagnostics = false;
+        public static bool diagnostics = true;
 
         public static int rand_guard = 0;
 
@@ -81,6 +81,7 @@ namespace CooperateRim
         public struct diagdata
         {
             public int frame;
+            public float result;
             public string trace;
             public Type context;
             public int clientID;
@@ -119,7 +120,7 @@ namespace CooperateRim
                             str += sf.ToString() + "\r\n";
                         }*/
 
-                            System.IO.File.WriteAllText("C:/CoopReplays/" + kv.clientID + "/" + kv.frame + "_" + kv.context + "_" + kv.iteration + ".txt", str);
+                            System.IO.File.AppendAllText("C:/CoopReplays/" + kv.clientID + "/" + kv.frame + "_" + kv.context + "_" + kv.iteration + ".txt", str);
                         }
                     }
                 });
@@ -177,8 +178,8 @@ namespace CooperateRim
                             mtbstr += "\\===========\r\n";
                         }
 
-                        framelistForTicks.Add(new diagdata() { clientID = SyncTickData.cliendID, context = RandContextCounter.currentContextName, frame = Find.TickManager.TicksGame, iteration = ___iterations, trace = str });
-                        framelistForTicks.Add(new diagdata() { clientID = SyncTickData.cliendID, context = typeof(MTBEventOccurs_patch), frame = Find.TickManager.TicksGame, iteration = ___iterations, trace = mtbstr });
+                        framelistForTicks.Add(new diagdata() { clientID = SyncTickData.cliendID, result = __result, context = RandContextCounter.currentContextName, frame = Find.TickManager.TicksGame, iteration = ___iterations, trace = str });
+                        //framelistForTicks.Add(new diagdata() { clientID = SyncTickData.cliendID, result = -1, context = typeof(MTBEventOccurs_patch), frame = Find.TickManager.TicksGame, iteration = ___iterations, trace = mtbstr });
 
                         MTBEventOccurs_patch.mtb_dump.Clear();
 
