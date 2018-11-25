@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
@@ -17,6 +18,50 @@ public class NetDemo
     public static NetworkStream ns;
     public static LinkedList<NetworkStream> allClients = new LinkedList<NetworkStream>();
     static int streamLocker;
+
+    [Serializable]
+    public class SaveFileData
+    {
+        public string partial_name;
+        public string tcontext;
+    }
+
+    static SaveFileData m_sfd;
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void SetSFD(SaveFileData sfd)
+    {
+        Console.WriteLine("Received savefile data for game " + sfd.partial_name + " with length of " + sfd.tcontext.Length);
+        m_sfd = sfd;
+    }
+
+    public static void LoadFromRemoteSFD()
+    {
+        PirateRPC.PirateRPC.SendInvocation
+        (
+            ns, u => 
+            {
+                var ldata = GetSFD();
+                PirateRPC.PirateRPC.SendInvocation(u, uu => 
+                {
+                    SetSFD(ldata);
+                    PerformSaveFileLoad();
+                });
+            }
+        );
+    }
+
+    public static void PerformSaveFileLoad()
+    {
+        System.IO.File.WriteAllText(GenFilePaths.FilePathForSavedGame(m_sfd.partial_name), m_sfd.tcontext);
+        GameDataSaveLoader.LoadGame(m_sfd.partial_name);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static SaveFileData GetSFD()
+    {
+        return m_sfd;
+    }
 
     static void Log(string s)
     {
