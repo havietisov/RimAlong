@@ -1,5 +1,6 @@
 ﻿using CooperateRim.Utilities;
 using Harmony;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,7 +35,27 @@ namespace CooperateRim
             __result = false;
         }
     }
-    
+
+    [HarmonyPatch(typeof(Pawn_InteractionsTracker), "InteractionsTrackerTick")]
+    public class interaction_tracker_tick
+    {
+        [HarmonyPrefix]
+        public static bool Prefix()
+        {
+            return false;
+        }
+    }
+
+    [HarmonyPatch(typeof(Map), "MapPostTick")]
+    public class MapPostTick__
+    {
+        [HarmonyPrefix]
+        public static bool Prefix()
+        {
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
     public class getValuePatch
     {
