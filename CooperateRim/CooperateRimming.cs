@@ -203,15 +203,22 @@ namespace CooperateRim
             RandRootContext<MusicManagerPlay>.ApplyPatch("StartNewSong");
             RandRootContext<MusicManagerPlay_placeholder1>.ApplyPatch("MusicUpdate", typeof(MusicManagerPlay));
             RandRootContext<Verse.MapDrawer>.ApplyPatch("MapMeshDrawerUpdate_First");
+            RandRootContext<TickManagerPatch>.ApplyPatch("Prefix");
             //RandRootContext<Verse.Root>.ApplyPatch("OnGUI");
 
             //separating UpdatePlay calls from each other
-            RandRootContext<TickManager>.ApplyPatch("DoSingleTick");
+            /*RandRootContext<TickManager>.ApplyPatch("DoSingleTick");
             RandRootContext<LetterStack>.ApplyPatch("LetterStackUpdate");
             RandRootContext<World>.ApplyPatch("WorldUpdate");
             RandRootContext<Map>.ApplyPatch("MapUpdate");
             RandRootContext<GameInfo>.ApplyPatch("GameInfoUpdate");
-            RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
+            RandRootContext<Need_Food>.ApplyPatch("get_MalnutritionSeverityPerInterval");
+            RandRootContext<Verse.AI.Pawn_PathFollower>.ApplyPatch("PatherTick");
+            RandRootContext<RimWorld.WildPlantSpawner>.ApplyPatch("WildPlantSpawnerTickInternal");
+            RandRootContext<TickList>.ApplyPatch("Tick");
+            RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
+            RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
+            RandRootContext<Verse.Pawn>.ApplyPatch("Tick");*/
             RandRootContext<SubEffecter_Sprayer>.ApplyPatch("MakeMote");
             RandRootContext<SubEffecter_DrifterEmote>.ApplyPatch("MakeMote");
             RandRootContext<SubEffecter_InteractSymbol>.ApplyPatch("SubEffectTick");
@@ -225,15 +232,10 @@ namespace CooperateRim
             RandRootContext<effecter_effecttick_placeholder>.ApplyPatch("EffectTick", typeof(Effecter));
             RandRootContext<effecter_Trigger_placeholder>.ApplyPatch("Trigger", typeof(Effecter));
             RandRootContext<effecter_Cleanup_placeholder>.ApplyPatch("Cleanup", typeof(Effecter));
-            RandRootContext<Need_Food>.ApplyPatch("get_MalnutritionSeverityPerInterval");
-            RandRootContext<Verse.AI.Pawn_PathFollower>.ApplyPatch("PatherTick");
+            
 
             RandRootContext<GameComponentUtility_placeholder>.ApplyPatch("GameComponentUpdate", typeof(GameComponentUtility));
             //finishing separating UpdatePlay calls from each other
-            RandRootContext<RimWorld.WildPlantSpawner>.ApplyPatch("WildPlantSpawnerTickInternal");
-            RandRootContext<TickList>.ApplyPatch("Tick");
-            RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
-            RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
 
             foreach (MethodInfo mi in typeof(MoteMaker).GetMethods())
             {
@@ -252,7 +254,6 @@ namespace CooperateRim
             RandRootContext<SustainerManager>.ApplyPatch("SustainerManagerUpdate");
             RandRootContext<SoundStarterPlaceholder>.ApplyPatch("PlayOneShot", typeof(SoundStarter));
             RandRootContext<SoundStarterPlaceholder2>.ApplyPatch("PlayOneShotOnCamera", typeof(SoundStarter));
-            RandRootContext<WorldPawns>.ApplyPatch("WorldPawnsTick");
             //RandRootContext<GamePlaceholder_1>.ApplyPatch("InitNewGame", typeof(Game));
             //RandRootContext<ThingOwner>.ApplyPatch("ThingOwnerTick");
         }
