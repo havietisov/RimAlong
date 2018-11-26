@@ -39,6 +39,14 @@ namespace CooperateRim
         {
             ThingIDMakerPatch.stopID = true;
 
+            ThinkTreeKeyAssigner.Reset();
+
+            foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
+            {
+                ThinkTreeKeyAssigner.AssignKeys(def.thinkRoot, 0);
+            }
+
+
             if (SyncTickData.cliendID == 0)
             {
                 Find.WindowStack.Add(new Dialog_SaveFileList_Load());
@@ -204,6 +212,15 @@ namespace CooperateRim
             RandRootContext<MusicManagerPlay_placeholder1>.ApplyPatch("MusicUpdate", typeof(MusicManagerPlay));
             RandRootContext<Verse.MapDrawer>.ApplyPatch("MapMeshDrawerUpdate_First");
             RandRootContext<TickManagerPatch>.ApplyPatch("Prefix");
+
+            RandRootContext<Map>.ApplyPatch("MapUpdate");
+            RandRootContext<TickManager>.ApplyPatch("DoSingleTick");
+            RandRootContext<TickList>.ApplyPatch("Tick");
+            RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
+            RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
+            RandRootContext<GameInfo>.ApplyPatch("GameInfoUpdate");
+            RandRootContext<World>.ApplyPatch("WorldUpdate");
+
             //RandRootContext<Verse.Root>.ApplyPatch("OnGUI");
 
             //separating UpdatePlay calls from each other
