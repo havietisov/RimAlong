@@ -52,6 +52,7 @@ namespace CooperateRim
         [HarmonyPrefix]
         public static bool Prefix(ref int ___ticksGameInt, ref TickManager __instance)
         {
+            Rand.PushState(___ticksGameInt);
             getValuePatch.SendDiagDataToServer();
             getValuePatch.diagData.Clear();
             CooperateRimming.dumpRand = true;
@@ -160,6 +161,8 @@ namespace CooperateRim
 
                             //lock (LocalDB.OnApply)
                             {
+
+                                Rand.PushState(___ticksGameInt);
                                 try
                                 {
                                     //RimLog.Message("applying at tick " + Verse.Find.TickManager.TicksGame);
@@ -189,6 +192,7 @@ namespace CooperateRim
                                 {
                                     RimLog.Message(ee.ToString());
                                 }
+                                Rand.PopState();
 
                                 LocalDB.clientLocalStorage.Clear();
                             }
@@ -202,6 +206,7 @@ namespace CooperateRim
             }
 
             //ReferenceTranspilerMethod(ref ___ticksGameInt);
+            Rand.PopState();
             return false;
         }
         

@@ -30,9 +30,11 @@ namespace CooperateRim
             {
                 mtb_dump.Add(new mtbdata() { checkDuration = checkDuration, mtb = mtb, mtbUnit = mtbUnit, __result = __result, ctx = RandContextCounter.currentContextName, tickID = Find.TickManager.TicksGame, context = new StackTrace().GetFrames() });
             }
+
+            __result = false;
         }
     }
-
+    
     [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
     public class getValuePatch
     {
