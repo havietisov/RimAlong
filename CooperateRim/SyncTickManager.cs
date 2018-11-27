@@ -102,7 +102,7 @@ namespace CooperateRim
                 sw.Start();
                 bool canNormallyTick = nextProcessionTick > Verse.Find.TickManager.TicksGame;
 
-                RimLog.Message("Tick " + ___ticksGameInt + " canNormallyTick " + canNormallyTick + "| comm " + nextCommunicationTick + " | " + nextProcessionTick);
+                //RimLog.Message("Tick " + ___ticksGameInt + " canNormallyTick " + canNormallyTick + "| comm " + nextCommunicationTick + " | " + nextProcessionTick);
 
                 if (canNormallyTick)
                 {

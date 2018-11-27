@@ -31,35 +31,13 @@ namespace CooperateRim
             {
                 mtb_dump.Add(new mtbdata() { checkDuration = checkDuration, mtb = mtb, mtbUnit = mtbUnit, __result = __result, ctx = RandContextCounter.currentContextName, tickID = Find.TickManager.TicksGame, context = new StackTrace().GetFrames() });
             }
-
-            __result = false;
         }
     }
-
-    [HarmonyPatch(typeof(Pawn_InteractionsTracker), "InteractionsTrackerTick")]
-    public class interaction_tracker_tick
-    {
-        [HarmonyPrefix]
-        public static bool Prefix()
-        {
-            return false;
-        }
-    }
-
-    [HarmonyPatch(typeof(Map), "MapPostTick")]
-    public class MapPostTick__
-    {
-        [HarmonyPrefix]
-        public static bool Prefix()
-        {
-            return false;
-        }
-    }
-
+    
     [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
     public class getValuePatch
     {
-        public static bool diagnostics = true;
+        public static bool diagnostics = false;
 
         public static int rand_guard = 0;
 

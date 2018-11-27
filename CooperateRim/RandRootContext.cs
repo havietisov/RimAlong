@@ -16,15 +16,19 @@ namespace CooperateRim
         public static List<Action<ulong>> replacement_seed = new List<Action<ulong>>();
     }
 
+    public static class ContextStack
+    {
+        public static Stack<ulong> stack = new Stack<ulong>();
+    }
+
     public class RandRootContext<T>
     {
         public static ulong context;
-        static ulong old_ctx;
         static Type oldContext;
 
         public static void Prefix()
         {
-            old_ctx = CRand.get_state();
+            ContextStack.stack.Push(CRand.get_state());
             CRand.set_state(context);
             oldContext = RandContextCounter.currentContextName;
             RandContextCounter.currentContextName = typeof(T);
@@ -34,7 +38,7 @@ namespace CooperateRim
         public static void Postfix()
         {
             context = CRand.get_state();
-            CRand.set_state(old_ctx);
+            CRand.set_state(ContextStack.stack.Pop());
             RandContextCounter.currentContextName = oldContext;
             oldContext = null;
             RandContextCounter.context_counter--;
@@ -46,7 +50,7 @@ namespace CooperateRim
             RandContextCounter.replacement_seed.Add(u => { context = u; });
             MethodInfo targetmethod = AccessTools.Method(typeof(T), methodname);
             HarmonyMethod postfix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
-            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
+            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Prefix"));
             //Utilities.RimLog.Message(postfix + "::" + prefix);
             CooperateRimming.inst.harmonyInst.Patch(targetmethod, prefix, postfix, null);
         }
@@ -55,7 +59,7 @@ namespace CooperateRim
         {
             MethodInfo targetmethod = AccessTools.Method(tt, methodname);
             HarmonyMethod postfix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
-            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
+            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Prefix"));
             //Utilities.RimLog.Message(postfix + "::" + prefix);
             CooperateRimming.inst.harmonyInst.Patch(targetmethod, prefix, postfix, null);
         }
@@ -63,7 +67,7 @@ namespace CooperateRim
         public static void ApplyPatch(MethodInfo targetmethod, Type tt)
         {
             HarmonyMethod postfix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
-            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Postfix"));
+            HarmonyMethod prefix = new HarmonyMethod(typeof(RandRootContext<T>).GetMethod("Prefix"));
             //Utilities.RimLog.Message(postfix + "::" + prefix);
             CooperateRimming.inst.harmonyInst.Patch(targetmethod, prefix, postfix, null);
         }
