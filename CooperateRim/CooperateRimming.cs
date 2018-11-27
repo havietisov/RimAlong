@@ -214,12 +214,16 @@ namespace CooperateRim
             RandRootContext<TickManagerPatch>.ApplyPatch("Prefix");
 
             RandRootContext<Map>.ApplyPatch("MapUpdate");
+            RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
+            RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
+
             RandRootContext<TickManager>.ApplyPatch("DoSingleTick");
             RandRootContext<TickList>.ApplyPatch("Tick");
             RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
             RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
             RandRootContext<GameInfo>.ApplyPatch("GameInfoUpdate");
             RandRootContext<World>.ApplyPatch("WorldUpdate");
+            RandRootContext<UIRoot_Play>.ApplyPatch("UIRootUpdate");
 
             //RandRootContext<Verse.Root>.ApplyPatch("OnGUI");
 
