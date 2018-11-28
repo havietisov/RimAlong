@@ -698,7 +698,7 @@ namespace CooperateRim
 
                     if (pawn == null)
                     {
-                        //RimLog.Message("pawn is null ? ");
+                        RimLog.Message("pawn is null ? ");
                     }
                     else
                     {
@@ -877,7 +877,7 @@ namespace CooperateRim
                     }
                     catch (Exception ee)
                     {
-
+                        RimLog.Error(ee.ToString());
                     }
 
                     try
@@ -896,7 +896,7 @@ namespace CooperateRim
                     }
                     catch (Exception ee)
                     {
-
+                        RimLog.Error(ee.ToString());
                     }
 
                     try
@@ -915,7 +915,7 @@ namespace CooperateRim
                     }
                     catch (Exception ee)
                     {
-
+                        RimLog.Error(ee.ToString());
                     }
 
                     SyncTickData.AvoidLoop = true;
