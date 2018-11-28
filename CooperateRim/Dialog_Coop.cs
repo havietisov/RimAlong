@@ -9,32 +9,6 @@ using System.Collections.Generic;
 
 namespace CooperateRim
 {
-    [HarmonyPatch(typeof(PawnGenerator), "GeneratePawn", new Type[] { typeof(PawnGenerationRequest) })]
-    public class pwnd
-    {
-        [HarmonyPrefix]
-        public static void Prefix()
-        {
-            getValuePatch.GuardedPush();
-        }
-
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            getValuePatch.GuardedPop();
-        }
-    }
-    /*
-    [HarmonyPatch(typeof(PawnApparelGenerator), "GenerateStartingApparelFor")]
-    public class generator_patch
-    {
-        [HarmonyPrefix]
-        public static bool Prefix()
-        {
-            return false;
-        }
-    }*/
-
     public class ThingRegistry
     {
         static Dictionary<int, WeakReference<Thing>> registry = new Dictionary<int, WeakReference<Thing>>();
@@ -85,20 +59,42 @@ namespace CooperateRim
             {
                 if (t is Pawn)
                 {
-                    Utilities.RimLog.Message("Made id for " + (t as Pawn) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+                    //Utilities.RimLog.Message("Made id for " + (t as Pawn) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
                 }
                 else
                 {
-                    Utilities.RimLog.Message("Made id for " + (t) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+                    //Utilities.RimLog.Message("Made id for " + (t) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
                 }
             }
         }
     }
-    
+
+    [HarmonyPatch(typeof(Thing), "set_ThingID")]
+    public class ThingIDset_patch
+    {
+        public static bool stopID;
+
+        [HarmonyPostfix]
+        public static void Postfix(Thing __instance)
+        {
+            ThingRegistry.AddThing(__instance, __instance.thingIDNumber);
+
+            if (!stopID)
+            {
+                if (__instance is Pawn)
+                {
+                    //Utilities.RimLog.Message("Made id for " + (__instance as Pawn) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+                }
+                else
+                {
+                    //Utilities.RimLog.Message("Made id for " + (__instance) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
+                }
+            }
+        }
+    }
+
     public partial class CooperateRimming
     {
-        
-
         public class Dialog_Coop : Window
         {
             public override void DoWindowContents(Rect inRect)
@@ -114,7 +110,6 @@ namespace CooperateRim
                 r.y += size;
                 Widgets.ButtonText(r, "MEANINGLESS BUTTON"); r.y += size;
                 hostName = Widgets.TextArea(r, hostName);
-                //Widgets.Label(r, "hey, motherfuckers!");
             }
 
             static void ErrorHandler(System.Exception ex)

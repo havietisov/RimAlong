@@ -43,7 +43,7 @@ namespace CooperateRim
             oldContext = null;
             RandContextCounter.context_counter--;
         }
-
+        
         public static void ApplyPatch(string methodname)
         {
             context = RandContextCounter.counter++;

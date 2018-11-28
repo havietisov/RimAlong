@@ -38,7 +38,7 @@ namespace CooperateRim
         public static void GenerateWorld()
         {
             ThingIDMakerPatch.stopID = true;
-
+            
             ThinkTreeKeyAssigner.Reset();
 
             foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
@@ -111,6 +111,38 @@ namespace CooperateRim
 
                 RimLog.Message("pawn added to world : " + p);
                 RimLog.Message("///==========");
+            }
+        }
+
+        [HarmonyPatch(typeof(Dialog_ManageOutfits), MethodType.Constructor, new Type[] { typeof(Outfit) })]
+        public class Dialog_ManageOutfits_patch
+        {
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                ThingFilterPatch.avoidThingFilterUsage = true;
+            }
+
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                ThingFilterPatch.avoidThingFilterUsage = false;
+            }
+        }
+
+        [HarmonyPatch(typeof(Dialog_ManageFoodRestrictions), MethodType.Constructor, new Type[] { typeof(FoodRestriction) })]
+        public class Dialog_ManageFoodRestrictions_patch
+        {
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                ThingFilterPatch.avoidThingFilterUsage = true;
+            }
+
+            [HarmonyPostfix]
+            public static void Postfix()
+            {
+                ThingFilterPatch.avoidThingFilterUsage = false;
             }
         }
 
@@ -204,6 +236,7 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Building_WorkTable, RecipeDef>>((Building_WorkTable table, RecipeDef recipe) => BillStackPatch.MakeNewBillAt(table, recipe));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, ThingDef, bool, bool>>((object o, ThingDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, SpecialThingFilterDef, bool, bool>>((object o, SpecialThingFilterDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
+            
 
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
             RandRootContext<Verse.Sound.SoundRoot>.ApplyPatch("Update");

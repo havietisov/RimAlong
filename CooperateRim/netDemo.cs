@@ -56,7 +56,9 @@ public class NetDemo
     {
         Rand.PushState(0);
         System.IO.File.WriteAllText(GenFilePaths.FilePathForSavedGame(m_sfd.partial_name), m_sfd.tcontext);
+        ThingFilterPatch.avoidThingFilterUsage = true;
         GameDataSaveLoader.LoadGame(m_sfd.partial_name);
+        ThingFilterPatch.avoidThingFilterUsage = false;
         Rand.PopState();
     }
 
