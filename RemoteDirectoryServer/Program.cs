@@ -9,6 +9,7 @@ using System.Threading;
 using System.Xml;
 using System.IO;
 using Verse;
+using System.Reflection;
 /*
 namespace UPnP
 {
@@ -38,27 +39,27 @@ DateTime start = DateTime.Now;
 
 do
 {
-    s.SendTo(data, ipe);
-    s.SendTo(data, ipe);
-    s.SendTo(data, ipe);
+s.SendTo(data, ipe);
+s.SendTo(data, ipe);
+s.SendTo(data, ipe);
 
-    int length = 0;
-    do
-    {
-        length = s.Receive(buffer);
+int length = 0;
+do
+{
+length = s.Receive(buffer);
 
-        string resp = Encoding.ASCII.GetString(buffer, 0, length).ToLower();
-        if (resp.Contains("upnp:rootdevice"))
-        {
-            resp = resp.Substring(resp.ToLower().IndexOf("location:") + 9);
-            resp = resp.Substring(0, resp.IndexOf("\r")).Trim();
-            if (!string.IsNullOrEmpty(_serviceUrl = GetServiceUrl(resp)))
-            {
-                _descUrl = resp;
-                return true;
-            }
-        }
-    } while (length > 0);
+string resp = Encoding.ASCII.GetString(buffer, 0, length).ToLower();
+if (resp.Contains("upnp:rootdevice"))
+{
+resp = resp.Substring(resp.ToLower().IndexOf("location:") + 9);
+resp = resp.Substring(0, resp.IndexOf("\r")).Trim();
+if (!string.IsNullOrEmpty(_serviceUrl = GetServiceUrl(resp)))
+{
+_descUrl = resp;
+return true;
+}
+}
+} while (length > 0);
 } while (start.Subtract(DateTime.Now) < _timeout);
 return false;
 }
@@ -75,10 +76,10 @@ XmlNamespaceManager nsMgr = new XmlNamespaceManager(desc.NameTable);
 nsMgr.AddNamespace("tns", "urn:schemas-upnp-org:device-1-0");
 XmlNode typen = desc.SelectSingleNode("//tns:device/tns:deviceType/text()", nsMgr);
 if (!typen.Value.Contains("InternetGatewayDevice"))
-    return null;
+return null;
 XmlNode node = desc.SelectSingleNode("//tns:service[tns:serviceType=\"urn:schemas-upnp-org:service:WANIPConnection:1\"]/tns:controlURL/text()", nsMgr);
 if (node == null)
-    return null;
+return null;
 XmlNode eventnode = desc.SelectSingleNode("//tns:service[tns:serviceType=\"urn:schemas-upnp-org:service:WANIPConnection:1\"]/tns:eventSubURL/text()", nsMgr);
 _eventUrl = CombineUrls(resp, eventnode.Value);
 return CombineUrls(resp, node.Value);
@@ -98,18 +99,18 @@ return resp.Substring(0, n) + p;
 public static void ForwardPort(int port, ProtocolType protocol, string description)
 {
 if (string.IsNullOrEmpty(_serviceUrl))
-    throw new Exception("No UPnP service available or Discover() has not been called");
+throw new Exception("No UPnP service available or Discover() has not been called");
 XmlDocument xdoc = SOAPRequest(_serviceUrl, "<u:AddPortMapping xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\">" +
-    "<NewRemoteHost></NewRemoteHost><NewExternalPort>" + port.ToString() + "</NewExternalPort><NewProtocol>" + protocol.ToString().ToUpper() + "</NewProtocol>" +
-    "<NewInternalPort>" + port.ToString() + "</NewInternalPort><NewInternalClient>" + Dns.GetHostAddresses(Dns.GetHostName())[0].ToString() +
-    "</NewInternalClient><NewEnabled>1</NewEnabled><NewPortMappingDescription>" + description +
+"<NewRemoteHost></NewRemoteHost><NewExternalPort>" + port.ToString() + "</NewExternalPort><NewProtocol>" + protocol.ToString().ToUpper() + "</NewProtocol>" +
+"<NewInternalPort>" + port.ToString() + "</NewInternalPort><NewInternalClient>" + Dns.GetHostAddresses(Dns.GetHostName())[0].ToString() +
+"</NewInternalClient><NewEnabled>1</NewEnabled><NewPortMappingDescription>" + description +
 "</NewPortMappingDescription><NewLeaseDuration>0</NewLeaseDuration></u:AddPortMapping>", "AddPortMapping");
 }
 
 public static void DeleteForwardingRule(int port, ProtocolType protocol)
 {
 if (string.IsNullOrEmpty(_serviceUrl))
-    throw new Exception("No UPnP service available or Discover() has not been called");
+throw new Exception("No UPnP service available or Discover() has not been called");
 XmlDocument xdoc = SOAPRequest(_serviceUrl,
 "<u:DeletePortMapping xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\">" +
 "<NewRemoteHost>" +
@@ -122,7 +123,7 @@ XmlDocument xdoc = SOAPRequest(_serviceUrl,
 public static IPAddress GetExternalIP()
 {
 if (string.IsNullOrEmpty(_serviceUrl))
-    throw new Exception("No UPnP service available or Discover() has not been called");
+throw new Exception("No UPnP service available or Discover() has not been called");
 XmlDocument xdoc = SOAPRequest(_serviceUrl, "<u:GetExternalIPAddress xmlns:u=\"urn:schemas-upnp-org:service:WANIPConnection:1\">" +
 "</u:GetExternalIPAddress>", "GetExternalIPAddress");
 XmlNamespaceManager nsMgr = new XmlNamespaceManager(xdoc.NameTable);
@@ -162,9 +163,21 @@ namespace RemoteDirectoryServer
     {
         static void Main(string[] args)
         {
-            int listenPort = int.Parse(System.Configuration.ConfigurationManager.AppSettings["listen_port"]);
-            int playercount = int.Parse(System.Configuration.ConfigurationManager.AppSettings["player_count"]);
-            NetDemo.SetDesiredPlayerCount(playercount);
+            int listenPort = 12345;// int.Parse(System.Configuration.ConfigurationManager.AppSettings["listen_port"]);
+            int playercount = 2;
+            try
+            {
+                CooperateRim.TickManagerPatch.syncRoundLength = int.Parse(System.Configuration.ConfigurationManager.AppSettings["round_length_ticks"]);
+                playercount = int.Parse(System.Configuration.ConfigurationManager.AppSettings["player_count"]);
+                NetDemo.SetDesiredPlayerCount(playercount);
+            }
+            catch (Exception ee)
+            {
+                Console.WriteLine(ee.ToString());
+                Console.WriteLine("Error reading config file. Press any key to exit.");
+                Console.ReadKey();
+                return;
+            }
             //UPnP.NAT.Discover();
             //UPnP.NAT.ForwardPort(12345, ProtocolType.Tcp, "MyApp (TCP)");
             //CRand.set_state(900 << 32);
@@ -180,7 +193,10 @@ namespace RemoteDirectoryServer
             AsyncCallback acceptor = null;
             Console.WriteLine("Player count set to " + playercount);
             Console.WriteLine("Listen port is " + listenPort);
-            Console.WriteLine("RimAlong server version 0.0.0.2, codename \"shabby+\", ready to rumble!");
+
+            AssemblyName updatedAssemblyName = AssemblyName.GetAssemblyName("CooperateRim.dll");
+            Console.WriteLine("RimAlong mod version is " + updatedAssemblyName.Version );
+            Console.WriteLine("RimAlong server version 0.0.0.2, codename \"mumblebee\", ready to rumble!");
             CooperateRim.SyncTickData.cliendID = 0;
             
             lst.BeginAcceptTcpClient(acceptor = u =>
