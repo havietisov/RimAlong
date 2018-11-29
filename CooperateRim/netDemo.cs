@@ -43,13 +43,29 @@ public class NetDemo
             ns, u => 
             {
                 var ldata = GetSFD();
-                PirateRPC.PirateRPC.SendInvocation(u, uu => 
+
+                for (; ldata == null; ldata = GetSFD())
+                {
+                    Thread.Sleep(100);
+                }
+
+                PirateRPC.PirateRPC.SendInvocation(u, uu =>
                 {
                     SetSFD(ldata);
                     PerformSaveFileLoad();
                 });
             }
         );
+    }
+
+    public static int ServerGetRoundLength()
+    {
+        return TickManagerPatch.syncRoundLength;
+    }
+
+    public static void ClientSetRoundLength(int roundLen)
+    {
+        TickManagerPatch.syncRoundLength = roundLen;
     }
 
     public static void PerformSaveFileLoad()
@@ -147,6 +163,17 @@ public class NetDemo
         desiredPlayerCount = playercount;
     }
 
+    static Action<Stream> GetCallbackForSuccessfulPlayerJoin(int id, int roundLen)
+    {
+        return k => 
+        {
+            SyncTickData.SetClientID(id);
+            NetDemo.ClientSetRoundLength(roundLen);
+            hasClientID = true;
+            LongEventHandler.QueueLongEvent(CooperateRimming.GenerateWorld, "Waiting to make a world", true, e => { NetDemo.Log(e.ToString()); });
+        };
+    }
+
     public static void ServerHandlePlayerJoined(int id, Stream s)
     {
         if (id >= desiredPlayerCount)
@@ -157,13 +184,9 @@ public class NetDemo
         else
         {
             Log("sending client id " + id);
-
-            PirateRPC.PirateRPC.SendInvocation(s, k =>
-            {
-                SyncTickData.SetClientID(id);
-                hasClientID = true;
-                LongEventHandler.QueueLongEvent(CooperateRimming.GenerateWorld, "Waiting to make a world", true, e => { NetDemo.Log(e.ToString()); });
-            });
+            int roundLen = ServerGetRoundLength();
+            Log("sending round len " + roundLen);
+            PirateRPC.PirateRPC.SendInvocation(s, GetCallbackForSuccessfulPlayerJoin(id, roundLen));
         }
     }
 
