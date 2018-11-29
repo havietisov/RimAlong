@@ -66,8 +66,8 @@ namespace CooperateRim
         {
             dynamicAssembly.Save(@"asm.dll");
         }
-
-        static Random r = new Random();
+        
+        static int parrot_counter = 9000;
 
         public static void ParrotPatchExpressiontarget<T>(Expression<T> expr)
         {
@@ -101,7 +101,7 @@ namespace CooperateRim
             
             int pos = 0;
             
-            TypeBuilder ass_patch = dynamicModule.DefineType("<parrot_patch_type>[" + r.Next().ToString() + "]");
+            TypeBuilder ass_patch = dynamicModule.DefineType("<parrot_patch_type>[" + (parrot_counter++) + "]");
             MethodBuilder mbb = ass_patch.DefineMethod("[prefix]", MethodAttributes.Static | MethodAttributes.Public, typeof(bool), partchParams.ToArray());
             List<Type> originalMethodArgs = new List<Type>();
             List<Type> wrapperMethodArgs = new List<Type>();
