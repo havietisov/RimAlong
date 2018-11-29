@@ -425,8 +425,7 @@ namespace CooperateRim
         }
 
         List<string> researches = new List<string>();
-
-        public static int clientCount = 2;
+        
         public static int cliendID = -1;
 
         public static void SetClientID(int id)
@@ -1275,15 +1274,7 @@ namespace CooperateRim
                 singleton.jobsToSerialize.Add(new FinalJobData() { count = job.count, playerForced = job.playerForced, forceSleep = job.forceSleep, restUntilHealed = job.restUntilHealed, haulDroppedApparel = job.haulDroppedApparel, ignoreDesignations = job.ignoreDesignations, ignoreAssignment = job.ignoreJoyTimeAssignment, ignoreForbidden = job.ignoreForbidden, locomotionUrgency = job.locomotionUrgency, haulMode = job.haulMode, cell = cell, jobDef = job.def.defName, pawn = pawn, jobTargetA = job.targetA, jobTargetB = job.targetB, jobTargetC = job.targetC });
             }
         }
-
-        public static IEnumerable<string> tickFileNames(int ticknum)
-        {
-            for (int i = 0; i < clientCount; i++)
-            {
-                yield return @"D:\CoopReplays\_" + ticknum + "client_" + i + ".xml";
-            }
-        }
-
+        
         public static void Apply(int tickNum)
         {
             //RimLog.Message("Applied frame " + tickNum);

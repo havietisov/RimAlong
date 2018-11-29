@@ -162,6 +162,9 @@ namespace RemoteDirectoryServer
     {
         static void Main(string[] args)
         {
+            int listenPort = int.Parse(System.Configuration.ConfigurationManager.AppSettings["listen_port"]);
+            int playercount = int.Parse(System.Configuration.ConfigurationManager.AppSettings["player_count"]);
+            NetDemo.SetDesiredPlayerCount(playercount);
             //UPnP.NAT.Discover();
             //UPnP.NAT.ForwardPort(12345, ProtocolType.Tcp, "MyApp (TCP)");
             //CRand.set_state(900 << 32);
@@ -169,34 +172,29 @@ namespace RemoteDirectoryServer
             int completions;
             ThreadPool.GetMinThreads(out workers, out completions);
             bool res = ThreadPool.SetMinThreads(4, 4);
-            TcpListener lst = new TcpListener(IPAddress.Any, 12345);
+            TcpListener lst = new TcpListener(IPAddress.Any, listenPort);
             lst.Server.NoDelay = true;
             lst.AllowNatTraversal(true);
             lst.Server.ExclusiveAddressUse = true;
             lst.Start();
             AsyncCallback acceptor = null;
-            Console.WriteLine("RimAlong server version 0.0.0.1, codename \"shabby\", ready to rumble!");
+            Console.WriteLine("Player count set to " + playercount);
+            Console.WriteLine("Listen port is " + listenPort);
+            Console.WriteLine("RimAlong server version 0.0.0.2, codename \"shabby+\", ready to rumble!");
             CooperateRim.SyncTickData.cliendID = 0;
             
-            for (int i = 0; i < CooperateRim.TickManagerPatch.syncTickRoundOffset + 1; i++)
-            {
-                for (int l = 0; l < CooperateRim.SyncTickData.clientCount; l++)
-                {
-                    //LocalDB.PushData(CooperateRim.TickManagerPatch.syncRoundLength * i, l, new CooperateRim.SyncTickData() { randomToVerify = new int[] { -1 }, colonistJobsToVerify = new List<string>() { } });
-                }
-            }
-
             lst.BeginAcceptTcpClient(acceptor = u =>
             {
                 Console.WriteLine("new client");
                 TcpClient tcc = (u.AsyncState as TcpListener).EndAcceptTcpClient(u);
-                (u.AsyncState as TcpListener).BeginAcceptTcpClient(acceptor, u.AsyncState);
                 NetworkStream ns = tcc.GetStream();
                 NetDemo.allClients.AddLast(ns);
+                
+                (u.AsyncState as TcpListener).BeginAcceptTcpClient(acceptor, u.AsyncState);
 
                 for (; tcc.Connected ; )
                 {
-                    Thread.Sleep(50);
+                    Thread.Sleep(10);
                     if (ns.DataAvailable)
                     {
                         PirateRPC.PirateRPC.ReceiveInvocation(ns);
