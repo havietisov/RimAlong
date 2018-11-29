@@ -37,7 +37,7 @@ public class LocalDB
         {
             if (!data.ContainsKey(tickID))
             {
-                data.Add(tickID, new SyncTickData[SyncTickData.clientCount]);
+                data.Add(tickID, new SyncTickData[NetDemo.desiredPlayerCount]);
             }
 
             if (data[tickID][playerID] == null)
@@ -111,7 +111,7 @@ public class LocalDB
         List<SyncTickData> sdl = new List<SyncTickData>();
 
         DateTime dt = DateTime.Now;
-        if (HasFullData(tickID, SyncTickData.clientCount)/* && playerStateTable[clientID] < tickID*/)
+        if (HasFullData(tickID, NetDemo.desiredPlayerCount)/* && playerStateTable[clientID] < tickID*/)
         {
             NetDemo.log("dictionary lookup took " + (DateTime.Now - dt).TotalMilliseconds + ", update at " + DateTime.Now);
             sdl = new List<SyncTickData>(data[tickID]);

@@ -82,6 +82,7 @@ public class NetDemo
         tc.Connect(host, 12345);
         ns = tc.GetStream();
         hasClientID = false;
+        forcedDisconnect = false;
         try
         {
             LongEventHandler.QueueLongEvent(() =>
@@ -90,17 +91,10 @@ public class NetDemo
                 {
                     int cid = SyncTickData.cliendID;
                     Interlocked.Increment(ref SyncTickData.cliendID);
-                    Log("sending client id " + cid);
-
-                    PirateRPC.PirateRPC.SendInvocation(u, k =>
-                    {
-                        SyncTickData.SetClientID(cid);
-                        hasClientID = true;
-                        LongEventHandler.QueueLongEvent(CooperateRimming.GenerateWorld, "Waiting to make a world", true, e => { NetDemo.Log(e.ToString()); });
-                    });
+                    NetDemo.ServerHandlePlayerJoined(cid, u);
                 });
 
-                for (; !hasClientID; )
+                for (; !hasClientID && !forcedDisconnect; )
                 {
 
                 }
@@ -137,12 +131,6 @@ public class NetDemo
         LocalDB.log = log;
     }
     
-    public static void SendStateRequest(int frameID, int sourceID)
-    {
-        int fid = frameID;
-        PirateRPC.PirateRPC.SendInvocation(ns, u => { LocalDB.NotifyClientNeedData(fid, sourceID, SyncTickData.clientCount, u); });
-    }
-    
     public static void PushStateToDirectory(int sourceID, int tickID, SyncTickData data, int channelID)
     {
         PirateRPC.PirateRPC.SendInvocation(ns, u => 
@@ -150,5 +138,40 @@ public class NetDemo
             LocalDB.PushData(tickID, sourceID, data);
             LocalDB.TryDistributeData(tickID);
         });
+    }
+
+    public static int desiredPlayerCount;
+
+    public static void SetDesiredPlayerCount(int playercount)
+    {
+        desiredPlayerCount = playercount;
+    }
+
+    public static void ServerHandlePlayerJoined(int id, Stream s)
+    {
+        if (id >= desiredPlayerCount)
+        {
+            Log("Client tried to connect, but server is full" + id);
+            PirateRPC.PirateRPC.SendInvocation(s, u => { NetDemo.ForcePlayerDisconnect("Connection refused : server full"); });
+        }
+        else
+        {
+            Log("sending client id " + id);
+
+            PirateRPC.PirateRPC.SendInvocation(s, k =>
+            {
+                SyncTickData.SetClientID(id);
+                hasClientID = true;
+                LongEventHandler.QueueLongEvent(CooperateRimming.GenerateWorld, "Waiting to make a world", true, e => { NetDemo.Log(e.ToString()); });
+            });
+        }
+    }
+
+    public static bool forcedDisconnect = false;
+
+    private static void ForcePlayerDisconnect(string reason)
+    {
+        forcedDisconnect = true;
+        Messages.Message(reason, RimWorld.MessageTypeDefOf.ThreatBig, true);
     }
 }

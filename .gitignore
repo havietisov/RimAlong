@@ -24,6 +24,7 @@ bld/
 temp/
 ModFolder/RimAlong/About/About.xml
 ModFolder/RimAlong/Assemblies/
+ModFolder/RimAlong/Server/
 dependencies/
 
 # Visual Studio 2015 cache/options directory
