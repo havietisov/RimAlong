@@ -72,6 +72,7 @@
     <Compile Include="BillStackSurrogate.cs" />
     <Compile Include="BillSurrogate.cs" />
     <Compile Include="Bill_ctor_patch.cs" />
+    <Compile Include="Bill_ProductionWithUft_surrogate.cs" />
     <Compile Include="Bill_production_patch.cs" />
     <Compile Include="bill_reorder_patch.cs" />
     <Compile Include="BlueprintBuildSurrogate.cs" />

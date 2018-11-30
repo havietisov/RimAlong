@@ -68,31 +68,7 @@ namespace CooperateRim
             }
         }
     }
-
-    [HarmonyPatch(typeof(Thing), "set_ThingID")]
-    public class ThingIDset_patch
-    {
-        public static bool stopID;
-
-        [HarmonyPostfix]
-        public static void Postfix(Thing __instance)
-        {
-            ThingRegistry.AddThing(__instance, __instance.thingIDNumber);
-
-            if (!stopID)
-            {
-                if (__instance is Pawn)
-                {
-                    //Utilities.RimLog.Message("Made id for " + (__instance as Pawn) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
-                }
-                else
-                {
-                    //Utilities.RimLog.Message("Made id for " + (__instance) + " | " + Rand.Int + "|" + System.Threading.Thread.CurrentThread.ManagedThreadId);
-                }
-            }
-        }
-    }
-
+    
     public partial class CooperateRimming
     {
         public class Dialog_Coop : Window

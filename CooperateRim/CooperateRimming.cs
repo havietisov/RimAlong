@@ -22,7 +22,7 @@ namespace CooperateRim
         public static bool dumpRand = false;
         public static CooperateRimming inst;
 
-        public CooperateRimming ()
+        public CooperateRimming()
         {
             RimLog.Init(this.Logger);
         }
@@ -34,11 +34,11 @@ namespace CooperateRim
                 return base.HarmonyInst;
             }
         }
-        
+
         public static void GenerateWorld()
         {
             ThingIDMakerPatch.stopID = true;
-            
+
             ThinkTreeKeyAssigner.Reset();
 
             foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
@@ -53,10 +53,10 @@ namespace CooperateRim
             }
             else
             {
-                LongEventHandler.QueueLongEvent(() => 
+                LongEventHandler.QueueLongEvent(() =>
                 {
                     NetDemo.LoadFromRemoteSFD();
-                    for (; NetDemo.GetSFD() == null ;)
+                    for (; NetDemo.GetSFD() == null;)
                     {
 
                     }
@@ -75,7 +75,7 @@ namespace CooperateRim
 
                 if (SyncTickData.cliendID == 0)
                 {
-                    PirateRPC.PirateRPC.SendInvocation(NetDemo.ns, u => 
+                    PirateRPC.PirateRPC.SendInvocation(NetDemo.ns, u =>
                     {
                         NetDemo.SetSFD(new NetDemo.SaveFileData() { tcontext = fileContent, partial_name = fileName + "_received" });
 
@@ -130,6 +130,38 @@ namespace CooperateRim
             }
         }
 
+        [HarmonyPatch(typeof(RimWorld.Bill), "ExposeData")]
+        public class Bill_exposeDataPatch
+        {
+            [HarmonyPrefix]
+            public static void Prefix(RimWorld.Bill __instance)
+            {
+                ThingFilterPatch.thingFilterCallerStack.Push(__instance);
+            }
+
+            [HarmonyPrefix]
+            public static void Postfix()
+            {
+                ThingFilterPatch.thingFilterCallerStack.Pop();
+            }
+        };
+
+        [HarmonyPatch(typeof(ThingWithComps), "ExposeData")]
+        public class ThingWithComps_ExposeData
+        {
+            [HarmonyPrefix]
+            public static void Prefix(ThingWithComps __instance)
+            {
+                ThingFilterPatch.thingFilterCallerStack.Push(__instance);
+            }
+
+            [HarmonyPrefix]
+            public static void Postfix()
+            {
+                ThingFilterPatch.thingFilterCallerStack.Pop();
+            }
+        }
+
         [HarmonyPatch(typeof(Dialog_ManageFoodRestrictions), MethodType.Constructor, new Type[] { typeof(FoodRestriction) })]
         public class Dialog_ManageFoodRestrictions_patch
         {
@@ -145,7 +177,7 @@ namespace CooperateRim
                 ThingFilterPatch.avoidThingFilterUsage = false;
             }
         }
-
+        
         static void InitBullshit()
         {
             /*
@@ -175,12 +207,21 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(Vector3), new Vector3Surrogate());
             SerializationService.AppendSurrogate(typeof(IntVec3), new IntVec3Surrogate());
             SerializationService.AppendSurrogate(typeof(BillStack), new BillStackSurrogate());
-            SerializationService.AppendSurrogate(typeof(Bill), new BillSurrogate());
-            SerializationService.AppendSurrogate(typeof(Pawn), new ThingSurrogate());
-            SerializationService.AppendSurrogate(typeof(Building_WorkTable), new ThingSurrogate());
-            SerializationService.AppendSurrogate(typeof(ThingWithComps), new ThingWithCompsSurrogate());
-            SerializationService.AppendSurrogate(typeof(Blueprint_Build), new BlueprintBuildSurrogate());
-            SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
+            ThingSurrogate tsr = new ThingSurrogate();
+
+            foreach (Assembly @as in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type t in @as.GetTypes())
+                {
+                    if (t.IsSubclassOf(typeof(Thing)))
+                    {
+                        SerializationService.AppendSurrogate(t, tsr);
+                    }
+                }
+            }
+
+            SerializationService.AppendSurrogate(typeof(Bill_ProductionWithUft), new Bill_ProductionWithUft_surrogate());
+            SerializationService.AppendSurrogate(typeof(Bill_Production), new BillSurrogate());
             SerializationService.AppendSurrogate(typeof(JobDef), new JobDefSurrogate());
             SerializationService.AppendSurrogate(typeof(ThingDef), new ThingDefSurrogate());
             SerializationService.AppendSurrogate(typeof(SpecialThingFilterDef), new SpecialThingFilterDefSurrogate());
