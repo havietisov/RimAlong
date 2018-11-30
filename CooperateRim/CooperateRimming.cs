@@ -22,7 +22,7 @@ namespace CooperateRim
         public static bool dumpRand = false;
         public static CooperateRimming inst;
 
-        public CooperateRimming ()
+        public CooperateRimming()
         {
             RimLog.Init(this.Logger);
         }
@@ -34,11 +34,11 @@ namespace CooperateRim
                 return base.HarmonyInst;
             }
         }
-        
+
         public static void GenerateWorld()
         {
             ThingIDMakerPatch.stopID = true;
-            
+
             ThinkTreeKeyAssigner.Reset();
 
             foreach (var def in DefDatabase<ThinkTreeDef>.AllDefsListForReading)
@@ -53,10 +53,10 @@ namespace CooperateRim
             }
             else
             {
-                LongEventHandler.QueueLongEvent(() => 
+                LongEventHandler.QueueLongEvent(() =>
                 {
                     NetDemo.LoadFromRemoteSFD();
-                    for (; NetDemo.GetSFD() == null ;)
+                    for (; NetDemo.GetSFD() == null;)
                     {
 
                     }
@@ -75,7 +75,7 @@ namespace CooperateRim
 
                 if (SyncTickData.cliendID == 0)
                 {
-                    PirateRPC.PirateRPC.SendInvocation(NetDemo.ns, u => 
+                    PirateRPC.PirateRPC.SendInvocation(NetDemo.ns, u =>
                     {
                         NetDemo.SetSFD(new NetDemo.SaveFileData() { tcontext = fileContent, partial_name = fileName + "_received" });
 
@@ -129,7 +129,7 @@ namespace CooperateRim
                 ThingFilterPatch.avoidThingFilterUsage = false;
             }
         }
-
+        
         [HarmonyPatch(typeof(Dialog_ManageFoodRestrictions), MethodType.Constructor, new Type[] { typeof(FoodRestriction) })]
         public class Dialog_ManageFoodRestrictions_patch
         {
@@ -145,7 +145,7 @@ namespace CooperateRim
                 ThingFilterPatch.avoidThingFilterUsage = false;
             }
         }
-
+        
         static void InitBullshit()
         {
             /*
@@ -187,8 +187,8 @@ namespace CooperateRim
                     }
                 }
             }
-            
-            SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
+            SerializationService.AppendSurrogate(typeof(Bill_ProductionWithUft), new Bill_ProductionWithUft_surrogate());
+            SerializationService.AppendSurrogate(typeof(Bill_Production), new BillSurrogate());
             SerializationService.AppendSurrogate(typeof(JobDef), new JobDefSurrogate());
             SerializationService.AppendSurrogate(typeof(ThingDef), new ThingDefSurrogate());
             SerializationService.AppendSurrogate(typeof(SpecialThingFilterDef), new SpecialThingFilterDefSurrogate());
