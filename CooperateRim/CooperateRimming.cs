@@ -176,10 +176,18 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(IntVec3), new IntVec3Surrogate());
             SerializationService.AppendSurrogate(typeof(BillStack), new BillStackSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill), new BillSurrogate());
-            SerializationService.AppendSurrogate(typeof(Pawn), new ThingSurrogate());
-            SerializationService.AppendSurrogate(typeof(Building_WorkTable), new ThingSurrogate());
-            SerializationService.AppendSurrogate(typeof(ThingWithComps), new ThingWithCompsSurrogate());
-            SerializationService.AppendSurrogate(typeof(Blueprint_Build), new BlueprintBuildSurrogate());
+
+            foreach (Assembly @as in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type t in @as.GetTypes())
+                {
+                    if (t.IsSubclassOf(typeof(Thing)))
+                    {
+                        SerializationService.AppendSurrogate(t, new ThingSurrogate());
+                    }
+                }
+            }
+            
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
             SerializationService.AppendSurrogate(typeof(JobDef), new JobDefSurrogate());
             SerializationService.AppendSurrogate(typeof(ThingDef), new ThingDefSurrogate());

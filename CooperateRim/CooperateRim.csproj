@@ -72,6 +72,7 @@
     <Compile Include="BillStackSurrogate.cs" />
     <Compile Include="BillSurrogate.cs" />
     <Compile Include="Bill_ctor_patch.cs" />
+    <Compile Include="Bill_exposeDataPatch.cs" />
     <Compile Include="Bill_production_patch.cs" />
     <Compile Include="bill_reorder_patch.cs" />
     <Compile Include="BlueprintBuildSurrogate.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="ThingFilter_setdisallowall_wrapper.cs" />
     <Compile Include="ThingSurrogate.cs" />
     <Compile Include="ThingWithCompsSurrogate.cs" />
+    <Compile Include="ThingWithComps_ExposeData.cs" />
     <Compile Include="ThinkNode_PrioritySorter_patch.cs" />
     <Compile Include="Utilities\RimLog.cs" />
     <Compile Include="UtilTable.cs" />

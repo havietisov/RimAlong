@@ -23,7 +23,7 @@ namespace CooperateRim
             {
                 if (registry.ContainsKey(id))
                 {
-                    RimLog.Error("attempt to add something with id " + id + " for thing " + t);
+                    //RimLog.Error("attempt to add something with id " + id + " for thing " + t);
                 }
                 else
                 {
