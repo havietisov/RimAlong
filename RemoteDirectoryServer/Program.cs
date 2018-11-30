@@ -165,10 +165,12 @@ namespace RemoteDirectoryServer
         {
             int listenPort = 12345;// int.Parse(System.Configuration.ConfigurationManager.AppSettings["listen_port"]);
             int playercount = 2;
+            bool useNatTraversal = true;
             try
             {
                 CooperateRim.TickManagerPatch.syncRoundLength = int.Parse(System.Configuration.ConfigurationManager.AppSettings["round_length_ticks"]);
                 playercount = int.Parse(System.Configuration.ConfigurationManager.AppSettings["player_count"]);
+                useNatTraversal = bool.Parse(System.Configuration.ConfigurationManager.AppSettings["sockopt_nat_traversal"]);
                 NetDemo.SetDesiredPlayerCount(playercount);
             }
             catch (Exception ee)
@@ -187,7 +189,7 @@ namespace RemoteDirectoryServer
             bool res = ThreadPool.SetMinThreads(4, 4);
             TcpListener lst = new TcpListener(IPAddress.Any, listenPort);
             lst.Server.NoDelay = true;
-            lst.AllowNatTraversal(true);
+            lst.AllowNatTraversal(useNatTraversal);
             lst.Server.ExclusiveAddressUse = true;
             lst.Start();
             AsyncCallback acceptor = null;
