@@ -10,7 +10,7 @@ namespace CooperateRim
 
     public class BillSurrogate : ISerializationSurrogate
     {
-        public virtual void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
             Bill b = (Bill)obj;
             BillStack st = b.billStack;
@@ -18,39 +18,24 @@ namespace CooperateRim
             info.AddValue("recipedef", b.recipe.defName);
         }
 
-        public virtual object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
-            int stage = 0;
-            int iter = -1;
-            try
+            string recipeDefName = info.GetString("recipedef");
+            BillStack st = (BillStack)info.GetValue("bill_stack", typeof(BillStack));
+            Utilities.RimLog.Message("bill lacks pawn restriction in surrogate!");
+            Utilities.RimLog.Message("billstack is null ? " + (st == null ? "yes" : "no"));
+            Utilities.RimLog.Message("bill giver as thing : " + (st.billGiver as Thing));
+            Utilities.RimLog.Message("bill giver def as thing : " + (st.billGiver as Thing).def);
+
+            foreach (var rec in (st.billGiver as Thing).def.recipes)
             {
-                string recipeDefName = info.GetString("recipedef");
-                BillStack st = (BillStack)info.GetValue("bill_stack", typeof(BillStack));
-                stage = 1;
-                Utilities.RimLog.Message("bill lacks pawn restriction in surrogate!");
-                stage = 2;
-                Utilities.RimLog.Message("billstack is null ? " + (st == null ? "yes" : "no"));
-                stage = 3;
-                Utilities.RimLog.Message("bill giver as thing : " + (st.billGiver as Thing));
-                stage = 4;
-                Utilities.RimLog.Message("bill giver def as thing : " + (st.billGiver as Thing).def);
-                stage = 5;
-                iter++;
-                Utilities.RimLog.Message("bill giver def recipes : " + (st.billGiver as Thing).def.AllRecipes);
-                foreach (var rec in (st.billGiver as Thing).def.AllRecipes)
+                if (rec.defName == recipeDefName)
                 {
-                    Utilities.RimLog.Message("rec is " + (rec == null || rec.defName == null ? "<null>" : rec.ToString()));
-                    if (rec.defName == recipeDefName)
-                    {
-                        iter++;
-                        return BillUtility.MakeNewBill(rec);
-                    }
+                    return BillUtility.MakeNewBill(rec);
                 }
             }
-            catch (System.Exception ee)
-            {
-                Utilities.RimLog.Error("stage " + stage + " at iter " + iter +  "could not make bill! " + ee.ToString());
-            }
+
+            Utilities.RimLog.Message("could not make bill!");
             return null;
         }
     }
