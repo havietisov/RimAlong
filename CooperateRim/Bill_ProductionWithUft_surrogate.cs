@@ -10,14 +10,14 @@ namespace CooperateRim
 {
     class Bill_ProductionWithUft_surrogate : BillSurrogate
     {
-        public override void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
+        public new void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
         {
             Bill_ProductionWithUft bpwu = (Bill_ProductionWithUft)obj;
             base.GetObjectData(obj, info, context);
             info.AddValue("uft", bpwu.BoundUft);
         }
 
-        public override object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+        public new object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
             Bill_ProductionWithUft _obj = (Bill_ProductionWithUft)base.SetObjectData(obj, info, context, selector);
             UnfinishedThing uft = (UnfinishedThing)info.GetValue("uft", typeof(UnfinishedThing));

@@ -189,6 +189,7 @@ namespace CooperateRim
             }
             
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
+            SerializationService.AppendSurrogate(typeof(Bill_ProductionWithUft), new Bill_ProductionWithUft_surrogate());
             SerializationService.AppendSurrogate(typeof(JobDef), new JobDefSurrogate());
             SerializationService.AppendSurrogate(typeof(ThingDef), new ThingDefSurrogate());
             SerializationService.AppendSurrogate(typeof(SpecialThingFilterDef), new SpecialThingFilterDefSurrogate());
