@@ -201,29 +201,49 @@ namespace RemoteDirectoryServer
             Console.WriteLine("RimAlong server version 0.0.0.2, codename \"mumblebee\", ready to rumble!");
             CooperateRim.SyncTickData.cliendID = 0;
             
+
             lst.BeginAcceptTcpClient(acceptor = u =>
             {
                 Console.WriteLine("new client");
                 TcpClient tcc = (u.AsyncState as TcpListener).EndAcceptTcpClient(u);
                 NetworkStream ns = tcc.GetStream();
-                NetDemo.allClients.AddLast(ns);
-                
+                int clid = CooperateRim.SyncTickData.cliendID;
+
                 (u.AsyncState as TcpListener).BeginAcceptTcpClient(acceptor, u.AsyncState);
 
-                for (; tcc.Connected ; )
+                if (clid < NetDemo.desiredPlayerCount)
                 {
-                    Thread.Sleep(10);
-                    if (ns.DataAvailable)
+                    NetDemo.allClients.AddLast(ns);
+
+
+                    for (; tcc.Connected;)
                     {
-                        PirateRPC.PirateRPC.ReceiveInvocation(ns);
-                    }
-                };
+                        Thread.Sleep(10);
+                        if (ns.DataAvailable)
+                        {
+                            PirateRPC.PirateRPC.ReceiveInvocation(ns);
+                        }
+                    };
+                }
+                else
+                {
+                    for (; !ns.DataAvailable;)
+                    {
+                        Thread.Sleep(10);
+                        if (ns.DataAvailable)
+                        {
+                            PirateRPC.PirateRPC.ReceiveInvocation(ns);
+                            break;
+                        }
+                    };
+                }
 
                 Console.WriteLine("client lost");
             }, lst);
             
             for (; ; )
             {
+                Thread.Sleep(100);
             }
         }
     }
