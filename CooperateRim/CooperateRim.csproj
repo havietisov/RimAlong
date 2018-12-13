@@ -148,6 +148,7 @@
     <Compile Include="ParrotWrapper.cs" />
     <Compile Include="PawnAttackMeleeGizmoUtilityPatch.cs" />
     <Compile Include="Pawn_MeleeVerbs_patch.cs" />
+    <Compile Include="Pawn_player_settings_allowed_area_patch.cs" />
     <Compile Include="pawn_worksettings_patch.cs" />
     <Compile Include="PirateRPC.CompilerGeneratedSurrogate.cs" />
     <Compile Include="PirateRPC.cs" />

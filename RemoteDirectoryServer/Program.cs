@@ -243,7 +243,7 @@ namespace RemoteDirectoryServer
             
             for (; ; )
             {
-                Thread.Sleep(100);
+                Thread.Sleep(10);
             }
         }
     }
