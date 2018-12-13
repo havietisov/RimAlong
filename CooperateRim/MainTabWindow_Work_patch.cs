@@ -12,7 +12,18 @@ namespace CooperateRim
     [HarmonyPatch(typeof(MainTabWindow_Work), "DoManualPrioritiesCheckbox")]
     class MainTabWindow_Work_patch
     {
-        public static int useWorkPriorities_index;
+        public static void ChangeUseWorkPriorities(bool val)
+        {
+            Current.Game.playSettings.useWorkPriorities = val;
+
+            foreach (Pawn pawn in PawnsFinder.AllMapsWorldAndTemporary_Alive)
+            {
+                if (pawn.Faction == Faction.OfPlayer && pawn.workSettings != null)
+                {
+                    pawn.workSettings.Notify_UseWorkPrioritiesChanged();
+                }
+            }
+        }
 
         [HarmonyPrefix]
         public static bool Prefix()
@@ -26,7 +37,7 @@ namespace CooperateRim
             Widgets.CheckboxLabeled(rect, "ManualPriorities".Translate(), ref useWorkPriorities_, false, null, null, false);
             if (useWorkPriorities != useWorkPriorities_)
             {
-                MemberTracker<bool>.ApplyChange(useWorkPriorities_, useWorkPriorities_index);
+                ChangeUseWorkPriorities(useWorkPriorities_);
             }
             if (!Current.Game.playSettings.useWorkPriorities)
             {

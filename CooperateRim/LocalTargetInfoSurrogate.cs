@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using CooperateRim.Utilities;
+using System.Runtime.Serialization;
 using Verse;
 
 namespace CooperateRim
@@ -25,13 +26,15 @@ namespace CooperateRim
             LocalTargetInfo lti;
             if (info.GetBoolean("lti.hasthing"))
             {
-                lti = new LocalTargetInfo((Thing)info.GetValue("lti.thing", typeof(Thing)));
+                object o = info.GetValue("lti.thing", typeof(Thing));
+                
+                lti = new LocalTargetInfo((Thing)o);
             }
             else
             {
                 lti = new LocalTargetInfo((IntVec3)info.GetValue("lti.cell", typeof(IntVec3)));
             }
-
+            
             return lti;
         }
     }

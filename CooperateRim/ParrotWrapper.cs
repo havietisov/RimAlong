@@ -8,6 +8,7 @@ using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using CooperateRim.Utilities;
 using Harmony;
 
 namespace CooperateRim
@@ -34,7 +35,6 @@ namespace CooperateRim
             dynamicModule = dynamicAssembly.DefineDynamicModule("ParrotPatchDynamicModule");
         }
         
-        static HarmonyInstance hi = HarmonyInstance.Create("id1");
 
         public static void SerializeInstance<T>(T arg)
         {
@@ -69,6 +69,17 @@ namespace CooperateRim
         
         static int parrot_counter = 9000;
 
+
+        static uint conditional_wraps = 0;
+
+        public static void FastPatch<TSource,TPatch>(Expression<TSource> exprdesignator, Expression<TPatch> exprPatch)
+        {
+            MethodInfo miSource = ExpressionHelper.GetMethodInfo(exprdesignator);
+            MethodInfo miTarget = ExpressionHelper.GetMethodInfo(exprPatch);
+            RimLog.Message(miSource + "::" + miTarget);
+            CooperateRimming.inst.harmonyInst.Patch(miSource, new HarmonyMethod(miTarget));
+        }
+
         public static void ParrotPatchExpressiontarget<T>(Expression<T> expr)
         {
             MethodInfo mi = ExpressionHelper.GetMethodInfo(expr);
@@ -78,7 +89,8 @@ namespace CooperateRim
             List<Type> partchParams = new List<Type>();
             List<string> @paramNames = new List<string>();
             ParameterExpression instanceParameter = null;
-
+            int ppnameIndex = 0;
+            
             foreach(var a in expr.Parameters)
             {
                 if (a.Name != "__instance")
@@ -170,7 +182,7 @@ namespace CooperateRim
             Type t = ass_patch.CreateType();
             wrappers.Add(t.GetMethod(wrapper.Name));
             var hm = new HarmonyMethod(t.GetMethod("[prefix]"));
-            hi.Patch(mi, hm, null, null);
+            CooperateRimming.inst.harmonyInst.Patch(mi, hm, null, null);
 
             //var body = (System.Linq.Expressions.MethodCallExpression)expr.Body;
         }

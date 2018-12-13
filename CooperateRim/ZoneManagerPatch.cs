@@ -9,6 +9,36 @@ using System.Diagnostics;
 
 namespace CooperateRim
 {
+    [HarmonyPatch(typeof(AreaManager))]
+    [HarmonyPatch("TryMakeNewAllowed")]
+    public class TryMakeNewAllowed_patch
+    {
+        static bool avoid_internal_loop = true;
+
+        public static void TryMakeNewArea(AreaManager inst)
+        {
+            Area_Allowed area;
+            avoid_internal_loop = false;
+            inst.TryMakeNewAllowed(out area);
+            avoid_internal_loop = true;
+        }
+
+        [HarmonyPrefix]
+        public static bool prefix(AreaManager __instance, bool __result)
+        {
+            if (avoid_internal_loop)
+            {
+                TryMakeNewArea(__instance);
+                __result = false;
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+    }
+
     /*
     [HarmonyPatch(typeof(Designator_ZoneAdd))]
     [HarmonyPatch("DesignateMultiCell")]

@@ -198,7 +198,7 @@ namespace RemoteDirectoryServer
 
             AssemblyName updatedAssemblyName = AssemblyName.GetAssemblyName("CooperateRim.dll");
             Console.WriteLine("RimAlong mod version is " + updatedAssemblyName.Version );
-            Console.WriteLine("RimAlong server version 0.0.0.2, codename \"mumblebee\", ready to rumble!");
+            Console.WriteLine("RimAlong server version 0.0.0.3, codename \"crubmle tree\", ready to rumble!");
             CooperateRim.SyncTickData.cliendID = 0;
             
 

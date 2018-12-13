@@ -16,22 +16,13 @@ namespace CooperateRim
         public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
             int idNumber = info.GetInt32("pawn_thingid");
+            Thing t = ThingRegistry.tryGetThing(idNumber);
 
-            List<Thing>[] things = (List<Thing>[])Find.CurrentMap.thingGrid.GetType().GetField("thingGrid", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(Find.CurrentMap.thingGrid);
-
-            foreach (var tl in things)
+            if (t == null)
             {
-                foreach (var thing in tl)
-                {
-                    if (thing.thingIDNumber == idNumber)
-                    {
-                        return thing;
-                    }
-                }
+                RimLog.Message("Could not locate a pawn with thingid " + idNumber);
             }
-
-            RimLog.Message("Could not locate a pawn with thingid " + idNumber);
-            return null;
+            return t;
         }
     }
 }

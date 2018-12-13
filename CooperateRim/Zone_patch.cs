@@ -7,25 +7,25 @@ using Verse;
 
 namespace CooperateRim
 {
-    [HarmonyPatch(typeof(Verse.Zone))]
-    [HarmonyPatch("Delete")]
-    class Zone_patch
-    {
-        [HarmonyPrefix]
-        public static bool Prefix(Zone __instance)
-        {
-            if (SyncTickData.AvoidLoop)
-            {
+    //[HarmonyPatch(typeof(Verse.Zone))]
+    //[HarmonyPatch("Delete")]
+    //class Zone_patch
+    //{
+    //    [HarmonyPrefix]
+    //    public static bool Prefix(Zone __instance)
+    //    {
+    //        if (SyncTickData.AvoidLoop)
+    //        {
 
-                return true;
-            }
-            else
-            {
-                SyncTickData.AppendSyncTickDataDeleteZone(__instance);
-                return false;
-            }
-        }
-    }
+    //            return true;
+    //        }
+    //        else
+    //        {
+    //            SyncTickData.AppendSyncTickDataDeleteZone(__instance);
+    //            return false;
+    //        }
+    //    }
+    //}
     /*
     [HarmonyPatch(typeof(Verse.Command_Action))]
     [HarmonyPatch("ProcessInput")]

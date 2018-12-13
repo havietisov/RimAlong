@@ -11,10 +11,11 @@ using Verse.AI;
 using Verse.Sound;
 using CooperateRim.Utilities;
 using System.Diagnostics;
+using System.Linq.Expressions;
+using System.Reflection.Emit;
 
 namespace CooperateRim
 {
-
     public partial class CooperateRimming : ModBase
     {
         public override string ModIdentifier => "CooperateRim.CooperateRimming";
@@ -166,17 +167,11 @@ namespace CooperateRim
                     ParrotWrapper.IndexedCall(dat.methodContext, dat.dataObjects.ToArray());
                 }
             }*/
-
             Prefs.PauseOnLoad = false;
             Prefs.RunInBackground = true;
             SerializationService.Initialize();
             ParrotWrapper.Initialize();
-
-            SerializationService.AppendSurrogate(typeof(Vector3), new Vector3Surrogate());
-            SerializationService.AppendSurrogate(typeof(IntVec3), new IntVec3Surrogate());
-            SerializationService.AppendSurrogate(typeof(BillStack), new BillStackSurrogate());
-            SerializationService.AppendSurrogate(typeof(Bill), new BillSurrogate());
-
+            
             foreach (Assembly @as in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (Type t in @as.GetTypes())
@@ -187,7 +182,14 @@ namespace CooperateRim
                     }
                 }
             }
-            
+
+            SerializationService.AppendSurrogate(typeof(Vector3), new Vector3Surrogate());
+            SerializationService.AppendSurrogate(typeof(IntVec3), new IntVec3Surrogate());
+            SerializationService.AppendSurrogate(typeof(BillStack), new BillStackSurrogate());
+            SerializationService.AppendSurrogate(typeof(Bill), new BillSurrogate());
+            SerializationService.AppendSurrogate(typeof(Thing), new ThingSurrogate());
+            SerializationService.AppendSurrogate(typeof(Area), new AreaSurrogate());
+            SerializationService.AppendSurrogate(typeof(AreaManager), new AreaManaegerSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_ProductionWithUft), new Bill_ProductionWithUft_surrogate());
             SerializationService.AppendSurrogate(typeof(JobDef), new JobDefSurrogate());
@@ -204,36 +206,51 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(FoodRestriction), new FoodRestrictionSurrogate());
             SerializationService.AppendSurrogate(typeof(RecipeDef), new RecipeDefSurrogate());
             SerializationService.AppendSurrogate(typeof(BillRepeatModeDef), new BillRepeatModeDefSurrogate());
-
-            PirateRPC.PirateRPC.CompilerGeneratedSurrogate sur = new PirateRPC.PirateRPC.CompilerGeneratedSurrogate();
-            
-            MainTabWindow_Work_patch.useWorkPriorities_index = 
-            MemberTracker<bool>.TrackPublicField<Func<bool>>(() => Current.Game.playSettings.useWorkPriorities, 
-            u => 
-            {
-                Current.Game.playSettings.useWorkPriorities = u;
-                
-                foreach (Pawn pawn in PawnsFinder.AllMapsWorldAndTemporary_Alive)
-                {
-                    if (pawn.Faction == Faction.OfPlayer && pawn.workSettings != null)
-                    {
-                        pawn.workSettings.Notify_UseWorkPrioritiesChanged();
-                    }
-                }
-            });
-            ParrotWrapper.ParrotPatchExpressiontarget<Action<bool, int>>((bool newVal, int index) => MemberTracker<bool>.ApplyChange(newVal, index));
-
-            //MemberTracker<bool>.ApplyChange(true, 0);
-            //ParrotWrapper.ParrotPatchExpressiontarget<Action<BillStack, Bill>>((BillStack __instance, Bill bill) => __instance.AddBill(bill));
-
-            //ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallow_wrap(thingDefName, allow, thingIDNumber, isSpecial));
-            //ParrotWrapper.ParrotPatchExpressiontarget<Action<string, bool, int, bool>>((string thingDefName, bool allow, int zoneID, bool isSpecial) => ThingFilter_wrapper.Thingfilter_setallowzone_wrap(thingDefName, allow, zoneID, isSpecial));
-            //ThingFilter_setallow_bill_with_billgiver(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex)
-
-            //ParrotWrapper.ParrotPatchExpressiontarget<thing_filter_wrapper_1>((string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex) => ThingFilter_wrapper.ThingFilter_setallow_bill_with_billgiver(thingDefName, allow, thingIDNumber, isSpecial, billIndex));
-            //ParrotWrapper.ParrotPatchExpressiontarget<Action<int, bool>>((int thingIDNumber, bool actuallyDisallow) => ThingFilter_setallowall_wrapper.ThingFilter_setallowall_zone(thingIDNumber, actuallyDisallow));
-            //ParrotWrapper.ParrotPatchExpressiontarget<Action<Action>>((Action a) => FloatMenuOptionPatch.InvokeAction(a));
-
+            SerializationService.AppendSurrogate(typeof(DesignationDef), new DesignationDefSurrogate());
+            SerializationService.AppendSurrogate(typeof(Designation), new Designation_surrogate());
+            SerializationService.AppendSurrogate(typeof(Rot4), new Rot4Surrogate());
+            SerializationService.AppendSurrogate(typeof(Zone), new ZoneSurrogate());
+            SerializationService.AppendSurrogate(typeof(Zone_Growing), new ZoneSurrogate());
+            SerializationService.AppendSurrogate(typeof(WorkTypeDef), new WorkTypeDef_surrogate());
+            SerializationService.AppendSurrogate(typeof(ResearchProjectDef), new ResearchProjectDef_surrogate());
+            ParrotWrapper.FastPatch<Action<DesignationManager, Designation>, Action<Designation>>((__inst, des) => __inst.RemoveDesignation(des), (des) => designator_methods.designation_mgr_regular_RemoveDesignation(des));
+            ParrotWrapper.FastPatch<Action<DesignationManager, Designation>, Action<Designation>>( (__inst, newDes) => __inst.AddDesignation(newDes), (newDes) => designator_methods.designation_mgr_regular_AddDesignation(newDes) );
+            ParrotWrapper.FastPatch<Action<DesignationManager, Thing, bool>, Action<Thing, bool>>( (__inst, t, b) => __inst.RemoveAllDesignationsOn(t, b), ( t, standardCanceling) => designator_methods.designation_mgr_regular_RemoveAllDesignationsOn(t, standardCanceling));
+            ParrotWrapper.FastPatch<Action<Designator_Build, IntVec3>, Action<IntVec3, Rot4, BuildableDef, ThingDef>>( (u,c) => u.DesignateSingleCell(c), (IntVec3 c, Rot4 ___placingRot, BuildableDef ___entDef, ThingDef ___stuffDef) => designator_build_methods.prefix_designate_single_cell(c, ___placingRot, ___entDef, ___stuffDef));
+            ParrotWrapper.FastPatch<Action<Designator_Cancel, IntVec3>, Action<IntVec3>>((u, c) => u.DesignateSingleCell(c), (IntVec3 c) => designator_cancel_methods.prefix_designate_single_cell(c));
+            ParrotWrapper.FastPatch<Action<Designator_Cancel, Thing>, Action<Thing>>((u, t) => u.DesignateThing(t), (Thing t) => designator_cancel_methods.prefix_designate_thing(t));
+            ParrotWrapper.FastPatch<Action<Designator_Forbid, Thing>, Action<Thing>>((u, t) => u.DesignateThing(t), (Thing t) => designator_forbid_methods.prefix_designate_thing(t));
+            ParrotWrapper.FastPatch<Action<Designator_Forbid, IntVec3>, Action<IntVec3>>((u, c) => u.DesignateSingleCell(c), (IntVec3 c) => designator_forbid_methods.prefix_designate_cell(c));
+            ParrotWrapper.FastPatch<Action<Designator_Claim, Thing>, Action<Thing>>((u, c) => u.DesignateThing(c), (Thing t) => designator_claim_methods.prefix_designate_thing(t));
+            ParrotWrapper.FastPatch<Action<Designator_Unforbid, Thing>, Action<Thing>>((u, t) => u.DesignateThing(t), (Thing t) => designator_unforbid_methods.prefix_designate_thing(t));
+            ParrotWrapper.FastPatch<Action<Designator_Unforbid, IntVec3>, Action<IntVec3>>((u, c) => u.DesignateSingleCell(c), (IntVec3 c) => designator_unforbid_methods.prefix_designate_cell(c));
+            ParrotWrapper.FastPatch<Action<Designator_Plan, IntVec3>, Action<IntVec3, DesignateMode>>((u, c) => u.DesignateSingleCell(c), (IntVec3 c, DesignateMode ___mode) => designator_plan_methods.prefix_designate_cell(c, ___mode));
+            ParrotWrapper.FastPatch<Action<Designator_Hunt, Thing>, Action<Thing>>((u, t) => u.DesignateThing(t), (Thing t) => designator_hunt_methods.prefix_designate_thing(t));
+            ParrotWrapper.FastPatch<Action<Designator_Tame, Thing>, Action<Thing>>((u, t) => u.DesignateThing(t), (Thing t) => designator_tame_methods.prefix_designate_thing(t));
+            ParrotWrapper.FastPatch<Action<Designator_ZoneAdd, IEnumerable<IntVec3>>, Action<IEnumerable<IntVec3>, Designator_ZoneAdd>>((u, c) => u.DesignateMultiCell(c), (IEnumerable<IntVec3> cells, Designator_ZoneAdd __instance) => designator_zone_methods.prefix_designate_multicell(cells, __instance));
+            ParrotWrapper.FastPatch<Action<Designator_ZoneDelete, IntVec3>, Action<IntVec3, Designator_ZoneDelete>>((u, c) => u.DesignateSingleCell(c), (IntVec3 c, Designator_ZoneDelete __instance) => designator_zone_delete_methods.prefix_designate_single_cell(c, __instance));
+            ParrotWrapper.FastPatch<Action<Designator_Install, IntVec3>, Action<IntVec3, Rot4, Designator_Install>>( (u, c) => u.DesignateSingleCell(c), (IntVec3 c, Rot4 ___placingRot, Designator_Install __instance) => designator_install_methods.prefix_designate_single_cell(c, ___placingRot, __instance));
+            ParrotWrapper.FastPatch<Action<Designator_AreaBuildRoof, IntVec3>, Action<IntVec3>>((u,c) => u.DesignateSingleCell(c), c => designator_area_buildoof_methods.prefix_designate_single_cell(c));
+            ParrotWrapper.FastPatch<Action<Designator_AreaHomeExpand, IntVec3>, Action<IntVec3, Designator_AreaHome>>((u, c) => u.DesignateSingleCell(c), (c, __instance) => designator_area_home_methods.prefix_designate_single_cell(c, __instance));
+            ParrotWrapper.FastPatch<Action<Designator_AreaNoRoof, IntVec3>, Action<IntVec3>>((u, c) => u.DesignateSingleCell(c), c => designator_area_no_roof_methods.prefix_designate_single_cell(c));
+            ParrotWrapper.FastPatch<Action<Designator_AreaIgnoreRoof, IntVec3>, Action<IntVec3>>((u, c) => u.DesignateSingleCell(c), c => designator_area_ignore_roof_methods.prefix_designate_single_cell(c));
+            ParrotWrapper.FastPatch<Action<Designator_AreaSnowClear, IntVec3>, Action<IntVec3, Designator_AreaSnowClear>>((u,c)=> u.DesignateSingleCell(c), (c, __instance) => designator_area_snowclear_methods.prefix_designate_single_cell(c, __instance));
+            ParrotWrapper.FastPatch<Action<Pawn_WorkSettings, WorkTypeDef, int>, Action<WorkTypeDef, int, Pawn>>((u,c,i)=> u.SetPriority(c,i), (w, priority, ___pawn) => pawn_worksettings_patch.prefix_set_priority(w, priority, ___pawn));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing, bool>>((t, standardCanceling) => designator_methods.designation_mgr_parrot_RemoveAllDesignationsOn(t, standardCanceling));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Designation>>((newDes) => designator_methods.designation_mgr_parrot_AddDesignation(newDes));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Designation>>((des) => designator_methods.designation_mgr_parrot_RemoveDesignation(des));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3, ThingDef, Rot4, BuildableDef>>((IntVec3 c, ThingDef stuffDef, Rot4 placingRot, BuildableDef entDef) => designator_build_methods.parrot_designate_single_cell(c, stuffDef, placingRot, entDef));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3>>((c) => designator_cancel_methods.parrot_designate_single_cell(c));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing>>((t) => designator_cancel_methods.parrot_designate_thing(t));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing>>((t) => designator_forbid_methods.parrot_designate_thing(t));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3>>((c) => designator_forbid_methods.parrot_designate_cell(c));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing>>((t) => designator_unforbid_methods.parrot_designate_thing(t));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3>>((c) => designator_unforbid_methods.parrot_designate_cell(c));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3, DesignateMode>>((c, mode) => designator_plan_methods.parrot_designate_cell(c, mode));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing>>((t) => designator_hunt_methods.parrot_designate_thing(t));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing>>((t) => designator_tame_methods.parrot_designate_thing(t));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing>>((t) => designator_claim_methods.parrot_designate_thing(t));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IEnumerable<IntVec3>, Type, Zone>> ((cells, designator_type, z) => designator_zone_methods.parrot_designate_multicell(cells, designator_type, z));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Bill_Production, int>>((Bill_Production bill, int count) => BillRepeatModeUtilityPatch.SetBillTargetCount(bill, count));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Bill_Production, int>>((Bill_Production bill, int count) => BillRepeatModeUtilityPatch.SetBillRepeatCount(bill, count));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Bill_Production, BillRepeatModeDef>>((Bill_Production bill, BillRepeatModeDef repeatMode) => BillRepeatModeUtilityPatch.SetBillRepeatType(bill, repeatMode));
@@ -245,8 +262,21 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Building_WorkTable, RecipeDef>>((Building_WorkTable table, RecipeDef recipe) => BillStackPatch.MakeNewBillAt(table, recipe));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, ThingDef, bool, bool>>((object o, ThingDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, SpecialThingFilterDef, bool, bool>>((object o, SpecialThingFilterDef def, bool isSpecial, bool isAllow) => thingfilter_methods.SetAllowance(o, def, isSpecial, isAllow));
-            
-
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<AreaManager>>((inst) => TryMakeNewAllowed_patch.TryMakeNewArea(inst));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing, Pawn>>((t, p) => InterfaceDrop_patch.DropGear(t, p));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing, int>>((inst, index) => GenericGizmoMethods.CallByIndex(inst, index));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<ThingDef, Zone_Growing>>((plantDef, inst) => Zone_growing_setplantdef_patch.parrot(plantDef, inst));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Zone>>((inst) => zone_delete_patch.parrot(inst));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3, Rot4, Thing>>((IntVec3 c, Rot4 placingRot, Thing thingToInstall) => designator_install_methods.parrot_designate_single_cell(c, placingRot, thingToInstall));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3, Type>>((c, t) => designator_zone_delete_methods.parrot_designate_single_cell(c,t));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3>>(c => designator_area_buildoof_methods.parrot_designate_single_cell(c));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3, Type>>((c,t) => designator_area_home_methods.parrot_designate_single_cell(c, t));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3>>((c) => designator_area_no_roof_methods.parrot_designate_single_cell(c));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3>>((c) => designator_area_ignore_roof_methods.parrot_designate_single_cell(c));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3, Type>>((c,t)=> designator_area_snowclear_methods.parrot_designate_single_cell(c,t));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<WorkTypeDef, int, Pawn>>((w, priority, p) => pawn_worksettings_patch.parrot_set_priority(w, priority, p));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<ResearchProjectDef>>(project => MainTabWindow_Research_patch.parrotSetCurrentResearch(project));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<bool>>(val=> MainTabWindow_Work_patch.ChangeUseWorkPriorities(val));
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
             RandRootContext<Verse.Sound.SoundRoot>.ApplyPatch("Update");
             RandRootContext<UnityEngine.GUI>.ApplyPatch("CallWindowDelegate");
@@ -254,11 +284,9 @@ namespace CooperateRim
             RandRootContext<MusicManagerPlay_placeholder1>.ApplyPatch("MusicUpdate", typeof(MusicManagerPlay));
             RandRootContext<Verse.MapDrawer>.ApplyPatch("MapMeshDrawerUpdate_First");
             RandRootContext<TickManagerPatch>.ApplyPatch("Prefix");
-
             RandRootContext<Map>.ApplyPatch("MapUpdate");
             RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
             RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
-
             RandRootContext<TickManager>.ApplyPatch("DoSingleTick");
             RandRootContext<TickList>.ApplyPatch("Tick");
             RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
@@ -266,7 +294,6 @@ namespace CooperateRim
             RandRootContext<GameInfo>.ApplyPatch("GameInfoUpdate");
             RandRootContext<World>.ApplyPatch("WorldUpdate");
             RandRootContext<UIRoot_Play>.ApplyPatch("UIRootUpdate");
-
             //RandRootContext<Verse.Root>.ApplyPatch("OnGUI");
 
             //separating UpdatePlay calls from each other
@@ -285,18 +312,14 @@ namespace CooperateRim
             RandRootContext<SubEffecter_Sprayer>.ApplyPatch("MakeMote");
             RandRootContext<SubEffecter_DrifterEmote>.ApplyPatch("MakeMote");
             RandRootContext<SubEffecter_InteractSymbol>.ApplyPatch("SubEffectTick");
-
             RandRootContext<SubEffecter_ProgressBar>.ApplyPatch("SubEffectTick");
             RandRootContext<SubEffecter_SoundIntermittent>.ApplyPatch("SubEffectTick");
             RandRootContext<SubEffecter_SoundTriggered>.ApplyPatch("SubTrigger");
             RandRootContext<SubEffecter_Sustainer>.ApplyPatch("SubEffectTick");
-            
             RandRootContext<SubEffecterDef>.ApplyPatch("Spawn");
             RandRootContext<effecter_effecttick_placeholder>.ApplyPatch("EffectTick", typeof(Effecter));
             RandRootContext<effecter_Trigger_placeholder>.ApplyPatch("Trigger", typeof(Effecter));
             RandRootContext<effecter_Cleanup_placeholder>.ApplyPatch("Cleanup", typeof(Effecter));
-            
-
             RandRootContext<GameComponentUtility_placeholder>.ApplyPatch("GameComponentUpdate", typeof(GameComponentUtility));
             //finishing separating UpdatePlay calls from each other
 
@@ -320,17 +343,7 @@ namespace CooperateRim
             //RandRootContext<GamePlaceholder_1>.ApplyPatch("InitNewGame", typeof(Game));
             //RandRootContext<ThingOwner>.ApplyPatch("ThingOwnerTick");
         }
-        /*
-        [HarmonyPatch(typeof(Hediff), "Tick")]
-        class hediff_tick_cancel
-        {
-            [HarmonyPrefix]
-            public static bool prefix()
-            {
-                return false;
-            }
-        }*/
-
+        
         class effecter_effecttick_placeholder { };
         class effecter_Trigger_placeholder { };
         class effecter_Cleanup_placeholder { };
@@ -346,6 +359,13 @@ namespace CooperateRim
         class WorldGenPlaceholder { };
         class InitNewGamePlaceholder { };
 
+        public static void PatchDesignateSingleCellFor(Type t, Delegate delPatch)
+        {
+            MethodInfo targetmethod = AccessTools.Method(t, "DesignateSingleCell");
+            HarmonyMethod prefix = new HarmonyMethod(delPatch.Method);
+            CooperateRimming.inst.harmonyInst.Patch(targetmethod, prefix);
+        }
+        
         
         public delegate void  thing_filter_wrapper_1(string thingDefName, bool allow, int thingIDNumber, bool isSpecial, int billIndex);
 
@@ -379,7 +399,7 @@ namespace CooperateRim
                     }
                 }
             }
-
+            
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (Type t in a.GetTypes())
@@ -395,81 +415,7 @@ namespace CooperateRim
                     }
                 }
             }
-
-            List<Type> doNotPatchDesignators = new List<Type>(new [] { typeof(Designator_ZoneDelete), typeof(Designator_Build), typeof(Designator) });
-
-            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (Type t in a.GetTypes())
-                {
-                    if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)) && !doNotPatchDesignators.Contains(t))
-                    {
-                        MethodInfo targetmethod = AccessTools.Method(t, "DesignateSingleCell");
-                        HarmonyMethod prefix_1 = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateSingleCell_1"));
-                        HarmonyMethod prefix_2 = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateSingleCell_2"));
-                        try
-                        {
-                            harmony.Patch(targetmethod, prefix_1, null, null);
-                        }
-                        catch (Exception ee)
-                        {
-                            harmony.Patch(targetmethod, prefix_2, null, null);
-                        }
-                    }
-                }
-            }
-
-            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (Type t in a.GetTypes())
-                {
-                    if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)) && !doNotPatchDesignators.Contains(t))
-                    {
-                        MethodInfo targetmethod = AccessTools.Method(t, "DesignateMultiCell");
-                        HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateMultiCell"));
-                        harmony.Patch(targetmethod, prefix, null, null);
-                    }
-                }
-            }
-
-            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (Type t in a.GetTypes())
-                {
-                    if (!t.IsAbstract && t.IsSubclassOf(typeof(Designator)) && !doNotPatchDesignators.Contains(t))
-                    {
-                        MethodInfo targetmethod = AccessTools.Method(t, "DesignateThing");
-                        HarmonyMethod prefix = new HarmonyMethod(typeof(CooperateRim.Designator_patch).GetMethod("DesignateThing"));
-                        harmony.Patch(targetmethod, prefix, null, null);
-                    }
-                }
-            }
             
-            Logger.Message("Field : " + (typeof(Building_Trap)).GetField("autoRearm", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.IgnoreCase));
-
-            foreach (MethodInfo mi in new[] 
-            {
-                typeof(CooperateRim.WorkGiverPatch).GetMethod("JobOnThing_1"),
-                typeof(CooperateRim.WorkGiverPatch).GetMethod("JobOnThing_2"),
-            })
-            {
-                foreach (Type t in typesToPatch)
-                {
-                    try
-                    {
-                        MethodInfo targetmethod = AccessTools.Method(t, "JobOnThing");
-                        HarmonyMethod postfix = new HarmonyMethod(mi);
-                        //Logger.Message("Patched type : " + t);
-                        harmony.Patch(targetmethod, null, postfix, null);
-                        leftOverTypes.Remove(t);
-                    }
-                        catch (Exception ee)
-                    {
-                        //Logger.Message("Patching exception : " + ee.ToString());
-                    }
-                }
-            }
-
             if (leftOverTypes.Count > 0)
             {
                 foreach (Type t in leftOverTypes)
@@ -486,7 +432,6 @@ namespace CooperateRim
             {
                 //harmony.PatchAll(Assembly.GetExecutingAssembly());
             }
-
         }
         
         [HarmonyPatch(typeof(MainMenuDrawer))]

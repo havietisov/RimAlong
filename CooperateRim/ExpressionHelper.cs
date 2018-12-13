@@ -9,6 +9,7 @@ namespace CooperateRim
     using System.Linq.Expressions;
     using System.Reflection;
     using System;
+    using CooperateRim.Utilities;
 
     public static class ExpressionHelper
     {
@@ -74,6 +75,13 @@ namespace CooperateRim
                 throw new ArgumentException("Invalid Expression. Expression should consist of a Method call only.");
             }
 
+            if (outermostExpression.Method.IsVirtual)
+            {
+                RimLog.Message("type : " + outermostExpression.Object.Type);
+                var meth = outermostExpression.Object.Type.GetMethods().First(u => u.GetBaseDefinition() == outermostExpression.Method);
+                RimLog.Message("method found : " + meth.ReflectedType);
+                return meth;
+            }
             return outermostExpression.Method;
         }
     }

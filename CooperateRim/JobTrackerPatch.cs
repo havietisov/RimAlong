@@ -3,6 +3,7 @@ using Harmony;
 using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -47,27 +48,29 @@ namespace CooperateRim
             return false;
         }
     }
-    /*
-    [HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
-    [HarmonyPatch("TryTakeOrderedJob")]
+    
+    [HarmonyPatch(typeof(Job), MethodType.Constructor, new Type[] { typeof(JobDef) , typeof(LocalTargetInfo) , typeof(LocalTargetInfo)  })]
     class JobTrackerPatch_
     {
-        [HarmonyPrefix]
-        public static bool TryTakeOrderedJob(Pawn_JobTracker __instance, Job job, JobTag tag, Pawn ___pawn)
+        [HarmonyPostfix]
+        public static void TryTakeOrderedJob(Job __instance)
         {
             //job.def
             RimLog.Message("TryTakeOrderedJobPrioritizedWork.IsDes : " + SyncTickData.IsDeserializing);
-            if (!SyncTickData.AvoidLoop)
+            //if (!SyncTickData.AvoidLoop)
             {
-                SyncTickData.AllowJobAt(job, ___pawn, tag, ___pawn.Position);
-                return false;
-            }
-            else
-            {
-                return true;
+                StackTrace st = new StackTrace();
+                List<string> strs = new List<string>();
+
+                foreach(var a in st.GetFrames())
+                {
+                    strs.Add(a.GetMethod().ReflectedType + "::" + a.GetMethod().Name);
+                }
+
+                System.IO.File.WriteAllLines("C:\\CoopReplays\\" + SyncTickData.cliendID + "\\" + Find.TickManager.TicksGame + "__job__" + ".txt", strs.ToArray());
             }
         }
-    }*/
+    }
 
     //[HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
     //[HarmonyPatch("DetermineNextJob")]

@@ -62,6 +62,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AreaManaegerSurrogate.cs" />
+    <Compile Include="AreaSurrogate.cs" />
     <Compile Include="basic_hash_tracker.cs" />
     <Compile Include="BillPatches.cs" />
     <Compile Include="BillProductionSurrogate.cs" />
@@ -78,13 +80,32 @@
     <Compile Include="bill_reorder_patch.cs" />
     <Compile Include="BlueprintBuildSurrogate.cs" />
     <Compile Include="closest_tracker.cs" />
+    <Compile Include="common_patch_fields.cs" />
     <Compile Include="ContextualizedRand.cs" />
     <Compile Include="CooperateRimming.cs" />
     <Compile Include="CRandStuff.cs" />
     <Compile Include="def_patch.cs" />
+    <Compile Include="DesignationDefSurrogate.cs" />
     <Compile Include="DesignationManagerPatch.cs" />
+    <Compile Include="Designation_surrogate.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
-    <Compile Include="Dialog_billConfigPatch_.cs" />
+    <Compile Include="designator_area_buildoof_methods.cs" />
+    <Compile Include="designator_area_home_methods.cs" />
+    <Compile Include="designator_area_ignore_roof_methods.cs" />
+    <Compile Include="designator_area_no_roof_methods.cs" />
+    <Compile Include="designator_area_snowclear_methods.cs" />
+    <Compile Include="designator_build_methods.cs" />
+    <Compile Include="designator_cancel_methods.cs" />
+    <Compile Include="designator_claim_methods.cs" />
+    <Compile Include="designator_forbid_methods.cs" />
+    <Compile Include="designator_hunt_methods.cs" />
+    <Compile Include="designator_install_methods.cs" />
+    <Compile Include="designator_methods.cs" />
+    <Compile Include="designator_plan_methods.cs" />
+    <Compile Include="designator_tame_methods.cs" />
+    <Compile Include="designator_unforbid_methods.cs" />
+    <Compile Include="designator_zone_delete_methods.cs" />
+    <Compile Include="designator_zone_methods.cs" />
     <Compile Include="Dialog_Coop.cs" />
     <Compile Include="ExpressionHelper.cs" />
     <Compile Include="floatMenuMakerpatch.cs" />
@@ -100,6 +121,7 @@
     <Compile Include="getValuePatch.cs" />
     <Compile Include="haul_patch.cs" />
     <Compile Include="HighResolutionTimer.cs" />
+    <Compile Include="InterfaceDrop_patch.cs" />
     <Compile Include="IntermittentSteamSprayerPatch.cs" />
     <Compile Include="IntVec3Surrogate.cs" />
     <Compile Include="JobDefSurrogate.cs" />
@@ -121,7 +143,7 @@
     <Compile Include="ParrotWrapper.cs" />
     <Compile Include="PawnAttackMeleeGizmoUtilityPatch.cs" />
     <Compile Include="Pawn_MeleeVerbs_patch.cs" />
-    <Compile Include="Pawn_WorkSettings_patch.cs" />
+    <Compile Include="pawn_worksettings_patch.cs" />
     <Compile Include="PirateRPC.CompilerGeneratedSurrogate.cs" />
     <Compile Include="PirateRPC.cs" />
     <Compile Include="PirateRPC.Message.cs" />
@@ -129,10 +151,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandRootContext.cs" />
     <Compile Include="RecipeDefSurrogate.cs" />
+    <Compile Include="ResearchManagerPatch.cs" />
+    <Compile Include="ResearchProjectDef_surrogate.cs" />
     <Compile Include="ReservationManager_patch.cs" />
     <Compile Include="ReverseBillTable.cs" />
-    <Compile Include="MemberTracker.cs" />
     <Compile Include="root_play_fields.cs" />
+    <Compile Include="Rot4Surrogate.cs" />
     <Compile Include="Sample_patch.cs" />
     <Compile Include="Selector__patch.cs" />
     <Compile Include="soundRootPatch.cs" />
@@ -164,8 +188,11 @@
     <Compile Include="WorkGiverPatch.cs" />
     <Compile Include="WorkGiverSurrogate.cs" />
     <Compile Include="ZoneManagerPatch.cs" />
+    <Compile Include="ZoneSurrogate.cs" />
     <Compile Include="zone_add_p.cs" />
+    <Compile Include="zone_delete_patch.cs" />
     <Compile Include="Zone_GrowingPatch.cs" />
+    <Compile Include="Zone_growing_setplantdef_patch.cs" />
     <Compile Include="Zone_patch.cs" />
     <Compile Include="Zone_StockPileSurrogate.cs" />
     <Compile Include="zone_stockpile_ctor_patch.cs" />

@@ -209,48 +209,5 @@ namespace CooperateRim
             Rand.PopState();
             return false;
         }
-        
-        /*
-        [HarmonyTranspiler]
-        static IEnumerable<CodeInstruction> MyTranspiler(IEnumerable<CodeInstruction> instr, MethodBase __originalMethod)
-        {
-            var fld = typeof(TickManager).GetField("ticksGameInt", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var shouldTick = typeof(TickManagerPatch).GetField("shouldReallyTick", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-            var isNetfls = typeof(TickManagerPatch).GetField("isNetworkLaunch", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            var retrMethod = typeof(TickManagerPatch).GetMethod("Retr"); ;
-            var mtd = typeof(TickManagerPatch).GetMethod("ReferenceTranspilerMethod");
-            
-            RimLog.Message("patched : " + fld + " : " + mtd + " : " + isNetfls);
-            
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldarg_0);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldflda, fld);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Call, mtd);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldsfld, isNetfls);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Brfalse, 6);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ret);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Nop);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ldsfld, shouldTick);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Brtrue, 11);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Call, retrMethod);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Ret);
-            yield return new CodeInstruction(System.Reflection.Emit.OpCodes.Nop);
-            foreach (var @in in instr)
-            {
-                yield return @in;
-            }
-        }
-        */
-
-        public static ResearchProjectDef cachedRDef;
-
-        [HarmonyPostfix]
-        public static void Postfix()
-        {
-            if (Find.ResearchManager.currentProj != cachedRDef)
-            {
-                SyncTickData.AppendSyncTickData(Find.ResearchManager.currentProj);
-                Find.ResearchManager.currentProj = cachedRDef;
-            }
-        }
     }
 }

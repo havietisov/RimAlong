@@ -37,7 +37,7 @@ namespace CooperateRim
     [HarmonyPatch(typeof(Rand), "get_Value", new Type[] { })]
     public class getValuePatch
     {
-        public static bool diagnostics = false;
+        public static bool diagnostics = true;
 
         public static int rand_guard = 0;
 
@@ -67,7 +67,7 @@ namespace CooperateRim
 
             if (s.Length > 0)
             {
-                //System.IO.File.WriteAllText("G:\\CoopReplays\\" + (cid + "_tick_" + Find.TickManager.TicksGame) + ".txt", s);
+                System.IO.File.WriteAllText("C:\\CoopReplays\\" + (cid + "_tick_" + Find.TickManager.TicksGame) + ".txt", s);
             }
         }
 

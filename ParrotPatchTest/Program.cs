@@ -9,7 +9,6 @@ using System.Runtime.Serialization;
 
 namespace ParrotPatchTest
 {
-
     public class g2
     {
         public string ccc = "ccc";

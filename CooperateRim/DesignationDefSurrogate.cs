@@ -1,18 +1,17 @@
 ﻿using Verse;
 using System.Runtime.Serialization;
+using System.Linq;
 
-public class Rot4Surrogate : ISerializationSurrogate
+public class DesignationDefSurrogate : ISerializationSurrogate
 {
     public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
     {
-        Rot4 r = (Rot4)obj;
-        info.AddValue("rot4", r.AsInt);
+        info.AddValue("name", ((DesignationDef)obj).defName);
     }
 
     public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
     {
-        Rot4 r = new Rot4();
-        r.AsInt = info.GetInt32("rot4");
-        return r;
+        string defname = info.GetString("name");
+        return DefDatabase<DesignationDef>.AllDefs.First(u=> u.defName == defname);
     }
 }
