@@ -12,7 +12,7 @@ public class area_invert : common_patch_fields
         use_native = true;
         try
         {
-            area.Delete();
+            area.Invert();
         }
         finally
         {
