@@ -2,69 +2,6 @@
 using RimWorld;
 using System.Runtime.Serialization;
 using System.Linq;
-using Harmony;
-
-[HarmonyPatch(typeof(Area), "Invert")]
-public class area_invert : common_patch_fields
-{
-    public static void Invert(Area area)
-    {
-        use_native = true;
-        try
-        {
-            area.Invert();
-        }
-        finally
-        {
-            use_native = false;
-        }
-    }
-
-    [HarmonyPrefix]
-    public static bool prefix(Area __instance)
-    {
-        if (use_native)
-        {
-            return true;
-        }
-        else
-        {
-            Invert(__instance);
-            return false;
-        }
-    }
-}
-
-    [HarmonyPatch(typeof(Area), "Delete")]
-public class area_delete : common_patch_fields
-{
-    public static void Delete(Area area)
-    {
-        use_native = true;
-        try
-        {
-            area.Delete();
-        }
-        finally
-        {
-            use_native = false;
-        }
-    }
-
-    [HarmonyPrefix]
-    public static bool prefix(Area __instance)
-    {
-        if (use_native)
-        {
-            return true;
-        }
-        else
-        {
-            Delete(__instance);
-            return false;
-        }
-    }
-}
 
 public class designator_claim_methods : common_patch_fields
 {

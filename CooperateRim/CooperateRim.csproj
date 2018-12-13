@@ -64,6 +64,8 @@
   <ItemGroup>
     <Compile Include="AreaManaegerSurrogate.cs" />
     <Compile Include="AreaSurrogate.cs" />
+    <Compile Include="area_delete.cs" />
+    <Compile Include="area_invert.cs" />
     <Compile Include="basic_hash_tracker.cs" />
     <Compile Include="BillPatches.cs" />
     <Compile Include="BillProductionSurrogate.cs" />
@@ -89,6 +91,7 @@
     <Compile Include="DesignationManagerPatch.cs" />
     <Compile Include="Designation_surrogate.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
+    <Compile Include="designator_area_allowed_clear_methods.cs" />
     <Compile Include="designator_area_allowed_expand_methods.cs" />
     <Compile Include="designator_area_allowed_label.cs" />
     <Compile Include="designator_area_buildoof_methods.cs" />
