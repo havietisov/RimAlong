@@ -286,6 +286,7 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Area>>(area => area_invert.Invert(area));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3, Area>>((c, z) => designator_area_allowed_clear_methods.parrot_designate_single_cell(c, z));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Pawn,Area>>((pawn, area) => Pawn_player_settings_allowed_area_patch.set_restriction(pawn, area));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing, Pawn>>((t, p) => InterfaceIngest_patch.Ingest(t, p));
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
             RandRootContext<Verse.Sound.SoundRoot>.ApplyPatch("Update");
             RandRootContext<UnityEngine.GUI>.ApplyPatch("CallWindowDelegate");

@@ -127,6 +127,7 @@
     <Compile Include="haul_patch.cs" />
     <Compile Include="HighResolutionTimer.cs" />
     <Compile Include="InterfaceDrop_patch.cs" />
+    <Compile Include="InterfaceIngest_patch.cs" />
     <Compile Include="IntermittentSteamSprayerPatch.cs" />
     <Compile Include="IntVec3Surrogate.cs" />
     <Compile Include="JobDefSurrogate.cs" />

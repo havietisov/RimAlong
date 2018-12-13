@@ -10,6 +10,8 @@ public class designator_install_methods : designator_build_methods
         use_native = true;
         try
         {
+            var sel = Find.Selector.SelectedObjects;
+            Find.Selector.ClearSelection();
             Designator_Install ins = (Designator_Install)DesignatorUtility.FindAllowedDesignator<Designator_Install>();
             var field = ins.GetType().GetField("placingRot", BindingFlags.NonPublic | BindingFlags.Instance);
             RimLog.Message("thing : " + thingToInstall);
@@ -18,6 +20,8 @@ public class designator_install_methods : designator_build_methods
             Rand.PushState(0);
             Find.Selector.Select(thingToInstall, false, false);
             ins.DesignateSingleCell(c);
+            Find.Selector.ClearSelection();
+            sel.ForEach(u => Find.Selector.Select(u, false, false));
         }
         finally
         {

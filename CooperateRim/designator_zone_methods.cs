@@ -11,16 +11,21 @@ public class designator_zone_methods : common_patch_fields
         try
         {
             Designator_Zone _z = (Designator_Zone)typeof(DesignatorUtility).GetMethod(nameof(DesignatorUtility.FindAllowedDesignator)).MakeGenericMethod(designator_type).Invoke(null, null);
-            var sel = Find.Selector.SelectedObjects;
+            var sel = Find.Selector.SelectedObjects.ToArray();
+            Rand.PushState(0);
             Find.Selector.ClearSelection();
 
             if (z != null)
             {
                 Find.Selector.Select(z);
             }
+            Rand.PopState();
 
             _z.DesignateMultiCell(cells);
-            sel.ForEach(u => Find.Selector.Select(u, false, false));
+            Rand.PushState(0);
+            Find.Selector.ClearSelection();
+            new List<object>(sel).ForEach(u => Find.Selector.Select(u, false, false));
+            Rand.PopState();
         }
         finally
         {
