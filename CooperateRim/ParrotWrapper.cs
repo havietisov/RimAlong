@@ -76,7 +76,6 @@ namespace CooperateRim
         {
             MethodInfo miSource = ExpressionHelper.GetMethodInfo(exprdesignator);
             MethodInfo miTarget = ExpressionHelper.GetMethodInfo(exprPatch);
-            RimLog.Message(miSource + "::" + miTarget);
             CooperateRimming.inst.harmonyInst.Patch(miSource, new HarmonyMethod(miTarget));
         }
 

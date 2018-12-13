@@ -95,7 +95,6 @@ namespace CooperateRim
                     if (cliendID > -1)
                     {
                         singleton.randomToVerify = new int[] { Verse.Rand.Int };
-                        RimLog.Message("Rand control context : " + RandContextCounter.currentContextName);
                         var colonists = Find.ColonistBar.GetColonistsInOrder();
                         singleton.colonistJobsToVerify = colonists == null ? new List<string> { } : colonists.ConvertAll<string>(u=> u.CurJobDef == null ? u.ThingID + "::" + "<null>" : u.ThingID + "::" + u.CurJobDef.defName);
                         singleton.serializationServiceData = SerializationService.Flush();
@@ -113,7 +112,7 @@ namespace CooperateRim
                 }
                 catch (Exception ee)
                 {
-                    RimLog.Message(ee.ToString());
+                    RimLog.Error(ee.ToString());
                     return false;
                 }
             }

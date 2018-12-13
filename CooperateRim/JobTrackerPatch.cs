@@ -48,7 +48,7 @@ namespace CooperateRim
             return false;
         }
     }
-    
+    /*
     [HarmonyPatch(typeof(Job), MethodType.Constructor, new Type[] { typeof(JobDef) , typeof(LocalTargetInfo) , typeof(LocalTargetInfo)  })]
     class JobTrackerPatch_
     {
@@ -70,7 +70,7 @@ namespace CooperateRim
                 System.IO.File.WriteAllLines("C:\\CoopReplays\\" + SyncTickData.cliendID + "\\" + Find.TickManager.TicksGame + "__job__" + ".txt", strs.ToArray());
             }
         }
-    }
+    }*///this one is diagnostic
 
     //[HarmonyPatch(typeof(Verse.AI.Pawn_JobTracker))]
     //[HarmonyPatch("DetermineNextJob")]

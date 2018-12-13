@@ -377,29 +377,9 @@ namespace CooperateRim
 
             HarmonyInstance harmony = HarmonyInst;
             RimLog.Message(System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments);
-            List<Type> typesToPatch = new List<Type>();
             List<Type> designatorInheritees = new List<Type>();
-            List<Type> leftOverTypes = new List<Type>();
-
             InitBullshit();
-            
 
-
-            foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (Type t in a.GetTypes())
-                {
-                    if (!t.IsAbstract)
-                    {
-                        if (t.IsSubclassOf(typeof(RimWorld.WorkGiver_Scanner)))
-                        {
-                            typesToPatch.Add(t);
-                            leftOverTypes.Add(t);
-                        }
-                    }
-                }
-            }
-            
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (Type t in a.GetTypes())
@@ -416,18 +396,6 @@ namespace CooperateRim
                 }
             }
             
-            if (leftOverTypes.Count > 0)
-            {
-                foreach (Type t in leftOverTypes)
-                {
-                    Logger.Message("Unpatched job issuer : " + t);
-                }
-            }
-            else
-            {
-                Logger.Message("All job issuers patched");
-            }
-
             if (System.Diagnostics.Process.GetCurrentProcess().StartInfo.Arguments.Contains("network_launch"))
             {
                 //harmony.PatchAll(Assembly.GetExecutingAssembly());

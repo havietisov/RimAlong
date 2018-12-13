@@ -98,7 +98,6 @@ public class designator_methods : common_patch_fields
         }
         else
         {
-            RimLog.Message(des.designationManager.GetType() + "");
             designation_mgr_parrot_RemoveDesignation(des);
             return false;
         }
@@ -134,12 +133,10 @@ public class designator_methods : common_patch_fields
     {
         if (use_native)
         {
-            RimLog.Message(newDes.def + "-");
             return true;
         }
         else
         {
-            RimLog.Message(newDes.def.defName + "+");
             designation_mgr_parrot_AddDesignation(newDes);
             return false;
         }

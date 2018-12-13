@@ -77,9 +77,7 @@ namespace CooperateRim
 
             if (outermostExpression.Method.IsVirtual)
             {
-                RimLog.Message("type : " + outermostExpression.Object.Type);
                 var meth = outermostExpression.Object.Type.GetMethods().First(u => u.GetBaseDefinition() == outermostExpression.Method);
-                RimLog.Message("method found : " + meth.ReflectedType);
                 return meth;
             }
             return outermostExpression.Method;

@@ -13,8 +13,6 @@ public class Zone_growing_setplantdef_patch
         use_native = true;
         try
         {
-
-            RimLog.Message("parrot");
             inst.SetPlantDefToGrow(plantDef);
         }
         finally
@@ -32,7 +30,6 @@ public class Zone_growing_setplantdef_patch
         }
         else
         {
-            RimLog.Message("prefix");
             parrot(plantDef, __instance);
             return false;
         }
