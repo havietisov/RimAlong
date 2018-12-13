@@ -175,6 +175,7 @@
     <Compile Include="SubSoundVolume.cs" />
     <Compile Include="SyncTickData.cs" />
     <Compile Include="SyncTickManager.cs" />
+    <Compile Include="TerrainDefSurrogate.cs" />
     <Compile Include="TesterSurrogate.cs" />
     <Compile Include="ThingDefSurrogate.cs" />
     <Compile Include="ThingFilterPatch.cs" />

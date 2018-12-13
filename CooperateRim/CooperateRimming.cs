@@ -192,6 +192,7 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(Area_Allowed), new AreaSurrogate());
             SerializationService.AppendSurrogate(typeof(Area_Home), new AreaSurrogate());
             SerializationService.AppendSurrogate(typeof(AreaManager), new AreaManaegerSurrogate());
+            SerializationService.AppendSurrogate(typeof(TerrainDef), new TerrainDefSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_ProductionWithUft), new Bill_ProductionWithUft_surrogate());
             SerializationService.AppendSurrogate(typeof(JobDef), new JobDefSurrogate());
