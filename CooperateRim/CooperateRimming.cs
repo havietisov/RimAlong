@@ -281,6 +281,8 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<bool>>(val=> MainTabWindow_Work_patch.ChangeUseWorkPriorities(val));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3, Area>>((c,z) => designator_area_allowed_expand_methods.parrot_designate_single_cell(c,z));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Area_Allowed, string>>((area, label) => designator_area_allowed_label.setLabel(area, label));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Area>>(area => area_delete.Delete(area));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Area>>(area => area_invert.Invert(area));
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
             RandRootContext<Verse.Sound.SoundRoot>.ApplyPatch("Update");
             RandRootContext<UnityEngine.GUI>.ApplyPatch("CallWindowDelegate");

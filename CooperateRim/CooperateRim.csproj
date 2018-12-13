@@ -89,6 +89,8 @@
     <Compile Include="DesignationManagerPatch.cs" />
     <Compile Include="Designation_surrogate.cs" />
     <Compile Include="Designator_AreaPatches.cs" />
+    <Compile Include="designator_area_allowed_expand_methods.cs" />
+    <Compile Include="designator_area_allowed_label.cs" />
     <Compile Include="designator_area_buildoof_methods.cs" />
     <Compile Include="designator_area_home_methods.cs" />
     <Compile Include="designator_area_ignore_roof_methods.cs" />
