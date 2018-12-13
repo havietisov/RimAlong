@@ -14,7 +14,7 @@ namespace CooperateRim
         public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
         {
             string s = info.GetString("defname");
-            return DefDatabase<JobDef>.AllDefs.First(u=> u.defName == s);
+            return DefDatabase<TerrainDef>.AllDefs.First(u=> u.defName == s);
         }
     }
 }
