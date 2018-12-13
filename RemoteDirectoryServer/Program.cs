@@ -189,7 +189,10 @@ namespace RemoteDirectoryServer
             bool res = ThreadPool.SetMinThreads(4, 4);
             TcpListener lst = new TcpListener(IPAddress.Any, listenPort);
             lst.Server.NoDelay = true;
-            lst.AllowNatTraversal(useNatTraversal);
+            if (useNatTraversal)
+            {
+                lst.AllowNatTraversal(useNatTraversal);
+            }
             lst.Server.ExclusiveAddressUse = true;
             lst.Start();
             AsyncCallback acceptor = null;
