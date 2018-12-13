@@ -1,5 +1,7 @@
 ﻿using Verse;
 using RimWorld;
+using System.Runtime.Serialization;
+using System.Linq;
 
 public class designator_claim_methods : common_patch_fields
 {

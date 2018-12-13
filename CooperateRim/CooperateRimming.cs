@@ -189,6 +189,7 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(Bill), new BillSurrogate());
             SerializationService.AppendSurrogate(typeof(Thing), new ThingSurrogate());
             SerializationService.AppendSurrogate(typeof(Area), new AreaSurrogate());
+            SerializationService.AppendSurrogate(typeof(Area_Allowed), new AreaSurrogate());
             SerializationService.AppendSurrogate(typeof(AreaManager), new AreaManaegerSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_Production), new BillProductionSurrogate());
             SerializationService.AppendSurrogate(typeof(Bill_ProductionWithUft), new Bill_ProductionWithUft_surrogate());
@@ -236,6 +237,7 @@ namespace CooperateRim
             ParrotWrapper.FastPatch<Action<Designator_AreaIgnoreRoof, IntVec3>, Action<IntVec3>>((u, c) => u.DesignateSingleCell(c), c => designator_area_ignore_roof_methods.prefix_designate_single_cell(c));
             ParrotWrapper.FastPatch<Action<Designator_AreaSnowClear, IntVec3>, Action<IntVec3, Designator_AreaSnowClear>>((u,c)=> u.DesignateSingleCell(c), (c, __instance) => designator_area_snowclear_methods.prefix_designate_single_cell(c, __instance));
             ParrotWrapper.FastPatch<Action<Pawn_WorkSettings, WorkTypeDef, int>, Action<WorkTypeDef, int, Pawn>>((u,c,i)=> u.SetPriority(c,i), (w, priority, ___pawn) => pawn_worksettings_patch.prefix_set_priority(w, priority, ___pawn));
+            ParrotWrapper.FastPatch<Action<Designator_AreaAllowedExpand, IntVec3>, Action<IntVec3>>((u,c)=> u.DesignateSingleCell(c), c => designator_area_allowed_expand_methods.prefix_designate_single_cell(c));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing, bool>>((t, standardCanceling) => designator_methods.designation_mgr_parrot_RemoveAllDesignationsOn(t, standardCanceling));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Designation>>((newDes) => designator_methods.designation_mgr_parrot_AddDesignation(newDes));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Designation>>((des) => designator_methods.designation_mgr_parrot_RemoveDesignation(des));
@@ -277,6 +279,8 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<WorkTypeDef, int, Pawn>>((w, priority, p) => pawn_worksettings_patch.parrot_set_priority(w, priority, p));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<ResearchProjectDef>>(project => MainTabWindow_Research_patch.parrotSetCurrentResearch(project));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<bool>>(val=> MainTabWindow_Work_patch.ChangeUseWorkPriorities(val));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<IntVec3, Area>>((c,z) => designator_area_allowed_expand_methods.parrot_designate_single_cell(c,z));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Area_Allowed, string>>((area, label) => designator_area_allowed_label.setLabel(area, label));
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
             RandRootContext<Verse.Sound.SoundRoot>.ApplyPatch("Update");
             RandRootContext<UnityEngine.GUI>.ApplyPatch("CallWindowDelegate");
