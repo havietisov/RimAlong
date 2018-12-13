@@ -18,8 +18,15 @@ namespace CooperateRim
                 RimLog.Message("thing : " + t);
                 RimLog.Message("pawn : " + p);
                 ThingWithComps thingWithComps = t as ThingWithComps;
+                var objects = Find.Selector.SelectedObjects;
+                Find.Selector.ClearSelection();
                 Find.Selector.Select(p, false, false);
                 typeof(ITab_Pawn_Gear).GetMethod("InterfaceDrop", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(new ITab_Pawn_Gear(), new object[] { t });
+
+                foreach (object o in objects)
+                {
+                    Find.Selector.Select(0, false, false);
+                }
             }
             finally
             {
