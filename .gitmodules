@@ -1,0 +1,3 @@
+[submodule "Harmony/Harmony"]
+    path = Harmony/Harmony
+    url = https://github.com/pardeike/Harmony.git
