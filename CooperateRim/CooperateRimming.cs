@@ -13,9 +13,27 @@ using CooperateRim.Utilities;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
+using System.Runtime.Serialization;
 
 namespace CooperateRim
 {
+    public class ThingCompSurrogate : ISerializationSurrogate
+    {
+        public void GetObjectData(object obj, SerializationInfo info, StreamingContext context)
+        {
+            ThingComp tc = (ThingComp)obj;
+            info.AddValue("parent", tc.parent);
+            info.AddValue("index", tc.parent.AllComps.FirstIndexOf(t => t == tc));
+        }
+
+        public object SetObjectData(object obj, SerializationInfo info, StreamingContext context, ISurrogateSelector selector)
+        {
+            ThingComp tc;
+            ThingWithComps tcc = (ThingWithComps)info.GetValue("parent", typeof(ThingWithComps));
+            return tcc.AllComps[info.GetInt32("index")];
+        }
+    }
+
     public partial class CooperateRimming : ModBase
     {
         public override string ModIdentifier => "CooperateRim.CooperateRimming";
@@ -216,6 +234,9 @@ namespace CooperateRim
             SerializationService.AppendSurrogate(typeof(Zone_Growing), new ZoneSurrogate());
             SerializationService.AppendSurrogate(typeof(WorkTypeDef), new WorkTypeDef_surrogate());
             SerializationService.AppendSurrogate(typeof(ResearchProjectDef), new ResearchProjectDef_surrogate());
+            SerializationService.AppendSurrogate(typeof(ThingComp), new ThingCompSurrogate());
+            SerializationService.AppendSurrogate(typeof(CompChangeableProjectile), new ThingCompSurrogate());
+            SerializationService.AppendSurrogate(typeof(TimeAssignmentDef), new TimeAssignmentDefSurrogate());
             ParrotWrapper.FastPatch<Action<DesignationManager, Designation>, Action<Designation>>((__inst, des) => __inst.RemoveDesignation(des), (des) => designator_methods.designation_mgr_regular_RemoveDesignation(des));
             ParrotWrapper.FastPatch<Action<DesignationManager, Designation>, Action<Designation>>( (__inst, newDes) => __inst.AddDesignation(newDes), (newDes) => designator_methods.designation_mgr_regular_AddDesignation(newDes) );
             ParrotWrapper.FastPatch<Action<DesignationManager, Thing, bool>, Action<Thing, bool>>( (__inst, t, b) => __inst.RemoveAllDesignationsOn(t, b), ( t, standardCanceling) => designator_methods.designation_mgr_regular_RemoveAllDesignationsOn(t, standardCanceling));
@@ -290,6 +311,7 @@ namespace CooperateRim
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Pawn,Area>>((pawn, area) => Pawn_player_settings_allowed_area_patch.set_restriction(pawn, area));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<Thing, Pawn>>((t, p) => InterfaceIngest_patch.Ingest(t, p));
             ParrotWrapper.ParrotPatchExpressiontarget<Action<object, StoragePriority>>((object obj, StoragePriority priority) => Storage_settings_patch.set_storage_priority(obj, priority));
+            ParrotWrapper.ParrotPatchExpressiontarget<Action<Pawn, int, TimeAssignmentDef>>((Pawn p, int hour, TimeAssignmentDef ta) => pawnTimetableAssignPatch.set_assignment(p, hour, ta));
             //RandRootContext<Verse.Pawn>.ApplyPatch("Tick");
             RandRootContext<Verse.Sound.SoundRoot>.ApplyPatch("Update");
             RandRootContext<UnityEngine.GUI>.ApplyPatch("CallWindowDelegate");
@@ -297,16 +319,16 @@ namespace CooperateRim
             RandRootContext<MusicManagerPlay_placeholder1>.ApplyPatch("MusicUpdate", typeof(MusicManagerPlay));
             RandRootContext<Verse.MapDrawer>.ApplyPatch("MapMeshDrawerUpdate_First");
             RandRootContext<TickManagerPatch>.ApplyPatch("Prefix");
-            RandRootContext<Map>.ApplyPatch("MapUpdate");
-            RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
-            RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
-            RandRootContext<TickManager>.ApplyPatch("DoSingleTick");
-            RandRootContext<TickList>.ApplyPatch("Tick");
-            RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
-            RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
-            RandRootContext<GameInfo>.ApplyPatch("GameInfoUpdate");
-            RandRootContext<World>.ApplyPatch("WorldUpdate");
-            RandRootContext<UIRoot_Play>.ApplyPatch("UIRootUpdate");
+            //RandRootContext<Map>.ApplyPatch("MapUpdate");
+            //RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
+            //RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
+            //RandRootContext<TickManager>.ApplyPatch("DoSingleTick");
+            //RandRootContext<TickList>.ApplyPatch("Tick");
+            //RandRootContext<mapPreTick_placeholder>.ApplyPatch("MapPreTick", typeof(Map));
+            //RandRootContext<mapPostTick_placeholder>.ApplyPatch("MapPostTick", typeof(Map));
+            //RandRootContext<GameInfo>.ApplyPatch("GameInfoUpdate");
+            //RandRootContext<World>.ApplyPatch("WorldUpdate");
+            //RandRootContext<UIRoot_Play>.ApplyPatch("UIRootUpdate");
             //RandRootContext<Verse.Root>.ApplyPatch("OnGUI");
 
             //separating UpdatePlay calls from each other

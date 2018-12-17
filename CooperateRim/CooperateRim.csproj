@@ -130,6 +130,7 @@
     <Compile Include="InterfaceIngest_patch.cs" />
     <Compile Include="IntermittentSteamSprayerPatch.cs" />
     <Compile Include="IntVec3Surrogate.cs" />
+    <Compile Include="itab_storage_fill_patch.cs" />
     <Compile Include="JobDefSurrogate.cs" />
     <Compile Include="JobSurrogate.cs" />
     <Compile Include="JobTrackerPatch.cs" />
@@ -168,6 +169,7 @@
     <Compile Include="Selector__patch.cs" />
     <Compile Include="soundRootPatch.cs" />
     <Compile Include="Services\LoggingService.cs" />
+    <Compile Include="Storage_settings_patch.cs" />
     <Compile Include="StoreUtility.cs" />
     <Compile Include="SerializationService.cs" />
     <Compile Include="StorytellerTick_patch.cs" />
