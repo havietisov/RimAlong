@@ -88,11 +88,15 @@ namespace BuildUtils
                         string assemblyPath = Path.Combine(Path.GetDirectoryName(settings.rimworldExecPath), "RimWorldWin64_Data", "Managed", "Assembly-CSharp.dll");
 
                         Console.WriteLine("Copying assembly from " + assemblyPath + " to dependencies folder");
-                        File.Copy
-                        (
-                            assemblyPath
-                            , "../../../dependencies/Assembly-CSharp.dll", true
-                        );
+                        string dependenciesFolderPath = "../../../dependencies";
+
+                        if (!Directory.Exists(dependenciesFolderPath))
+                        {
+                            Console.WriteLine("Creating directory " + dependenciesFolderPath);
+                            Directory.CreateDirectory(dependenciesFolderPath);
+                        }
+
+                        File.Copy(assemblyPath, Path.Combine(dependenciesFolderPath, "Assembly-CSharp.dll"), true);
 
                         string assemblyFolderPath = "../../../ModFolder/RimAlong/Assemblies";
 
